@@ -8,6 +8,7 @@ import DeleteZone from './components/DeleteZone.jsx';
 import ConfirmationModal from './components/ConfirmationModal.jsx';
 import useHotkeys from './hooks/useHotkeys.js';
 import profileImage from './assets/profile.png';
+import logoImage from './assets/logo.png'; // 1. Importar el logo
 
 // --- Helper Functions ---
 
@@ -109,10 +110,10 @@ function App() {
     const newBoardName = prompt("Introduce el nombre del nuevo tablero:");
     if (newBoardName) {
       const newBoard = {
-        id: `board-${Date.now()}`,
+        id: `board-${crypto.randomUUID()}`,
         title: newBoardName,
         columns: [
-            { id: `col-${Date.now()}`, title: 'To Do', color: '#42A5F5' }
+            { id: `col-${crypto.randomUUID()}`, title: 'To Do', color: '#42A5F5' }
         ],
         cards: [],
       };
@@ -123,13 +124,13 @@ function App() {
 
   // --- Item Management Functions ---
   const addColumn = () => {
-    const newColumn = { id: `col-${Date.now()}`, title: '', color: '#8b949e' };
+    const newColumn = { id: `col-${crypto.randomUUID()}`, title: '', color: '#8b949e' };
     updateActiveBoard(board => ({ ...board, columns: [...board.columns, newColumn] }));
     setEditingColumnId(newColumn.id);
   };
 
   const addCard = (columnId) => {
-    const newCard = { id: `${Date.now()}`, title: '', column: columnId };
+    const newCard = { id: `${crypto.randomUUID()}`, title: '', column: columnId };
     updateActiveBoard(board => ({ ...board, cards: [...board.cards, newCard] }));
     setEditingCardId(newCard.id);
   };
@@ -281,7 +282,7 @@ function App() {
     <div className={`task-board-container ${isDragging ? 'is-dragging' : ''}`}>
       <header className="task-board-header">
         <div className="header-left">
-          <i className="fas fa-th-large"></i>
+          <img src={logoImage} alt="Taskboard Logo" className="header-logo" /> {/* 2. Añadir la imagen del logo */}
           <div className="board-selector">
             <select value={activeBoardId} onChange={(e) => setActiveBoardId(e.target.value)}>
               {boards.map(board => (

@@ -74,6 +74,12 @@ body {
     gap: 15px;
 }
 
+.header-logo {
+    height: 28px; /* Ajusta la altura según necesites */
+    width: auto;
+    object-fit: contain;
+}
+
 .header-left h1 {
     font-size: 1.2em;
     margin: 0;
@@ -612,3 +618,27 @@ body {
 .item-enter-animation {
     animation: item-enter 0.3s ease-out;
 }
+
+
+
+
+/* POSIBLE PALETA DE COLORES DEL LOGO DE ESTA APP */
+/* :root {
+  --amarillo-dorado: #fcc502;
+  --naranja-vibrante: #ff8c00;
+  --rosa-coral: #ff7f50;
+
+  --verde-menta: #90ee90;
+  --azul-cielo: #87ceeb;
+}
+
+
+
+:root {
+    --amarillo-dorado: #fcc502;
+  
+    --azul-electrico: #0000ff;
+    --rosa-fucsia: #ff00ff;
+    --verde-lima: #32cd32;
+    --morado-oscuro: #800080;
+} */
