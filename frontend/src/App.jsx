@@ -127,15 +127,11 @@ function App() {
     }
   };
 
-  const editBoard = (boardId) => {
-    const board = boards.find(b => b.id === boardId);
-    if (board) {
-      const newTitle = prompt("Introduce el nuevo nombre para el tablero:", board.title);
-      if (newTitle && newTitle.trim() !== '') {
-        setBoards(prevBoards =>
-          prevBoards.map(b => (b.id === boardId ? { ...b, title: newTitle.trim() } : b))
-        );
-      }
+  const editBoard = (boardId, newTitle) => {
+    if (newTitle && newTitle.trim() !== '') {
+      setBoards(prevBoards =>
+        prevBoards.map(b => (b.id === boardId ? { ...b, title: newTitle.trim() } : b))
+      );
     }
   };
 

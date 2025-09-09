@@ -9,6 +9,8 @@ const BoardSelector = ({
   onBoardDelete,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [editingBoardId, setEditingBoardId] = useState(null);
+  const [editingTitle, setEditingTitle] = useState('');
   const selectorRef = useRef(null);
 
   // Hook para cerrar el dropdown si se hace clic fuera
@@ -16,6 +18,8 @@ const BoardSelector = ({
     const handleClickOutside = (event) => {
       if (selectorRef.current && !selectorRef.current.contains(event.target)) {
         setIsOpen(false);
+        // Si se hace clic fuera mientras se edita, cancela la edición
+        setEditingBoardId(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -23,19 +27,39 @@ const BoardSelector = ({
   }, []);
 
   const handleSelect = (boardId) => {
+    if (editingBoardId) return; // No cambiar de tablero mientras se edita
     onBoardSelect(boardId);
     setIsOpen(false);
   };
 
   const handleAdd = () => {
     onBoardAdd();
-    setIsOpen(false);
+    // No cerramos el dropdown para que el usuario vea el nuevo tablero
   };
 
-  const handleEdit = (e, boardId) => {
+  const startEditing = (e, board) => {
     e.stopPropagation(); // Evita que el dropdown se cierre
-    onBoardEdit(boardId);
-    setIsOpen(false);
+    setEditingBoardId(board.id);
+    setEditingTitle(board.title);
+  };
+
+  const handleTitleChange = (e) => {
+    setEditingTitle(e.target.value);
+  };
+
+  const handleTitleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      saveEdit();
+    } else if (e.key === 'Escape') {
+      setEditingBoardId(null);
+    }
+  };
+
+  const saveEdit = () => {
+    if (editingTitle.trim()) {
+      onBoardEdit(editingBoardId, editingTitle.trim());
+    }
+    setEditingBoardId(null);
   };
 
   const handleDelete = (e, boardId) => {
@@ -53,10 +77,25 @@ const BoardSelector = ({
       {isOpen && (
         <ul className="board-selector-dropdown">
           {boards.map(board => (
-            <li key={board.id} onClick={() => handleSelect(board.id)}>
-              <span className="board-name">{board.title}</span>
+            <li key={board.id} onClick={() => handleSelect(board.id)} className={editingBoardId === board.id ? 'editing' : ''}>
+              {editingBoardId === board.id ? (
+                <input
+                  type="text"
+                  value={editingTitle}
+                  onChange={handleTitleChange}
+                  onKeyDown={handleTitleKeyDown}
+                  onBlur={saveEdit}
+                  onClick={(e) => e.stopPropagation()} // Evita que el li se active
+                  autoFocus
+                  className="board-name-input"
+                />
+              ) : (
+                <span className="board-name">{board.title}</span>
+              )}
               <div className="board-actions">
-                <i className="fas fa-pencil-alt" title="Renombrar tablero" onClick={(e) => handleEdit(e, board.id)}></i>
+                {editingBoardId !== board.id && (
+                  <i className="fas fa-pencil-alt" title="Renombrar tablero" onClick={(e) => startEditing(e, board)}></i>
+                )}
                 {boards.length > 1 && ( // No permitir eliminar el último tablero
                   <i className="fas fa-trash-alt" title="Eliminar tablero" onClick={(e) => handleDelete(e, board.id)}></i>
                 )}

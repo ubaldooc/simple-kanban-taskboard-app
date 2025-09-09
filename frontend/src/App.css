@@ -717,6 +717,29 @@ body {
     color: #cf222e; /* Color rojo para eliminar */
 }
 
+.board-selector-dropdown li.editing {
+    background-color: #f0f6fc; /* Un fondo ligeramente diferente para el modo edición */
+    cursor: default;
+}
+
+.board-name-input {
+    flex-grow: 1;
+    padding: 4px 8px;
+    border: 1px solid #0969da;
+    border-radius: 4px;
+    font-size: inherit;
+    font-family: inherit;
+    color: #1f2328;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.3);
+}
+
+/* Oculta las acciones mientras se edita el nombre de ese tablero */
+.board-selector-dropdown li.editing .board-actions {
+    visibility: hidden;
+}
+
+
 /* --- Estilos para el Dropdown de Perfil --- */
 .profile-dropdown-container {
     position: relative;
