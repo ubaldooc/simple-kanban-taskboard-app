@@ -96,6 +96,7 @@ body {
     width: 30px;
     height: 30px;
     border-radius: 50%;
+    cursor: pointer;
     background-color: #6c757d;
 }
 
@@ -716,6 +717,83 @@ body {
 }
 .board-selector-dropdown .board-actions i.fa-trash-alt:hover {
     color: #cf222e; /* Color rojo para eliminar */
+}
+
+/* --- Estilos para el Dropdown de Perfil --- */
+.profile-dropdown-container {
+    position: relative;
+}
+
+.profile-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 300px;
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    z-index: 110;
+    color: #c9d1d9;
+    padding: 8px 0;
+}
+
+.profile-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+}
+
+.profile-dropdown-header .avatar-large {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.profile-dropdown-header .user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-dropdown-header .user-info strong {
+    font-weight: 600;
+    color: #e6edf3;
+}
+
+.profile-dropdown-header .user-info span {
+    font-size: 0.85em;
+    color: #8b949e;
+}
+
+.profile-dropdown-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-dropdown-menu li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.profile-dropdown-menu li:hover {
+    background-color: #21262d;
+}
+
+.profile-dropdown-menu li i {
+    width: 16px; /* Alinea los iconos */
+    text-align: center;
+    color: #8b949e;
+}
+
+.profile-dropdown-menu .dropdown-divider {
+    margin: 8px 0;
 }
 
 

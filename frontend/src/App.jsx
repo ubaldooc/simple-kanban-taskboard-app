@@ -8,7 +8,7 @@ import DeleteZone from './components/DeleteZone.jsx';
 import ConfirmationModal from './components/ConfirmationModal.jsx';
 import useHotkeys from './hooks/useHotkeys.js';
 import BoardSelector from './components/BoardSelector.jsx'; // Importar el nuevo componente
-import profileImage from './assets/profile.png';
+import ProfileDropdown from './components/ProfileDropdown.jsx';
 import logoImage from './assets/logo.png'; // 1. Importar el logo
 
 // --- Helper Functions ---
@@ -327,7 +327,7 @@ function App() {
         <div className="header-right">
           <i className="fas fa-bell"></i>
           <i className="fas fa-question-circle"></i>
-          <img src={profileImage} alt="User Avatar" className="avatar" />
+          <ProfileDropdown />
         </div>
       </header>
 
