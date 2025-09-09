@@ -621,12 +621,10 @@ body {
 
 .add-board-option {
     cursor: pointer;
-    font-style: italic;
+    /* font-style: italic; */
     color: #207ae1;
     background-color: #fff;
-    display: flex; /* Asegura que el contenido se alinee horizontalmente */
-    align-items: center; /* Centra verticalmente el contenido */
-    justify-content: center;
+    padding-left: 28px;
 }
 
 .add-board-option:hover {

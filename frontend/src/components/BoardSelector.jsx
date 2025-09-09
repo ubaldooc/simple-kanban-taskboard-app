@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import SortableBoardItem from './SortableBoardItem';
@@ -20,6 +20,13 @@ const BoardSelector = ({
   const [activeDragItem, setActiveDragItem] = useState(null);
   const selectorRef = useRef(null);
 
+  const saveEdit = useCallback(() => {
+    if (editingBoardId && editingTitle.trim()) {
+      onBoardEdit(editingBoardId, editingTitle.trim());
+    }
+    setEditingBoardId(null);
+  }, [editingBoardId, editingTitle, onBoardEdit]);
+
   // Hook para cerrar el dropdown si se hace clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -29,12 +36,11 @@ const BoardSelector = ({
         if (editingBoardId) {
           saveEdit();
         }
-        setEditingBoardId(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [saveEdit]);
 
   // Hook para entrar en modo edición al crear un nuevo tablero
   useEffect(() => {
@@ -47,7 +53,7 @@ const BoardSelector = ({
         onEditModeEntered(); // Notifica al padre que se ha entrado en modo edición
       }
     }
-  }, [newBoardIdToEdit, boards, onEditModeEntered]);
+  }, [newBoardIdToEdit, boards, onEditModeEntered, setEditingTitle]);
 
   const handleSelect = (boardId) => {
     if (editingBoardId) return; // No cambiar de tablero mientras se edita
@@ -76,13 +82,6 @@ const BoardSelector = ({
     } else if (e.key === 'Escape') {
       setEditingBoardId(null);
     }
-  };
-
-  const saveEdit = () => {
-    if (editingTitle.trim()) {
-      onBoardEdit(editingBoardId, editingTitle.trim());
-    }
-    setEditingBoardId(null);
   };
 
   // --- DND Kit Logic ---
