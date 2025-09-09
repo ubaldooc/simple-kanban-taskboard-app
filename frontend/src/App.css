@@ -629,6 +629,7 @@ body {
 .board-selector {
     position: relative;
     min-width: 280px;
+    max-width: 320px;
 }
 
 .board-selector-active {
@@ -739,6 +740,22 @@ body {
     visibility: hidden;
 }
 
+.board-edit-actions {
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+}
+
+.board-edit-actions i {
+    color: #2da44e; /* Verde para confirmar */
+    cursor: pointer;
+    font-size: 1.1em;
+    padding: 4px;
+}
+
+.board-edit-actions i:hover {
+    opacity: 0.8;
+}
 
 /* --- Estilos para el Dropdown de Perfil --- */
 .profile-dropdown-container {

@@ -79,16 +79,20 @@ const BoardSelector = ({
           {boards.map(board => (
             <li key={board.id} onClick={() => handleSelect(board.id)} className={editingBoardId === board.id ? 'editing' : ''}>
               {editingBoardId === board.id ? (
-                <input
-                  type="text"
-                  value={editingTitle}
-                  onChange={handleTitleChange}
-                  onKeyDown={handleTitleKeyDown}
-                  onBlur={saveEdit}
-                  onClick={(e) => e.stopPropagation()} // Evita que el li se active
-                  autoFocus
-                  className="board-name-input"
-                />
+                <>
+                  <input
+                    type="text"
+                    value={editingTitle}
+                    onChange={handleTitleChange}
+                    onKeyDown={handleTitleKeyDown}
+                    onClick={(e) => e.stopPropagation()} // Evita que el li se active
+                    autoFocus
+                    className="board-name-input"
+                  />
+                  <div className="board-edit-actions">
+                    <i className="fas fa-check" title="Guardar cambios" onClick={saveEdit}></i>
+                  </div>
+                </>
               ) : (
                 <span className="board-name">{board.title}</span>
               )}
