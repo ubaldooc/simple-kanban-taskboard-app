@@ -620,9 +620,17 @@ body {
 }
 
 .add-board-option {
+    cursor: pointer;
     font-style: italic;
     color: #207ae1;
     background-color: #fff;
+    display: flex; /* Asegura que el contenido se alinee horizontalmente */
+    align-items: center; /* Centra verticalmente el contenido */
+    justify-content: center;
+}
+
+.add-board-option:hover {
+    background-color: #f0f0f0;
 }
 
 /* --- Estilos para el nuevo BoardSelector --- */
@@ -677,8 +685,8 @@ body {
     max-height: 300px;
     overflow-y: auto;
 }
-
-.board-selector-dropdown li {
+/* Renombramos 'li' a una clase más específica para evitar conflictos */
+.board-list-item {
     padding: 8px 12px;
     cursor: pointer;
     border-radius: 4px;
@@ -686,10 +694,36 @@ body {
     justify-content: space-between;
     align-items: center;
     color: #1f2328; /* Color de texto oscuro para contraste */
+    background-color: #ffffff; /* Fondo para el DragOverlay */
 }
 
-.board-selector-dropdown li:hover {
+.board-list-item:hover {
     background-color: #dfe6ec; /* Fondo suave al pasar el ratón */
+}
+
+.board-item-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    gap: 8px;
+}
+
+.drag-handle {
+    cursor: grab;
+    color: #8b949e;
+    padding: 0 4px;
+}
+
+.board-list-item.editing .drag-handle {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Estilo para el elemento mientras se arrastra (el que está bajo el cursor) */
+.is-dragging-board-item {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border: 1px solid #d0d7de;
+    opacity: 0.95;
 }
 
 .board-selector-dropdown .board-name {
@@ -718,7 +752,7 @@ body {
     color: #cf222e; /* Color rojo para eliminar */
 }
 
-.board-selector-dropdown li.editing {
+.board-list-item.editing {
     background-color: #f0f6fc; /* Un fondo ligeramente diferente para el modo edición */
     cursor: default;
 }
@@ -736,7 +770,7 @@ body {
 }
 
 /* Oculta las acciones mientras se edita el nombre de ese tablero */
-.board-selector-dropdown li.editing .board-actions {
+.board-list-item.editing .board-actions {
     visibility: hidden;
 }
 

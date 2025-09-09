@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, arrayMove } from '@dnd-kit/sortable';
+import SortableBoardItem from './SortableBoardItem';
 
 const BoardSelector = ({
   boards,
@@ -7,12 +10,14 @@ const BoardSelector = ({
   onBoardAdd,
   onBoardEdit,
   onBoardDelete,
+  onReorderBoards,
   newBoardIdToEdit,
   onEditModeEntered,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingBoardId, setEditingBoardId] = useState(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [activeDragItem, setActiveDragItem] = useState(null);
   const selectorRef = useRef(null);
 
   // Hook para cerrar el dropdown si se hace clic fuera
@@ -20,7 +25,10 @@ const BoardSelector = ({
     const handleClickOutside = (event) => {
       if (selectorRef.current && !selectorRef.current.contains(event.target)) {
         setIsOpen(false);
-        // Si se hace clic fuera mientras se edita, cancela la edición
+        // Si se hace clic fuera mientras se edita, guarda los cambios
+        if (editingBoardId) {
+          saveEdit();
+        }
         setEditingBoardId(null);
       }
     };
@@ -77,6 +85,28 @@ const BoardSelector = ({
     setEditingBoardId(null);
   };
 
+  // --- DND Kit Logic ---
+  const sensors = useSensors(useSensor(PointerSensor, {
+    activationConstraint: { distance: 5 }, // Requiere mover 5px para iniciar el arrastre
+  }));
+
+  const handleDragStart = (event) => {
+    const { active } = event;
+    setActiveDragItem(boards.find(b => b.id === active.id));
+  };
+
+  const handleDragEnd = (event) => {
+    setActiveDragItem(null);
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = boards.findIndex(b => b.id === active.id);
+      const newIndex = boards.findIndex(b => b.id === over.id);
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onReorderBoards(oldIndex, newIndex);
+      }
+    }
+  };
+
   const handleDelete = (e, boardId) => {
     e.stopPropagation(); // Evita que el dropdown se cierre
     onBoardDelete(boardId);
@@ -90,41 +120,39 @@ const BoardSelector = ({
         <i className={`fas fa-chevron-down ${isOpen ? 'open' : ''}`}></i>
       </div>
       {isOpen && (
-        <ul className="board-selector-dropdown">
-          {boards.map(board => (
-            <li key={board.id} onClick={() => handleSelect(board.id)} className={editingBoardId === board.id ? 'editing' : ''}>
-              {editingBoardId === board.id ? (
-                <>
-                  <input
-                    type="text"
-                    value={editingTitle}
-                    onChange={handleTitleChange}
-                    onKeyDown={handleTitleKeyDown}
-                    onClick={(e) => e.stopPropagation()} // Evita que el li se active
-                    autoFocus
-                    className="board-name-input"
-                  />
-                  <div className="board-edit-actions">
-                    <i className="fas fa-check" title="Guardar cambios" onClick={saveEdit}></i>
-                  </div>
-                </>
-              ) : (
-                <span className="board-name">{board.title}</span>
-              )}
-              <div className="board-actions">
-                {editingBoardId !== board.id && (
-                  <i className="fas fa-pencil-alt" title="Renombrar tablero" onClick={(e) => startEditing(e, board)}></i>
-                )}
-                {boards.length > 1 && ( // No permitir eliminar el último tablero
-                  <i className="fas fa-trash-alt" title="Eliminar tablero" onClick={(e) => handleDelete(e, board.id)}></i>
-                )}
-              </div>
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <ul className="board-selector-dropdown">
+            <SortableContext items={boards.map(b => b.id)}>
+              {boards.map(board => (
+                <SortableBoardItem
+                  key={board.id}
+                  board={board}
+                  isEditing={editingBoardId === board.id}
+                  editingTitle={editingTitle}
+                  onTitleChange={handleTitleChange}
+                  onTitleKeyDown={handleTitleKeyDown}
+                  onSaveEdit={saveEdit}
+                  onSelect={handleSelect}
+                  onStartEditing={startEditing}
+                  onDelete={handleDelete}
+                  canDelete={boards.length > 1}
+                />
+              ))}
+            </SortableContext>
+            <li className="add-board-option" onClick={handleAdd}>
+              ✚ Crear nuevo tablero...
             </li>
-          ))}
-          <li className="add-board-option" onClick={handleAdd}>
-            ✚ Crear nuevo tablero...
-          </li>
-        </ul>
+          </ul>
+          <DragOverlay>
+            {activeDragItem ? (
+              <SortableBoardItem
+                board={activeDragItem}
+                isDragging={true}
+                canDelete={boards.length > 1}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
     </div>
   );

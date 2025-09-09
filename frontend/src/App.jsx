@@ -134,6 +134,10 @@ function App() {
     }
   };
 
+  const reorderBoards = (oldIndex, newIndex) => {
+    setBoards(prevBoards => arrayMove(prevBoards, oldIndex, newIndex));
+  };
+
   const requestDeleteBoard = (boardId) => {
     setBoardToDelete(boardId);
   };
@@ -328,6 +332,7 @@ function App() {
             onBoardAdd={addBoard}
             onBoardEdit={editBoard}
             onBoardDelete={requestDeleteBoard}
+            onReorderBoards={reorderBoards}
             newBoardIdToEdit={newBoardIdToEdit}
             onEditModeEntered={() => setNewBoardIdToEdit(null)}
           />
