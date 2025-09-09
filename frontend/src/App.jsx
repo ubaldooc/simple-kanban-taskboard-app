@@ -7,6 +7,7 @@ import Card from './components/Card.jsx';
 import DeleteZone from './components/DeleteZone.jsx';
 import ConfirmationModal from './components/ConfirmationModal.jsx';
 import useHotkeys from './hooks/useHotkeys.js';
+import ColumnOptionsDropdown from './components/ColumnOptionsDropdown.jsx';
 import BoardSelector from './components/BoardSelector.jsx'; // Importar el nuevo componente
 import ProfileDropdown from './components/ProfileDropdown.jsx';
 import logoImage from './assets/logo.png'; // 1. Importar el logo
@@ -83,6 +84,7 @@ function App() {
   const [boardToEdit, setBoardToEdit] = useState(null); // Nuevo estado para editar tableros
   const [isOverDeleteZone, setIsOverDeleteZone] = useState(false);
   const [exitingItemIds, setExitingItemIds] = useState([]);
+  const [activeDropdown, setActiveDropdown] = useState({ columnId: null, position: null });
 
   // --- Derived State ---
   const activeBoard = boards.find(b => b.id === activeBoardId); // busca el json del tablero activo en el array de tableros boards
@@ -201,6 +203,15 @@ function App() {
           cards: board.cards.filter(card => card.column !== columnToDelete),
         }));
       }, ANIMATION_DURATION);
+    }
+  };
+
+  // --- Column Options Dropdown Handler ---
+  const handleToggleColumnOptions = (columnId, position) => {
+    if (activeDropdown.columnId === columnId) {
+      setActiveDropdown({ columnId: null, position: null }); // Cierra si ya está abierto
+    } else {
+      setActiveDropdown({ columnId, position }); // Abre en la nueva posición
     }
   };
 
@@ -343,13 +354,12 @@ function App() {
                 updateCardTitle={updateCardTitle}
                 editingCardId={editingCardId}
                 clearEditingCardId={() => setEditingCardId(null)}
-                onDeleteColumn={handleDeleteColumnRequest}
                 editingColumnId={editingColumnId}
                 setEditingColumnId={setEditingColumnId}
                 updateColumnTitle={updateColumnTitle}
-                updateColumnColor={updateColumnColor}
                 exitingItemIds={exitingItemIds}
                 onCardKeyDown={handleCardCreationKeyDown}
+                onToggleOptions={handleToggleColumnOptions}
               />
             ))}
           </SortableContext>
@@ -365,6 +375,25 @@ function App() {
             ) : null}
           </DragOverlay>
         </DndContext>
+        {activeDropdown.columnId && (
+          <ColumnOptionsDropdown
+            position={activeDropdown.position}
+            onClose={() => setActiveDropdown({ columnId: null, position: null })}
+            onRename={() => {
+              setEditingColumnId(activeDropdown.columnId);
+              setActiveDropdown({ columnId: null, position: null });
+            }}
+            onDelete={() => {
+              handleDeleteColumnRequest(activeDropdown.columnId);
+              setActiveDropdown({ columnId: null, position: null });
+            }}
+            onColorChange={(color) => {
+              updateColumnColor(activeDropdown.columnId, color);
+              setActiveDropdown({ columnId: null, position: null });
+            }}
+          />
+        )}
+
         <div className="add-column-container">
           <div className="add-column-btn" onClick={addColumn}>
             <i className="fas fa-plus"></i> Añadir otra lista

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import Card from './Card.jsx';
 
 const Column = ({
@@ -10,23 +9,16 @@ const Column = ({
   updateCardTitle,
   editingCardId,
   clearEditingCardId,
-  onDeleteColumn,
   editingColumnId,
   setEditingColumnId,
   updateColumnTitle,
-  updateColumnColor,
   exitingItemIds,
+  onToggleOptions, // Nueva prop para manejar el dropdown en App
 }) => {
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [title, setTitle] = useState(column.title);
   const titleInputRef = useRef(null);
-  const optionsContainerRef = useRef(null);
-
-  const columnColors = [
-    '#EF5350', '#AB47BC', '#5C6BC0', '#42A5F5',
-    '#26A69A', '#66BB6A', '#FFEE58', '#FF7043'
-  ];
-
+  const optionsButtonRef = useRef(null); // Ref para el botón de opciones
+  
   const isEditing = editingColumnId === column.id;
 
   useEffect(() => {
@@ -36,25 +28,6 @@ const Column = ({
     }
   }, [isEditing]);
 
-  // Cerrar popups (opciones o paleta de colores) si se hace clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Si el clic fue fuera del contenedor de opciones, cierra el dropdown.
-      if (optionsContainerRef.current && !optionsContainerRef.current.contains(event.target)) {
-        setIsOptionsOpen(false);
-      }
-    };
-
-    // Añadimos el listener solo si el dropdown de opciones está abierto.
-    if (isOptionsOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    // Función de limpieza para remover el listener.
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOptionsOpen]);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column.id,
@@ -67,31 +40,15 @@ const Column = ({
 
   const style = {
     transition,
-    transform: CSS.Transform.toString(transform),
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     '--column-header-color': column.color || '#888',
   };
 
   const toggleOptions = (e) => {
-    // Detenemos la propagación para que dnd-kit no interprete el clic como un inicio de arrastre
     e.stopPropagation();
-    setIsOptionsOpen(!isOptionsOpen);
-  };
-
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    setIsOptionsOpen(false);
-    onDeleteColumn(column.id);
-  };
-
-  const handleRenameClick = (e) => {
-    e.stopPropagation();
-    setEditingColumnId(column.id);
-    setIsOptionsOpen(false);
-  };
-
-  const handleColorSelect = (color) => {
-    updateColumnColor(column.id, color);
-    setIsOptionsOpen(false);
+    const rect = optionsButtonRef.current.getBoundingClientRect();
+    // Llama a la función del padre con el ID de la columna y su posición
+    onToggleOptions(column.id, rect);
   };
 
   const handleTitleChange = (e) => {
@@ -143,28 +100,7 @@ const Column = ({
           )}
           <span className="card-count">{cards.length}</span>
         </div>
-        <div className="column-options-container" ref={optionsContainerRef}>
-          <i className="fas fa-ellipsis-h column-options" onClick={toggleOptions}></i>
-          {isOptionsOpen && (
-            <div className="column-options-dropdown">
-              <div className="column-option" onClick={handleRenameClick}>Renombrar columna</div>
-              <hr className="dropdown-divider" />
-              <div className="column-option-label">Cambiar color</div>
-              <div className="color-palette-container">
-                {columnColors.map(color => (
-                  <div
-                    key={color}
-                    className="color-swatch"
-                    style={{ backgroundColor: color }}
-                    onClick={() => handleColorSelect(color)}
-                  />
-                ))}
-              </div>
-              <hr className="dropdown-divider" />
-              <div className="column-option" onClick={handleDelete}>Eliminar columna</div>
-            </div>
-          )}
-        </div>
+        <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions}></i>
       </div>
       <SortableContext items={cards.map((card) => card.id)}>
         {cards.map((card) => (

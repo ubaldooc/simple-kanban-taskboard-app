@@ -351,16 +351,14 @@ body {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Este estilo ahora es para el dropdown que se renderiza en el body */
 .column-options-dropdown {
-    position: absolute;
-    top: 80%; /* Se posiciona justo debajo del header */
-    right: 0px;
+    position: absolute; /* La posición se calcula en JS */
     background-color: #21262d;
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    z-index: 20;
-    /* width: 180px; */
-    width: fit-content;
+    z-index: 110; /* Debe estar por encima de otros elementos */
+    width: 200px;
     padding: 5px;
     border: 1px solid #30363d;
 }
