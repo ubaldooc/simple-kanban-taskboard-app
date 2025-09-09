@@ -7,6 +7,7 @@ import Card from './components/Card.jsx';
 import DeleteZone from './components/DeleteZone.jsx';
 import ConfirmationModal from './components/ConfirmationModal.jsx';
 import useHotkeys from './hooks/useHotkeys.js';
+import BoardSelector from './components/BoardSelector.jsx'; // Importar el nuevo componente
 import profileImage from './assets/profile.png';
 import logoImage from './assets/logo.png'; // 1. Importar el logo
 
@@ -78,6 +79,8 @@ function App() {
   const [editingCardId, setEditingCardId] = useState(null);
   const [editingColumnId, setEditingColumnId] = useState(null);
   const [columnToDelete, setColumnToDelete] = useState(null);
+  const [boardToDelete, setBoardToDelete] = useState(null); // Nuevo estado para eliminar tableros
+  const [boardToEdit, setBoardToEdit] = useState(null); // Nuevo estado para editar tableros
   const [isOverDeleteZone, setIsOverDeleteZone] = useState(false);
   const [exitingItemIds, setExitingItemIds] = useState([]);
 
@@ -121,6 +124,35 @@ function App() {
       setActiveBoardId(newBoard.id);
     }
   };
+
+  const editBoard = (boardId) => {
+    const board = boards.find(b => b.id === boardId);
+    if (board) {
+      const newTitle = prompt("Introduce el nuevo nombre para el tablero:", board.title);
+      if (newTitle && newTitle.trim() !== '') {
+        setBoards(prevBoards =>
+          prevBoards.map(b => (b.id === boardId ? { ...b, title: newTitle.trim() } : b))
+        );
+      }
+    }
+  };
+
+  const requestDeleteBoard = (boardId) => {
+    setBoardToDelete(boardId);
+  };
+
+  const confirmDeleteBoard = () => {
+    if (boardToDelete) {
+      const newBoards = boards.filter(b => b.id !== boardToDelete);
+      setBoards(newBoards);
+      // Si el tablero eliminado era el activo, activa el primero de la lista
+      if (activeBoardId === boardToDelete) {
+        setActiveBoardId(newBoards[0]?.id || null);
+      }
+      setBoardToDelete(null);
+    }
+  };
+
 
   // --- Item Management Functions ---
   const addColumn = () => {
@@ -283,14 +315,14 @@ function App() {
       <header className="task-board-header">
         <div className="header-left">
           <img src={logoImage} alt="Taskboard Logo" className="header-logo" /> {/* 2. Añadir la imagen del logo */}
-          <div className="board-selector">
-            <select value={activeBoardId} onChange={(e) => setActiveBoardId(e.target.value)}>
-              {boards.map(board => (
-                <option key={board.id} value={board.id}>{board.title}</option>
-              ))}
-            </select>
-            <button onClick={addBoard} className="add-board-btn">+</button>
-          </div>
+          <BoardSelector
+            boards={boards}
+            activeBoard={activeBoard}
+            onBoardSelect={setActiveBoardId}
+            onBoardAdd={addBoard}
+            onBoardEdit={editBoard}
+            onBoardDelete={requestDeleteBoard}
+          />
         </div>
         <div className="header-right">
           <i className="fas fa-bell"></i>
@@ -350,6 +382,14 @@ function App() {
         onCancel={() => setColumnToDelete(null)}
         title="Eliminar Columna"
         message="¿Estás seguro de que quieres eliminar esta columna? Todas las tarjetas dentro de ella también serán eliminadas. Esta acción no se puede deshacer."
+      />
+
+      <ConfirmationModal
+        isOpen={!!boardToDelete}
+        onConfirm={confirmDeleteBoard}
+        onCancel={() => setBoardToDelete(null)}
+        title="Eliminar Tablero"
+        message="¿Estás seguro de que quieres eliminar este tablero? Esta acción no se puede deshacer."
       />
     </div>
   );

@@ -66,6 +66,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
+    z-index: 100; /* Asegura que el header y sus dropdowns estén siempre al frente */
 }
 
 .header-left, .header-right {
@@ -619,6 +620,103 @@ body {
     animation: item-enter 0.3s ease-out;
 }
 
+.add-board-option {
+    font-style: italic;
+    color: #207ae1;
+    background-color: #fff;
+}
+
+/* --- Estilos para el nuevo BoardSelector --- */
+.board-selector {
+    position: relative;
+    min-width: 280px;
+}
+
+.board-selector-active {
+    /* background-color: rgba(255, 255, 255, 0.1); */
+    background-color: rgba(224, 15, 15, 0.667);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    /* justify-content: center; */
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.board-selector-active:hover {
+    /* background-color: rgba(255, 255, 255, 0.15); */
+    background-color: rgba(187, 53, 53, 0.667);
+}
+
+.board-selector-active span {
+    font-weight: 600;
+}
+
+.board-selector-active .fa-chevron-down {
+    transition: transform 0.2s ease-in-out;
+}
+
+.board-selector-active .fa-chevron-down.open {
+    transform: rotate(180deg);
+}
+
+.board-selector-dropdown {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background-color: #ffffff; /* Fondo blanco */
+    border: 1px solid #d0d7de; /* Borde sutil */
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2); /* Sombra más suave */
+    z-index: 100;
+    list-style: none;
+    padding: 5px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.board-selector-dropdown li {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1f2328; /* Color de texto oscuro para contraste */
+}
+
+.board-selector-dropdown li:hover {
+    background-color: #dfe6ec; /* Fondo suave al pasar el ratón */
+}
+
+.board-selector-dropdown .board-name {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.board-selector-dropdown .board-actions {
+    display: flex;
+    gap: 12px;
+    padding-left: 10px;
+}
+
+.board-selector-dropdown .board-actions i {
+    color: #656d76; /* Color base para los iconos */
+    font-size: 0.85em; /* Iconos más pequeños */
+    transition: color 0.2s;
+}
+
+.board-selector-dropdown .board-actions i.fa-pencil-alt:hover {
+    color: #0969da; /* Color azul para editar */
+}
+.board-selector-dropdown .board-actions i.fa-trash-alt:hover {
+    color: #cf222e; /* Color rojo para eliminar */
+}
 
 
 
