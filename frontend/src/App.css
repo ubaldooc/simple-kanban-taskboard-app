@@ -695,6 +695,7 @@ body {
     align-items: center;
     color: #1f2328; /* Color de texto oscuro para contraste */
     background-color: #ffffff; /* Fondo para el DragOverlay */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* Línea separadora sutil */
 }
 
 .board-list-item:hover {
@@ -709,12 +710,19 @@ body {
 }
 
 .drag-handle {
+    visibility: hidden; /* Oculto por defecto */
     cursor: grab;
     color: #8b949e;
     padding: 0 4px;
 }
 
+.board-list-item:hover .drag-handle {
+    visibility: visible; /* Visible en hover */
+}
+
 .board-list-item.editing .drag-handle {
+    /* Mantenemos el drag-handle oculto y deshabilitado durante la edición */
+    visibility: hidden;
     cursor: not-allowed;
     opacity: 0.5;
 }
@@ -735,6 +743,7 @@ body {
 
 .board-selector-dropdown .board-actions {
     display: flex;
+    visibility: hidden; /* Oculto por defecto */
     gap: 12px;
     padding-left: 10px;
 }
@@ -743,6 +752,10 @@ body {
     color: #656d76; /* Color base para los iconos */
     font-size: 0.85em; /* Iconos más pequeños */
     transition: color 0.2s;
+}
+
+.board-list-item:hover .board-actions {
+    visibility: visible; /* Visible en hover */
 }
 
 .board-selector-dropdown .board-actions i.fa-pencil-alt:hover {
