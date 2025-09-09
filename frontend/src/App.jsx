@@ -40,7 +40,7 @@ const initialBoardsData = () => {
 
   if (oldColumns && oldCards) {
     const migratedBoards = [{
-      id: `board-${Date.now()}`,
+      id: `board-${crypto.randomUUID()}`,
       title: 'Tablero Principal',
       columns: oldColumns,
       cards: oldCards,
@@ -50,7 +50,7 @@ const initialBoardsData = () => {
 
   // 3. Si no hay datos guardados en ningún formato, usa los datos iniciales por defecto.
   return [{
-    id: `board-${Date.now()}`,
+    id: `board-${crypto.randomUUID()}`,
     title: 'Mi Primer Tablero',
     columns: [
       { id: 'ideas', title: 'Ideas', color: '#AB47BC' },
@@ -68,8 +68,8 @@ const initialBoardsData = () => {
 
 function App() {
   // --- State Management ---
-  const [boards, setBoards] = useState(initialBoardsData);
-  const [activeBoardId, setActiveBoardId] = useState(() => boards[0]?.id);
+  const [boards, setBoards] = useState(initialBoardsData); // inicializa la variable con el array de tableros
+  const [activeBoardId, setActiveBoardId] = useState(() => boards[0]?.id); // inicializa el ID del primer tablero con inicialización diferida (lazy initialization) para esperar a que la variable boards obtenga los tableros.
 
   const [active, setActive] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -80,9 +80,9 @@ function App() {
   const [exitingItemIds, setExitingItemIds] = useState([]);
 
   // --- Derived State ---
-  const activeBoard = boards.find(b => b.id === activeBoardId);
-  const columns = activeBoard ? activeBoard.columns : [];
-  const cards = activeBoard ? activeBoard.cards : [];
+  const activeBoard = boards.find(b => b.id === activeBoardId); // busca el json del tablero activo en el array de tableros boards
+  const columns = activeBoard ? activeBoard.columns : []; // busca las columnas del tablero en el json, si no hay retorna un array vacio
+  const cards = activeBoard ? activeBoard.cards : []; // busca las tarjetas del tablero en el json, si no hay retorna un array vacio
 
   // --- Effects ---
   useEffect(() => {
@@ -100,11 +100,7 @@ function App() {
 
   // --- Helper to update the active board ---
   const updateActiveBoard = (updater) => {
-    setBoards(prevBoards =>
-      prevBoards.map(board =>
-        board.id === activeBoardId ? updater(board) : board
-      )
-    );
+    setBoards(prevBoards => prevBoards.map(board => board.id === activeBoardId ? updater(board) : board));
   };
 
   // --- Board Management ---
