@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import './App.css';
@@ -6,7 +6,8 @@ import Column from './components/Column.jsx';
 import Card from './components/Card.jsx';
 import DeleteZone from './components/DeleteZone.jsx';
 import ConfirmationModal from './components/ConfirmationModal.jsx';
-import profileImage from './profile.png';
+import useHotkeys from './hooks/useHotkeys.js';
+import profileImage from './assets/profile.png';
 
 // --- Helper Functions ---
 
@@ -98,12 +99,12 @@ function App() {
 
   const ANIMATION_DURATION = 400;
 
-  // --- Helper to update the active board ---
+  // --- Helper to update the active board / Actualiza el tablero actual ---
   const updateActiveBoard = (updater) => {
     setBoards(prevBoards => prevBoards.map(board => board.id === activeBoardId ? updater(board) : board));
   };
 
-  // --- Board Management ---
+  // --- Board Management / Gestion de Tableros (crear, cambiar) ---
   const addBoard = () => {
     const newBoardName = prompt("Introduce el nombre del nuevo tablero:");
     if (newBoardName) {
@@ -117,6 +118,79 @@ function App() {
       };
       setBoards(prevBoards => [...prevBoards, newBoard]);
       setActiveBoardId(newBoard.id);
+    }
+  };
+
+  // --- Item Management Functions ---
+  const addColumn = () => {
+    const newColumn = { id: `col-${Date.now()}`, title: '', color: '#8b949e' };
+    updateActiveBoard(board => ({ ...board, columns: [...board.columns, newColumn] }));
+    setEditingColumnId(newColumn.id);
+  };
+
+  const addCard = (columnId) => {
+    const newCard = { id: `${Date.now()}`, title: '', column: columnId };
+    updateActiveBoard(board => ({ ...board, cards: [...board.cards, newCard] }));
+    setEditingCardId(newCard.id);
+  };
+
+  const updateCardTitle = (id, newTitle) => {
+    updateActiveBoard(board => ({
+      ...board,
+      cards: board.cards.map(c => c.id === id ? { ...c, title: newTitle } : c)
+    }));
+  };
+
+  const updateColumnTitle = (id, newTitle) => {
+    updateActiveBoard(board => ({
+      ...board,
+      columns: board.columns.map(c => c.id === id ? { ...c, title: newTitle } : c)
+    }));
+  };
+
+  const updateColumnColor = (id, newColor) => {
+    updateActiveBoard(board => ({
+      ...board,
+      columns: board.columns.map(c => c.id === id ? { ...c, color: newColor } : c)
+    }));
+  };
+
+  const handleDeleteColumnRequest = (columnId) => setColumnToDelete(columnId);
+
+  const confirmDeleteColumn = () => {
+    if (columnToDelete) {
+      setExitingItemIds(prev => [...prev, columnToDelete]);
+      setColumnToDelete(null);
+      setTimeout(() => {
+        updateActiveBoard(board => ({
+          ...board,
+          columns: board.columns.filter(col => col.id !== columnToDelete),
+          cards: board.cards.filter(card => card.column !== columnToDelete),
+        }));
+      }, ANIMATION_DURATION);
+    }
+  };
+
+  // --- Keyboard Shortcuts ---
+  const hotkeys = useMemo(() => ({
+    'ctrl+n': addColumn,
+    'alt+arrowright': () => {
+      const currentIndex = boards.findIndex(b => b.id === activeBoardId);
+      const nextIndex = (currentIndex + 1) % boards.length;
+      setActiveBoardId(boards[nextIndex].id);
+    },
+    'alt+arrowleft': () => {
+      const currentIndex = boards.findIndex(b => b.id === activeBoardId);
+      const prevIndex = (currentIndex - 1 + boards.length) % boards.length;
+      setActiveBoardId(boards[prevIndex].id);
+    },
+  }), [boards, activeBoardId, addColumn]);
+
+  useHotkeys(hotkeys, [boards, activeBoardId]);
+
+  const handleCardCreationKeyDown = (e, columnId) => {
+    if (e.key === 'Enter' && !e.shiftKey) { // Enter sin Shift
+      addCard(columnId);
     }
   };
 
@@ -188,56 +262,6 @@ function App() {
     }
   };
 
-  // --- Item Management Functions ---
-  const addColumn = () => {
-    const newColumn = { id: `col-${Date.now()}`, title: '', color: '#8b949e' };
-    updateActiveBoard(board => ({ ...board, columns: [...board.columns, newColumn] }));
-    setEditingColumnId(newColumn.id);
-  };
-
-  const addCard = (columnId) => {
-    const newCard = { id: `${Date.now()}`, title: '', column: columnId };
-    updateActiveBoard(board => ({ ...board, cards: [...board.cards, newCard] }));
-    setEditingCardId(newCard.id);
-  };
-
-  const updateCardTitle = (id, newTitle) => {
-    updateActiveBoard(board => ({
-      ...board,
-      cards: board.cards.map(c => c.id === id ? { ...c, title: newTitle } : c)
-    }));
-  };
-
-  const updateColumnTitle = (id, newTitle) => {
-    updateActiveBoard(board => ({
-      ...board,
-      columns: board.columns.map(c => c.id === id ? { ...c, title: newTitle } : c)
-    }));
-  };
-
-  const updateColumnColor = (id, newColor) => {
-    updateActiveBoard(board => ({
-      ...board,
-      columns: board.columns.map(c => c.id === id ? { ...c, color: newColor } : c)
-    }));
-  };
-
-  const handleDeleteColumnRequest = (columnId) => setColumnToDelete(columnId);
-
-  const confirmDeleteColumn = () => {
-    if (columnToDelete) {
-      setExitingItemIds(prev => [...prev, columnToDelete]);
-      setColumnToDelete(null);
-      setTimeout(() => {
-        updateActiveBoard(board => ({
-          ...board,
-          columns: board.columns.filter(col => col.id !== columnToDelete),
-          cards: board.cards.filter(card => card.column !== columnToDelete),
-        }));
-      }, ANIMATION_DURATION);
-    }
-  };
-
   // --- Render Logic ---
   const activeCard = active && active.data.current?.type === 'Card' && cards.find(c => c.id === active.id);
   const activeColumn = active && active.data.current?.type === 'Column' && columns.find(c => c.id === active.id);
@@ -292,6 +316,7 @@ function App() {
                 updateColumnTitle={updateColumnTitle}
                 updateColumnColor={updateColumnColor}
                 exitingItemIds={exitingItemIds}
+                onCardKeyDown={handleCardCreationKeyDown}
               />
             ))}
           </SortableContext>

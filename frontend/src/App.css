@@ -19,7 +19,7 @@ body {
     /* min-height: calc(100vh - 20px); */
     min-width: calc(100vh - 20px);
     box-sizing: border-box;
-    background-image: url('background.jpg'); /* Imagen de fondo  */
+    background-image: url('./assets/background.jpg'); /* Imagen de fondo  */
     background-size: cover;
     background-position: center;
     /* overflow: hidden; */
