@@ -371,6 +371,7 @@ function App() {
               <Column
                 column={activeColumn}
                 cards={cards.filter(card => card.column === activeColumn.id)}
+                exitingItemIds={exitingItemIds}
               />
             ) : null}
           </DragOverlay>
