@@ -7,6 +7,8 @@ const BoardSelector = ({
   onBoardAdd,
   onBoardEdit,
   onBoardDelete,
+  newBoardIdToEdit,
+  onEditModeEntered,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingBoardId, setEditingBoardId] = useState(null);
@@ -25,6 +27,19 @@ const BoardSelector = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Hook para entrar en modo edición al crear un nuevo tablero
+  useEffect(() => {
+    if (newBoardIdToEdit) {
+      const newBoard = boards.find(b => b.id === newBoardIdToEdit);
+      if (newBoard) {
+        setIsOpen(true); // Asegura que el dropdown esté abierto
+        setEditingBoardId(newBoard.id);
+        setEditingTitle(newBoard.title);
+        onEditModeEntered(); // Notifica al padre que se ha entrado en modo edición
+      }
+    }
+  }, [newBoardIdToEdit, boards, onEditModeEntered]);
 
   const handleSelect = (boardId) => {
     if (editingBoardId) return; // No cambiar de tablero mientras se edita

@@ -83,6 +83,7 @@ function App() {
   const [boardToDelete, setBoardToDelete] = useState(null); // Nuevo estado para eliminar tableros
   const [boardToEdit, setBoardToEdit] = useState(null); // Nuevo estado para editar tableros
   const [isOverDeleteZone, setIsOverDeleteZone] = useState(false);
+  const [newBoardIdToEdit, setNewBoardIdToEdit] = useState(null);
   const [exitingItemIds, setExitingItemIds] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState({ columnId: null, position: null });
 
@@ -112,19 +113,17 @@ function App() {
 
   // --- Board Management / Gestion de Tableros (crear, cambiar) ---
   const addBoard = () => {
-    const newBoardName = prompt("Introduce el nombre del nuevo tablero:");
-    if (newBoardName) {
-      const newBoard = {
-        id: `board-${crypto.randomUUID()}`,
-        title: newBoardName,
-        columns: [
-            { id: `col-${crypto.randomUUID()}`, title: 'To Do', color: '#42A5F5' }
-        ],
-        cards: [],
-      };
-      setBoards(prevBoards => [...prevBoards, newBoard]);
-      setActiveBoardId(newBoard.id);
-    }
+    const newBoard = {
+      id: `board-${crypto.randomUUID()}`,
+      title: 'Nuevo Tablero', // Título por defecto
+      columns: [
+          { id: `col-${crypto.randomUUID()}`, title: 'To Do', color: '#42A5F5' }
+      ],
+      cards: [],
+    };
+    setBoards(prevBoards => [...prevBoards, newBoard]);
+    setActiveBoardId(newBoard.id);
+    setNewBoardIdToEdit(newBoard.id); // Marca este tablero para edición
   };
 
   const editBoard = (boardId, newTitle) => {
@@ -329,6 +328,8 @@ function App() {
             onBoardAdd={addBoard}
             onBoardEdit={editBoard}
             onBoardDelete={requestDeleteBoard}
+            newBoardIdToEdit={newBoardIdToEdit}
+            onEditModeEntered={() => setNewBoardIdToEdit(null)}
           />
         </div>
         <div className="header-right">
