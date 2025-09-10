@@ -97,6 +97,12 @@ function App() {
     localStorage.setItem('taskboards', JSON.stringify(boards));
   }, [boards]);
 
+  // Efecto para actualizar el título de la pestaña del navegador
+  useEffect(() => {
+    if (activeBoard) {
+      document.title = `${activeBoard.title} - Taskboard`;
+    }
+  }, [activeBoard]);
   // --- DND Kit Sensors ---
   const sensors = useSensors(
     useSensor(PointerSensor, {

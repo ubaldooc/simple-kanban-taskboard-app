@@ -12,6 +12,10 @@ const Card = ({ card, updateCardTitle, isEditingInitial, clearEditingCardId }) =
       const textarea = inputRef.current;
       textarea.focus();
       // Ajustar la altura inicial al contenido
+      // Mover el cursor al final del texto
+      const len = textarea.value.length;
+      textarea.setSelectionRange(len, len);
+
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
     }

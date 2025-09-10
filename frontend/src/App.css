@@ -231,7 +231,8 @@ body {
 }
 
 .card {
-    background-color: #21262d; /* Fondo de las tarjetas */
+    /* background-color: #21262d; */
+    background-color: #2d3239;
     border-radius: 6px;
     /* padding: 12px; */
     padding: 10px 12px;
@@ -239,13 +240,16 @@ body {
     margin-bottom: 16px;
 
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    cursor: grab;
-    transition: box-shadow 0.2s ease-in-out; /* Añadimos una transición suave para la sombra */
+    cursor: grab; /* Cambia a 'grabbing' durante el arrastre a través de JS */
+    /* La transición se gestiona con dnd-kit para un mejor rendimiento */
+    /* transition: box-shadow 0.2s ease-in-out; */
 
     overflow: hidden;
+    /* Promueve la capa a la GPU para animaciones más suaves */
+    will-change: transform;
 }
 
-/* --- Optimización de Rendimiento --- */
+/* --- Optimización de Rendimiento para Arrastre --- */
 /* Desactivamos las sombras durante el arrastre para mejorar la fluidez */
 .task-board-container.is-dragging .card,
 .task-board-container.is-dragging .column {
@@ -257,7 +261,7 @@ body {
     opacity: 0.3;
     border: 1px dashed #58a6ff;
     background-color: transparent;
-    box-shadow: none;
+    box-shadow: none !important; /* Aseguramos que no haya sombra */
     color: transparent; /* Oculta también el texto */
 }
 
