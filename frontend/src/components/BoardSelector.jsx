@@ -39,7 +39,9 @@ const BoardSelector = ({
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [saveEdit]);
 
   // Hook para entrar en modo edición al crear un nuevo tablero
@@ -130,7 +132,7 @@ const BoardSelector = ({
                   editingTitle={editingTitle}
                   onTitleChange={handleTitleChange}
                   onTitleKeyDown={handleTitleKeyDown}
-                  onSaveEdit={saveEdit}
+                  onSaveEdit={saveEdit} // Pasamos la función para el ícono de check
                   onSelect={handleSelect}
                   onStartEditing={startEditing}
                   onDelete={handleDelete}

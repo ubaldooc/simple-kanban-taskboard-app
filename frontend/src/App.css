@@ -684,7 +684,7 @@ body {
     z-index: 100;
     list-style: none;
     padding: 5px;
-    max-height: 300px;
+    max-height: 600px;
     overflow-y: auto;
 }
 /* Renombramos 'li' a una clase más específica para evitar conflictos */

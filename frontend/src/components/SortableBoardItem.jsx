@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -15,6 +15,16 @@ const SortableBoardItem = ({
   canDelete,
   isDragging,
 }) => {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+
   const {
     attributes,
     listeners,
@@ -56,12 +66,12 @@ const SortableBoardItem = ({
         {isEditing ? (
           <>
             <input
+              ref={inputRef}
               type="text"
               value={editingTitle}
               onChange={onTitleChange}
               onKeyDown={onTitleKeyDown}
               onClick={(e) => e.stopPropagation()}
-              autoFocus
               className="board-name-input"
             />
             <div className="board-edit-actions">
