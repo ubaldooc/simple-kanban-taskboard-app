@@ -337,7 +337,7 @@ body {
 }
 
 .add-column-btn {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(35, 35, 35, 0.42);
     border-radius: 8px;
     padding: 12px;
     text-align: left;
@@ -628,7 +628,7 @@ body {
     /* font-style: italic; */
     color: #207ae1;
     background-color: #fff;
-    padding-left: 28px;
+    padding: 8px 28px;
 }
 
 .add-board-option:hover {
@@ -684,8 +684,10 @@ body {
     z-index: 100;
     list-style: none;
     padding: 5px;
-    max-height: 600px;
+    max-height: 420px;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #a11b1b #ffffff; /* thumb y track */
 }
 /* Renombramos 'li' a una clase más específica para evitar conflictos */
 .board-list-item {
@@ -695,9 +697,10 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #1f2328; /* Color de texto oscuro para contraste */
+    color: #1f2328;
     background-color: #ffffff; /* Fondo para el DragOverlay */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* Línea separadora sutil */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    user-select: none;
 }
 
 .board-list-item:hover {
