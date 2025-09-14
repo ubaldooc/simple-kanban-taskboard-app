@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import axios from 'axios';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import './App.css';
 import Column from './components/Column.jsx';
@@ -12,8 +11,6 @@ import ColumnOptionsDropdown from './components/ColumnOptionsDropdown.jsx';
 import BoardSelector from './components/BoardSelector.jsx'; // Importar el nuevo componente
 import ProfileDropdown from './components/ProfileDropdown.jsx';
 import logoImage from './assets/logo.png'; // 1. Importar el logo
-
-const API_URL = 'http://localhost:3001';
 
 // --- Helper Functions ---
 
@@ -75,10 +72,11 @@ const initialBoardsData = () => {
 
 function App() {
   // --- State Management ---
-  const [boards, setBoards] = useState([]); // inicializa la variable con el array de tableros
-  const [isLoading, setIsLoading] = useState(true); // Estado para manejar la carga inicial
-  // const [activeBoardId, setActiveBoardId] = useState(() => boards[0]?.id); // inicializa el ID del primer tablero con inicialización diferida (lazy initialization) para esperar a que la variable boards obtenga los tableros.
-  const [activeBoardId, setActiveBoardId] = useState(null);
+  const [boards, setBoards] = useState(initialBoardsData);
+  const [activeBoardId, setActiveBoardId] = useState(() => {
+    const savedBoards = getInitialState('taskboards', []);
+    return savedBoards[0]?.id || null;
+  });
 
   const [active, setActive] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -98,25 +96,6 @@ function App() {
   const cards = activeBoard ? activeBoard.cards : []; // busca las tarjetas del tablero en el json, si no hay retorna un array vacio
 
   // --- Effects ---
-  useEffect(() => {
-    // Cargar los datos iniciales desde el backend
-    const fetchBoards = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/boards`);
-        setBoards(response.data);
-        if (response.data.length > 0) {
-          setActiveBoardId(response.data[0].id); // Activa el primer tablero por defecto
-        }
-      } catch (error) {
-        console.error("Error al cargar los tableros:", error);
-        // Aquí podrías manejar el error, quizás mostrando un mensaje al usuario
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBoards();
-  }, []); // El array vacío asegura que se ejecute solo una vez al montar el componente
-
   useEffect(() => {
     localStorage.setItem('taskboards', JSON.stringify(boards));
   }, [boards]);
@@ -338,14 +317,6 @@ function App() {
   // --- Render Logic ---
   const activeCard = active && active.data.current?.type === 'Card' && cards.find(c => c.id === active.id);
   const activeColumn = active && active.data.current?.type === 'Column' && columns.find(c => c.id === active.id);
-
-  if (isLoading) {
-    return (
-      <div className="task-board-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <h1>Cargando tableros...</h1>
-      </div>
-    );
-  }
 
   if (!activeBoard) {
     return (
