@@ -1,11 +1,13 @@
 import React from 'react';
-import { useTaskboard } from './hooks/useTaskboard';
+import { TaskboardProvider } from './context/TaskboardContext.jsx';
 import { TaskboardView } from './components/TaskboardView';
 
 function App() {
-  const taskboard = useTaskboard();
-
-  return <TaskboardView taskboard={taskboard} />;
+  return (
+    <TaskboardProvider>
+      <TaskboardView />
+    </TaskboardProvider>
+  );
 }
 
 export default App;

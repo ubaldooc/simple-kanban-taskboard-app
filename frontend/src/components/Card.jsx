@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
-const Card = ({ card, updateCardTitle, isEditingInitial, clearEditingCardId }) => {
+const Card = ({ card, isEditingInitial }) => {
+  const { updateCardTitle, clearEditingCardId } = useTaskboardContext();
   const [isEditing, setIsEditing] = useState(isEditingInitial);
   const [title, setTitle] = useState(card.title);
   const inputRef = useRef(null);

@@ -1,19 +1,28 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
-import SortableBoardItem from './SortableBoardItem';
+import SortableBoardItem from './SortableBoardItem.jsx';
+import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
-const BoardSelector = ({
-  boards,
-  activeBoard,
-  onBoardSelect,
-  onBoardAdd,
-  onBoardEdit,
-  onBoardDelete,
-  onReorderBoards,
-  newBoardIdToEdit,
-  onEditModeEntered,
-}) => {
+const BoardSelector = () => {
+  const {
+    boards,
+    activeBoard,
+    setActiveBoardId,
+    addBoard,
+    editBoard,
+    requestDeleteBoard,
+    reorderBoards,
+    newBoardIdToEdit,
+    setNewBoardIdToEdit,
+  } = useTaskboardContext();
+
+  const onBoardSelect = setActiveBoardId;
+  const onBoardAdd = addBoard;
+  const onBoardEdit = editBoard;
+  const onBoardDelete = requestDeleteBoard;
+  const onReorderBoards = reorderBoards;
+  const onEditModeEntered = () => setNewBoardIdToEdit(null);
   const [isOpen, setIsOpen] = useState(false);
   const [editingBoardId, setEditingBoardId] = useState(null);
   const [editingTitle, setEditingTitle] = useState('');

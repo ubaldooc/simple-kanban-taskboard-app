@@ -1,20 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import Card from './Card.jsx';
+import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
-const Column = ({
-  column,
-  cards,
-  onAddCard,
-  updateCardTitle,
-  editingCardId,
-  clearEditingCardId,
-  editingColumnId,
-  setEditingColumnId,
-  updateColumnTitle,
-  exitingItemIds,
-  onToggleOptions, // Nueva prop para manejar el dropdown en App
-}) => {
+const Column = ({ column, cards, onToggleOptions }) => {
+  const {
+    updateCardTitle,
+    editingCardId,
+    clearEditingCardId,
+    editingColumnId,
+    setEditingColumnId,
+    updateColumnTitle,
+    exitingItemIds,
+    onAddCard,
+  } = useTaskboardContext();
   const [title, setTitle] = useState(column.title);
   const titleInputRef = useRef(null);
   const optionsButtonRef = useRef(null); // Ref para el botón de opciones

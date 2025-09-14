@@ -5,16 +5,17 @@ import '../App.css';
 import Column from './Column.jsx';
 import Card from './Card.jsx';
 import DeleteZone from './DeleteZone.jsx';
-import ConfirmationModal from './ConfirmationModal.jsx';
-import useHotkeys from '../hooks/useHotkeys.js';
+import ConfirmationModal from './ConfirmationModal.jsx'; // Asegúrate que este archivo exista o créalo.
+import useHotkeys from '../hooks/useHotkeys.js'; // Asumiendo que este es un .js
 import ColumnOptionsDropdown from './ColumnOptionsDropdown.jsx';
 import BoardSelector from './BoardSelector.jsx';
 import ProfileDropdown from './ProfileDropdown.jsx';
 import logoImage from '../assets/logo.png';
+import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
 const ANIMATION_DURATION = 400;
 
-export const TaskboardView = ({ taskboard }) => {
+export const TaskboardView = () => {
   const {
     boards,
     activeBoard,
@@ -47,7 +48,7 @@ export const TaskboardView = ({ taskboard }) => {
     exitingItemIds,
     setExitingItemIds,
     updateActiveBoard
-  } = taskboard;
+  } = useTaskboardContext();
 
   const [active, setActive] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
