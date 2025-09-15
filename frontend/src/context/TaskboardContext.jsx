@@ -1,8 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { useTaskboard } from '../hooks/useTaskboard';
 
-// const TaskboardContext = createContext();
-const TaskboardContext = createContext(null); // O podrías usar: createContext({});
+const TaskboardContext = createContext(null);
 
 export const useTaskboardContext = () => {
   const context = useContext(TaskboardContext);

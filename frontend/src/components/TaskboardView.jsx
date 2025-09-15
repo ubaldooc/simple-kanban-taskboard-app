@@ -1,17 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext, arrayMove } from '@dnd-kit/sortable';
+import { SortableContext } from '@dnd-kit/sortable';
 import '../App.css';
 import Column from './Column.jsx';
 import Card from './Card.jsx';
 import DeleteZone from './DeleteZone.jsx';
-import ConfirmationModal from './ConfirmationModal.jsx'; // Asegúrate que este archivo exista o créalo.
-import useHotkeys from '../hooks/useHotkeys.js'; // Asumiendo que este es un .js
+import ConfirmationModal from './ConfirmationModal.jsx';
+import useHotkeys from '../hooks/useHotkeys.js';
 import ColumnOptionsDropdown from './ColumnOptionsDropdown.jsx';
 import BoardSelector from './BoardSelector.jsx';
 import ProfileDropdown from './ProfileDropdown.jsx';
 import logoImage from '../assets/logo.png';
-import { useTaskboardContext } from '../context/TaskboardContext.jsx';
+import { useTaskboardContext } from '../context/TaskboardContext';
+import { useTaskboardDnd } from '../hooks/useTaskboardDnd';
 
 const ANIMATION_DURATION = 400;
 
