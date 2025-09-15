@@ -99,6 +99,7 @@ const Card = ({ card }) => {
           onInput={handleInput}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
+          spellCheck="false"
         >{title}</div>
       ) : (
         <p>{card.title}</p>

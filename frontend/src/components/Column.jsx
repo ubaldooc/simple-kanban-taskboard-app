@@ -22,8 +22,10 @@ const Column = ({ column, cards, onToggleOptions }) => {
     if (isEditing && titleInputRef.current) {
       const textarea = titleInputRef.current;
       textarea.focus();
-      textarea.select();
       // Ajustar altura inicial al contenido
+      const len = textarea.value.length;
+      textarea.setSelectionRange(len, len); // Mueve el cursor al final
+
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
@@ -104,6 +106,7 @@ const Column = ({ column, cards, onToggleOptions }) => {
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
               className="column-title-input"
+              spellCheck="false"
             />
           ) : (
             <h2>{column.title}</h2>

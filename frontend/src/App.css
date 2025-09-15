@@ -199,6 +199,7 @@ textarea.column-title-input:focus {
     gap: 8px;
     flex-grow: 1;
     overflow: hidden; /* Evita que el título empuje los elementos */
+    user-select: none;
 }
 
 .card-count {
