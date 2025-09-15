@@ -69,6 +69,11 @@ const Column = ({ column, cards, onToggleOptions }) => {
     }
   };
 
+  const handleTitleDoubleClick = () => {
+    // No permitir doble clic si ya se está editando otra columna
+    if (!editingColumnId) setEditingColumnId(column.id);
+  };
+
   // La animación se aplica solo si la columna está en modo edición Y su título original está vacío.
   // Esto diferencia una columna nueva de una existente que se está editando.
   const isNewlyCreated = isEditing && column.title === '';
@@ -80,8 +85,8 @@ const Column = ({ column, cards, onToggleOptions }) => {
       className={`column ${isDragging ? 'is-dragging-column' : ''} ${isEditing ? 'column-editing' : ''} ${
         isNewlyCreated ? 'item-enter-animation' : ''
       } ${isExiting ? 'item-exit-animation' : ''}`}>
-      <div className="column-header" {...attributes} {...listeners} >
-        <div className="column-title-wrapper">
+      <div className="column-header" {...attributes} >
+        <div className="column-title-wrapper" onDoubleClick={handleTitleDoubleClick}>
           {isEditing ? (
             <input
               ref={titleInputRef}
@@ -97,7 +102,7 @@ const Column = ({ column, cards, onToggleOptions }) => {
           )}
           <span className="card-count">{cards.length}</span>
         </div>
-        <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions}></i>
+        <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions} {...listeners}></i>
       </div>
       <SortableContext items={cards.map((card) => card.id)}>
         {cards.map((card) => (
