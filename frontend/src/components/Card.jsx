@@ -7,7 +7,8 @@ const Card = ({ card }) => {
   const {
     updateCardTitle,
     editingCardId,
-    setEditingCardId
+    setEditingCardId,
+    deleteCard
   } = useTaskboardContext();
   const isEditingInitial = card.id === editingCardId;
   const [isEditing, setIsEditing] = useState(isEditingInitial);
@@ -51,10 +52,13 @@ const Card = ({ card }) => {
 
   const handleBlur = () => {
     setIsEditing(false);
-    // Si el título está vacío (o solo tiene espacios), se guarda un valor por defecto.
-    const finalTitle = title.trim() === '' ? 'nueva tarjeta' : title;
-    updateCardTitle(card.id, finalTitle);
     setEditingCardId(null);
+    const trimmedTitle = title.trim();
+    if (trimmedTitle === '') {
+      deleteCard(card.id);
+    } else {
+      updateCardTitle(card.id, trimmedTitle);
+    }
   };
 
   const handleChange = (e) => {

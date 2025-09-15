@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { SortableContext } from '@dnd-kit/sortable';
+import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import '../App.css';
 import Column from './Column.jsx';
 import Card from './Card.jsx';

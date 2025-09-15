@@ -138,6 +138,13 @@ export const useTaskboard = () => {
     }));
   };
 
+  const deleteCard = (id) => {
+    updateActiveBoard(board => ({
+      ...board,
+      cards: board.cards.filter(c => c.id !== id)
+    }));
+  };
+
   const updateColumnTitle = (id, newTitle) => {
     updateActiveBoard(board => ({
       ...board,
@@ -184,7 +191,9 @@ export const useTaskboard = () => {
     setBoardToDelete,
     addColumn,
     addCard,
+    onAddCard: addCard, // Exportamos addCard con el alias onAddCard
     updateCardTitle,
+    deleteCard,
     updateColumnTitle,
     updateColumnColor,
     handleDeleteColumnRequest,
