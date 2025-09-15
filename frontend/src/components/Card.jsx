@@ -18,15 +18,16 @@ const Card = ({ card }) => {
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      const textarea = inputRef.current;
-      textarea.focus();
-      // Ajustar la altura inicial al contenido
-      // Mover el cursor al final del texto
-      const len = textarea.value.length;
-      textarea.setSelectionRange(len, len);
+      const editableDiv = inputRef.current;
+      editableDiv.focus();
 
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
+      // Mover el cursor al final del contenido
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(editableDiv);
+      range.collapse(false); // false para colapsar al final
+      sel.removeAllRanges();
+      sel.addRange(range);
     }
   }, [isEditing]);
 
@@ -54,7 +55,7 @@ const Card = ({ card }) => {
   const handleBlur = () => {
     setIsEditing(false);
     setEditingCardId(null);
-    const trimmedTitle = title.trim();
+    const trimmedTitle = inputRef.current.innerText.trim();
     if (trimmedTitle === '') {
       deleteCard(card.id);
       // Si era una tarjeta nueva y se cancela, no creamos otra.
@@ -67,16 +68,15 @@ const Card = ({ card }) => {
     }
   };
 
-  const handleChange = (e) => {
-    setTitle(e.target.value);
-    // Ajustar la altura mientras se escribe
-    const textarea = inputRef.current;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
+  const handleInput = (e) => {
+    // No es necesario actualizar el estado 'title' mientras se escribe
+    // ya que leeremos el innerText directamente en el blur.
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    // Guardar con Enter, permitir nueva línea con Shift+Enter
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Evita que se inserte un salto de línea
       inputRef.current.blur();
     }
   };
@@ -92,14 +92,14 @@ const Card = ({ card }) => {
       onDoubleClick={handleDoubleClick}
     >
       {isEditing ? (
-        <textarea
+        <div
           ref={inputRef}
-          type="text"
-          value={title}
-          onChange={handleChange}
+          contentEditable={true}
+          suppressContentEditableWarning={true} // Necesario en React para contentEditable
+          onInput={handleInput}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-        />
+        >{title}</div>
       ) : (
         <p>{card.title}</p>
       )}
