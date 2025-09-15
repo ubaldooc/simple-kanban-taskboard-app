@@ -3,8 +3,13 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
-const Card = ({ card, isEditingInitial }) => {
-  const { updateCardTitle, clearEditingCardId } = useTaskboardContext();
+const Card = ({ card }) => {
+  const {
+    updateCardTitle,
+    editingCardId,
+    setEditingCardId
+  } = useTaskboardContext();
+  const isEditingInitial = card.id === editingCardId;
   const [isEditing, setIsEditing] = useState(isEditingInitial);
   const [title, setTitle] = useState(card.title);
   const inputRef = useRef(null);
@@ -49,7 +54,7 @@ const Card = ({ card, isEditingInitial }) => {
     // Si el título está vacío (o solo tiene espacios), se guarda un valor por defecto.
     const finalTitle = title.trim() === '' ? 'nueva tarjeta' : title;
     updateCardTitle(card.id, finalTitle);
-    clearEditingCardId();
+    setEditingCardId(null);
   };
 
   const handleChange = (e) => {

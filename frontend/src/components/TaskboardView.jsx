@@ -33,14 +33,12 @@ export const TaskboardView = () => {
     setBoardToDelete,
     addColumn,
     addCard,
-    updateCardTitle,
     updateColumnTitle,
     updateColumnColor,
     handleDeleteColumnRequest,
     confirmDeleteColumn,
     columnToDelete,
     setColumnToDelete,
-    editingCardId,
     setEditingCardId,
     editingColumnId,
     setEditingColumnId,
@@ -210,10 +208,6 @@ export const TaskboardView = () => {
                 key={column.id}
                 column={column}
                 cards={cards.filter(card => card.column === column.id)}
-                onAddCard={addCard}
-                updateCardTitle={updateCardTitle}
-                editingCardId={editingCardId}
-                clearEditingCardId={() => setEditingCardId(null)}
                 editingColumnId={editingColumnId}
                 setEditingColumnId={setEditingColumnId}
                 updateColumnTitle={updateColumnTitle}

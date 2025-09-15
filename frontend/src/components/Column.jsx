@@ -5,9 +5,7 @@ import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
 const Column = ({ column, cards, onToggleOptions }) => {
   const {
-    updateCardTitle,
-    editingCardId,
-    clearEditingCardId,
+
     editingColumnId,
     setEditingColumnId,
     updateColumnTitle,
@@ -103,13 +101,7 @@ const Column = ({ column, cards, onToggleOptions }) => {
       </div>
       <SortableContext items={cards.map((card) => card.id)}>
         {cards.map((card) => (
-          <Card
-            key={card.id}
-            card={card}
-            updateCardTitle={updateCardTitle}
-            isEditingInitial={card.id === editingCardId}
-            clearEditingCardId={clearEditingCardId}
-          />
+          <Card key={card.id} card={card} />
         ))}
       </SortableContext>
       <div className="add-card" onClick={() => onAddCard(column.id)}>
