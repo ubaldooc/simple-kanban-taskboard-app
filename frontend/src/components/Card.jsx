@@ -8,7 +8,8 @@ const Card = ({ card }) => {
     updateCardTitle,
     editingCardId,
     setEditingCardId,
-    deleteCard
+    deleteCard,
+    onAddCard
   } = useTaskboardContext();
   const isEditingInitial = card.id === editingCardId;
   const [isEditing, setIsEditing] = useState(isEditingInitial);
@@ -56,8 +57,13 @@ const Card = ({ card }) => {
     const trimmedTitle = title.trim();
     if (trimmedTitle === '') {
       deleteCard(card.id);
+      // Si era una tarjeta nueva y se cancela, no creamos otra.
     } else {
       updateCardTitle(card.id, trimmedTitle);
+      // Si la tarjeta era nueva (título original vacío) y se guardó con éxito, crea la siguiente.
+      if (card.title === '') {
+        onAddCard(card.column);
+      }
     }
   };
 

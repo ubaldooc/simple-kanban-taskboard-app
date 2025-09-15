@@ -129,6 +129,7 @@ export const useTaskboard = () => {
     const newCard = { id: `${crypto.randomUUID()}`, title: '', column: columnId };
     updateActiveBoard(board => ({ ...board, cards: [...board.cards, newCard] }));
     setEditingCardId(newCard.id);
+    return newCard.id; // Devolvemos el ID para la lógica de encadenamiento
   };
 
   const updateCardTitle = (id, newTitle) => {
