@@ -20,8 +20,12 @@ const Column = ({ column, cards, onToggleOptions }) => {
 
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
-      titleInputRef.current.focus();
-      titleInputRef.current.select();
+      const textarea = titleInputRef.current;
+      textarea.focus();
+      textarea.select();
+      // Ajustar altura inicial al contenido
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
     }
   }, [isEditing]);
 
@@ -50,6 +54,10 @@ const Column = ({ column, cards, onToggleOptions }) => {
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
+    // Auto-ajustar la altura del textarea
+    const textarea = titleInputRef.current;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
   const handleTitleBlur = () => {
@@ -61,7 +69,8 @@ const Column = ({ column, cards, onToggleOptions }) => {
   };
 
   const handleTitleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Evita el salto de línea
       handleTitleBlur();
     } else if (e.key === 'Escape') {
       setTitle(column.title); // Revert changes
@@ -88,9 +97,8 @@ const Column = ({ column, cards, onToggleOptions }) => {
       <div className="column-header" {...attributes} >
         <div className="column-title-wrapper" onDoubleClick={handleTitleDoubleClick}>
           {isEditing ? (
-            <input
+            <textarea
               ref={titleInputRef}
-              type="text"
               value={title}
               onChange={handleTitleChange}
               onBlur={handleTitleBlur}

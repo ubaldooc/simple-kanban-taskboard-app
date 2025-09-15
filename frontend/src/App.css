@@ -153,7 +153,7 @@ body {
 
 .column-editing {
     /* Opcional: Cambiar el borde o fondo para indicar que se está editando */
-    box-shadow: 0 0 0 2px #58a6ff;
+    box-shadow: 0 0 2px 4px #58a6ff;
 }
 
 .column-header {
@@ -169,7 +169,7 @@ body {
     cursor: grab;
 }
 
-.column-title-input {
+textarea.column-title-input {
     width: 100%;
     background-color: transparent;
     border: none;
@@ -181,9 +181,14 @@ body {
     padding: 2px 4px;
     margin: -2px -4px; /* Compensar el padding */
     border-radius: 4px;
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.18;
 }
 
-.column-title-input:focus {
+textarea.column-title-input:focus {
     background-color: #21262d;
     box-shadow: 0 0 0 2px #58a6ff inset;
 }
