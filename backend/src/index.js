@@ -27,10 +27,19 @@ app.get('/', (req, res) => {
 
 // --- API Routes ---
 
-// GET /api/boards - Devuelve todos los tableros (aún por implementar con Mongoose)
+// GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
 app.get('/api/boards', async (req, res) => {
-  // TODO: Reemplazar con la lógica para buscar los tableros en MongoDB
-  res.json([]);
+  try {
+    const boards = await Board.find({})
+      .populate('columns')
+      .populate('cards');
+    
+    // Si no hay tableros, se devolverá un array vacío, lo cual es correcto.
+    res.status(200).json(boards);
+  } catch (error) {
+    console.error('Error al obtener los tableros:', error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener los tableros.' });
+  }
 });
 
 // --- Conexión a la base de datos y arranque del servidor ---

@@ -19,16 +19,16 @@ const ColumnSchema = new Schema({
   color: { type: String, default: '#8b949e' },
   // Referencia al tablero al que pertenece.
   board: { type: Schema.Types.ObjectId, ref: 'Board', required: true },
+  // Array de referencias a las tarjetas que contiene, para mantener el orden.
+  cards: [{ type: Schema.Types.ObjectId, ref: 'Card' }],
 }, { timestamps: true });
 
 // --- Board Schema ---
 // El tablero es el contenedor principal.
 const BoardSchema = new Schema({
   title: { type: String, required: true, default: 'Nuevo Tablero' },
-  // Array de referencias a los documentos de las columnas.
+  // Array de referencias a los documentos de las columnas para mantener el orden.
   columns: [{ type: Schema.Types.ObjectId, ref: 'Column' }],
-  // Array de referencias a los documentos de las tarjetas.
-  cards: [{ type: Schema.Types.ObjectId, ref: 'Card' }],
 }, { timestamps: true });
 
 
