@@ -250,6 +250,7 @@ textarea.column-title-input:focus {
     /* La transición se gestiona con dnd-kit para un mejor rendimiento */
     /* transition: box-shadow 0.2s ease-in-out; */
 
+    user-select: none;
     overflow: hidden;
     /* Promueve la capa a la GPU para animaciones más suaves */
     will-change: transform;
@@ -333,6 +334,7 @@ textarea.column-title-input:focus {
     justify-content: center;
     gap: 8px;
     margin-top: auto; /* Empuja el "Add a card" al final de la columna */
+    user-select: none;
 }
 
 .add-card:hover {
@@ -358,6 +360,7 @@ textarea.column-title-input:focus {
     gap: 8px;
     transition: background-color 0.2s ease;
     width: 100%;
+    user-select: none;
 }
 
 .add-column-btn:hover {
@@ -638,6 +641,7 @@ textarea.column-title-input:focus {
     color: #207ae1;
     background-color: #fff;
     padding: 8px 28px;
+    user-select: none;
 }
 
 .add-board-option:hover {
