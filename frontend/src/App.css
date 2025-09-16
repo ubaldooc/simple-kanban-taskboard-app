@@ -147,8 +147,6 @@ body {
 /* Estilo para la columna original (placeholder) mientras se arrastra */
 .is-dragging-column {
     opacity: 0.4;
-    border-style: dashed;
-    border-color: #58a6ff;
 }
 
 .column-editing {
@@ -266,7 +264,6 @@ textarea.column-title-input:focus {
 /* Estilo para la tarjeta original mientras se está arrastrando */
 .is-dragging-card {
     opacity: 0.3;
-    border: 1px dashed #58a6ff;
     background-color: transparent;
     box-shadow: none !important; /* Aseguramos que no haya sombra */
     color: transparent; /* Oculta también el texto */

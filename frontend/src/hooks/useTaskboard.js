@@ -1,48 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
 
 // --- Helper Functions ---
 
-// Function to get initial state from localStorage
-const getInitialState = (key, defaultValue) => {
-  const savedState = localStorage.getItem(key);
-  if (savedState) {
-    try {
-      return JSON.parse(savedState);
-    } catch (error) {
-      console.error(`Error parsing localStorage key "${key}":`, error);
-      return defaultValue;
-    }
-  }
-  return defaultValue;
-};
-
-// --- Initial Data ---
-
-const initialBoardsData = () => {
-  const savedBoards = getInitialState('taskboards', null);
-  if (savedBoards && savedBoards.length > 0) {
-    return savedBoards;
-  }
-  return [{
-    id: `board-${crypto.randomUUID()}`,
-    title: 'Mi Primer Tablero',
-    columns: [
-      { id: 'ideas', title: 'Ideas', color: '#AB47BC' },
-      { id: 'todo', title: 'To Do', color: '#42A5F5' },
-      { id: 'in-progress', title: 'In Progress', color: '#FF7043' },
-      { id: 'done', title: 'Done', color: '#66BB6A' },
-    ],
-    cards: [
-      { id: '1', title: '¡Bienvenido a tu nuevo tablero!', column: 'ideas' },
-      { id: '2', title: 'Arrastra esta tarjeta a "To Do"', column: 'ideas' },
-    ],
-  }];
-};
-
 export const useTaskboard = () => {
   // --- State Management ---
-  const [boards, setBoards] = useState(initialBoardsData);
+  const [boards, setBoards] = useState([]);
   const [activeBoardId, setActiveBoardIdState] = useState(() => {
     // 1. Intentar obtener el último ID activo desde localStorage
     const lastActiveBoardId = localStorage.getItem('lastActiveBoardId');
@@ -50,10 +13,11 @@ export const useTaskboard = () => {
       return lastActiveBoardId;
     }
     // 2. Si no hay, usar el ID del primer tablero como predeterminado
-    const savedBoards = getInitialState('taskboards', []); // Reutilizamos la lógica existente
-    return savedBoards[0]?.id || null; // Si no hay tableros, será null
+    // El ID se establecerá después de la carga de datos.
+    return null;
   });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [editingCardId, setEditingCardId] = useState(null);
   const [editingColumnId, setEditingColumnId] = useState(null);
   const [columnToDelete, setColumnToDelete] = useState(null);
@@ -67,9 +31,55 @@ export const useTaskboard = () => {
   const cards = activeBoard ? activeBoard.cards : [];
 
   // --- Effects ---
+
+  // Cargar datos desde el backend al iniciar
   useEffect(() => {
-    localStorage.setItem('taskboards', JSON.stringify(boards));
-  }, [boards]);
+    const fetchBoards = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/boards');
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        let data = await response.json();
+
+        // Si la base de datos está vacía, crea un tablero por defecto
+        if (data.length === 0) {
+          // TODO: Crear este tablero por defecto en el backend y volver a fetchear
+          data = [{
+            id: `board-${crypto.randomUUID()}`,
+            title: 'Mi Primer Tablero',
+            columns: [
+              { id: 'ideas', title: 'Ideas', color: '#AB47BC' },
+              { id: 'todo', title: 'To Do', color: '#42A5F5' },
+            ],
+            cards: [
+              { id: '1', title: '¡Bienvenido!', column: 'ideas' },
+            ],
+          }];
+        } else {
+          // Transforma los datos del backend (_id) al formato del frontend (id)
+          data = data.map(board => ({
+            ...board,
+            id: board._id,
+            columns: board.columns.map(col => ({ ...col, id: col._id })),
+            cards: board.cards.map(card => ({ ...card, id: card._id })),
+          }));
+        }
+
+        setBoards(data);
+        // Si no hay un activeBoardId en localStorage, establece el primero de la lista
+        if (!localStorage.getItem('lastActiveBoardId')) {
+          setActiveBoardId(data[0]?.id || null);
+        }
+      } catch (error) {
+        console.error("Error al cargar los tableros:", error);
+        // Podrías establecer un estado de error aquí para mostrarlo en la UI
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBoards();
+  }, []); // El array vacío asegura que se ejecute solo una vez
 
   useEffect(() => {
     if (activeBoard) {
@@ -206,6 +216,7 @@ export const useTaskboard = () => {
   };
 
   return {
+    isLoading,
     boards,
     activeBoard,
     columns,
