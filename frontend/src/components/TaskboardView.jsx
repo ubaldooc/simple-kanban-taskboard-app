@@ -57,7 +57,8 @@ export const TaskboardView = () => {
   // --- DND Kit Sensors ---
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: { distance: 10 },
+      // El arrastre se inicia después de que el puntero se mueva 5 píxeles.
+    activationConstraint: { distance: 5 },
     })
   );
 
