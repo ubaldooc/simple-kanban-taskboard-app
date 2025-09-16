@@ -1,18 +1,18 @@
 // index.js
+import 'dotenv/config'; // Carga las variables de entorno desde .env
 import express from 'express';
 import cors from 'cors';
-import fs from 'fs/promises'; // Usamos fs/promises para async/await
-import path from 'path';
-import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
+import { Board, Column, Card } from './models/models.js';
 
-// Helper para obtener la ruta del directorio actual con ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const dbPath = path.join(__dirname, '../db.json');
-
+// --- Configuración inicial ---
 // Crea una instancia de la aplicación de Express
 const app = express();
-const port = 3001; // Cambiamos a 3001 para evitar conflictos con el frontend
+// Usa el puerto del .env o 5001 como valor por defecto
+const port = process.env.PORT || 5001;
+// Usa la URI de MongoDB del .env o una local como valor por defecto
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mi_app_taskboard';
+
 
 // Middleware para habilitar CORS
 app.use(cors());
@@ -27,13 +27,23 @@ app.get('/', (req, res) => {
 
 // --- API Routes ---
 
-// GET /api/boards - Devuelve todos los tableros desde db.json
+// GET /api/boards - Devuelve todos los tableros (aún por implementar con Mongoose)
 app.get('/api/boards', async (req, res) => {
-  const data = await fs.readFile(dbPath, 'utf-8');
-  res.json(JSON.parse(data));
+  // TODO: Reemplazar con la lógica para buscar los tableros en MongoDB
+  res.json([]);
 });
 
-// Inicia el servidor
-app.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
-});
+// --- Conexión a la base de datos y arranque del servidor ---
+const startServer = async () => {
+  try {
+    await mongoose.connect(MONGO_URI);
+    console.log('Conectado a MongoDB exitosamente.');
+    app.listen(port, () => {
+      console.log(`Servidor escuchando en http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error('Error al conectar con MongoDB:', error);
+  }
+};
+
+startServer();
