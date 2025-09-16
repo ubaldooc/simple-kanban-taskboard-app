@@ -96,16 +96,16 @@ const Column = ({ column, cards, onToggleOptions }) => {
       className={`column ${isDragging ? 'is-dragging-column' : ''} ${isEditing ? 'column-editing' : ''} ${
         isNewlyCreated ? 'item-enter-animation' : ''
       } ${isExiting ? 'item-exit-animation' : ''}`}>
-      <div className="column-header" {...attributes} >
+      <div className="column-header" {...attributes} {...listeners} >
         <div className="column-title-wrapper" onDoubleClick={handleTitleDoubleClick}>
-          {isEditing ? (
+          {isEditing ? ( 
             <textarea
               ref={titleInputRef}
               value={title}
               onChange={handleTitleChange}
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
-              className="column-title-input"
+              className="column-title-input" 
               spellCheck="false"
             />
           ) : (
@@ -113,7 +113,7 @@ const Column = ({ column, cards, onToggleOptions }) => {
           )}
           <span className="card-count">{cards.length}</span>
         </div>
-        <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions} {...listeners}></i>
+        <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions} ></i>
       </div>
       <SortableContext items={cards.map((card) => card.id)}>
         {cards.map((card) => (

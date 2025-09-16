@@ -104,29 +104,28 @@ export const TaskboardView = () => {
 
   const handleDragOver = (event) => {
     const { active, over } = event;
-    setIsOverDeleteZone(over?.id === 'delete-zone');
     if (!over || active.id === over.id) return;
-
+  
+    setIsOverDeleteZone(over.id === 'delete-zone');
+  
     const isActiveACard = active.data.current?.type === 'Card';
+    if (!isActiveACard) return;
+  
+    // Lógica para mover una tarjeta sobre otra columna
     const isOverAColumn = over.data.current?.type === 'Column';
     const isOverACard = over.data.current?.type === 'Card';
-
-    if (isActiveACard) {
+  
+    if (isOverAColumn || isOverACard) {
+      const overColumnId = isOverAColumn ? over.id : over.data.current.card.column;
+  
       updateActiveBoard(board => {
         const activeIndex = board.cards.findIndex(c => c.id === active.id);
-        let overIndex;
-
-        if (isOverAColumn) {
-          board.cards[activeIndex].column = over.id;
-          return { ...board, cards: arrayMove(board.cards, activeIndex, activeIndex) };
-        }
-        
-        if (isOverACard) {
-          overIndex = board.cards.findIndex(c => c.id === over.id);
-          if (board.cards[activeIndex].column !== board.cards[overIndex].column) {
-            board.cards[activeIndex].column = board.cards[overIndex].column;
-          }
-          return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
+        if (board.cards[activeIndex].column !== overColumnId) {
+          // Solo actualiza la columna de la tarjeta, sin moverla en el array todavía.
+          // El reordenamiento final se hará en onDragEnd.
+          const newCards = [...board.cards];
+          newCards[activeIndex] = { ...newCards[activeIndex], column: overColumnId };
+          return { ...board, cards: newCards };
         }
         return board;
       });
@@ -134,29 +133,44 @@ export const TaskboardView = () => {
   };
 
   const handleDragEnd = (event) => {
-    const { active, over } = event;
     setActive(null);
     setIsDragging(false);
     setIsOverDeleteZone(false);
-
+  
+    const { active, over } = event;
     if (!over) return;
-
-    if (over.id === 'delete-zone' && active.data.current?.type === 'Card') {
-      setExitingItemIds(prev => [...prev, active.id]);
-      setTimeout(() => {
-        updateActiveBoard(board => ({
-          ...board,
-          cards: board.cards.filter(card => card.id !== active.id)
-        }));
-      }, ANIMATION_DURATION);
-      return;
+  
+    const activeType = active.data.current?.type;
+  
+    // --- Manejo de eliminación de tarjetas ---
+    if (over.id === 'delete-zone' && activeType === 'Card') {
+        setExitingItemIds(prev => [...prev, active.id]);
+        setTimeout(() => {
+            updateActiveBoard(board => ({
+                ...board,
+                cards: board.cards.filter(card => card.id !== active.id)
+            }));
+        }, ANIMATION_DURATION);
+        return;
     }
-
-    if (active.id !== over.id && active.data.current?.type === 'Column') {
+  
+    if (active.id === over.id) return;
+  
+    // --- Manejo de reordenamiento de COLUMNAS ---
+    if (activeType === 'Column') {
       updateActiveBoard(board => {
         const oldIndex = board.columns.findIndex(c => c.id === active.id);
         const newIndex = board.columns.findIndex(c => c.id === over.id);
         return { ...board, columns: arrayMove(board.columns, oldIndex, newIndex) };
+      });
+    }
+  
+    // --- Manejo de reordenamiento de TARJETAS ---
+    if (activeType === 'Card') {
+      updateActiveBoard(board => {
+        const activeIndex = board.cards.findIndex(c => c.id === active.id);
+        const overIndex = board.cards.findIndex(c => c.id === over.id);
+        return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
       });
     }
   };
@@ -208,10 +222,12 @@ export const TaskboardView = () => {
                 key={column.id}
                 column={column}
                 cards={cards.filter(card => card.column === column.id)}
+                onAddCard={addCard}
                 editingColumnId={editingColumnId}
                 setEditingColumnId={setEditingColumnId}
                 updateColumnTitle={updateColumnTitle}
                 exitingItemIds={exitingItemIds}
+                setEditingCardId={setEditingCardId}
                 onCardKeyDown={handleCardCreationKeyDown}
                 onToggleOptions={handleToggleColumnOptions}
               />
