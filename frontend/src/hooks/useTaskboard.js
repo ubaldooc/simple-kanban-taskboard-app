@@ -43,9 +43,15 @@ const initialBoardsData = () => {
 export const useTaskboard = () => {
   // --- State Management ---
   const [boards, setBoards] = useState(initialBoardsData);
-  const [activeBoardId, setActiveBoardId] = useState(() => {
-    const savedBoards = getInitialState('taskboards', []);
-    return savedBoards[0]?.id || null;
+  const [activeBoardId, setActiveBoardIdState] = useState(() => {
+    // 1. Intentar obtener el último ID activo desde localStorage
+    const lastActiveBoardId = localStorage.getItem('lastActiveBoardId');
+    if (lastActiveBoardId) {
+      return lastActiveBoardId;
+    }
+    // 2. Si no hay, usar el ID del primer tablero como predeterminado
+    const savedBoards = getInitialState('taskboards', []); // Reutilizamos la lógica existente
+    return savedBoards[0]?.id || null; // Si no hay tableros, será null
   });
 
   const [editingCardId, setEditingCardId] = useState(null);
@@ -70,6 +76,29 @@ export const useTaskboard = () => {
       document.title = `${activeBoard.title} - Taskboard`;
     }
   }, [activeBoard]);
+
+  // Efecto para validar el activeBoardId cuando los tableros cambian
+  useEffect(() => {
+    if (boards.length > 0) {
+      const boardExists = boards.some(b => b.id === activeBoardId);
+      // Si el tablero activo no existe (p. ej. fue eliminado), o no hay ninguno seleccionado
+      if (!boardExists) {
+        // Selecciona el primero de la lista como fallback
+        setActiveBoardIdState(boards[0].id);
+        // No guardamos este cambio en localStorage para no sobreescribir la última selección del usuario
+        // si solo fue una eliminación temporal. El siguiente setActiveBoardId explícito lo hará.
+      }
+    } else {
+      // Si no hay tableros, el ID activo debe ser null
+      setActiveBoardIdState(null);
+    }
+  }, [boards, activeBoardId]); // Se ejecuta si los tableros o el ID activo cambian
+
+  // --- Wrappers para actualizar estado y localStorage ---
+  const setActiveBoardId = (id) => {
+    setActiveBoardIdState(id);
+    localStorage.setItem('lastActiveBoardId', id);
+  };
 
   // --- Helper to update the active board ---
   const updateActiveBoard = (updater) => {
