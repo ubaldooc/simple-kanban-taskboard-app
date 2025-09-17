@@ -11,7 +11,7 @@ const app = express();
 // Usa el puerto del .env o 5001 como valor por defecto
 const port =  5001;
 // Usa la URI de MongoDB del .env o una local como valor por defecto
-const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboard';
+const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboardversion2';
 
 
 // Middleware para habilitar CORS

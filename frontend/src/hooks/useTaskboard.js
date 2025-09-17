@@ -28,7 +28,7 @@ export const useTaskboard = () => {
   // --- Derived State ---
   const activeBoard = boards.find(b => b.id === activeBoardId);
   const columns = activeBoard ? activeBoard.columns : [];
-  const cards = activeBoard ? activeBoard.cards : [];
+  const cards = activeBoard?.cards || [];
 
   // --- Effects ---
 
@@ -116,6 +116,9 @@ export const useTaskboard = () => {
     setBoards(prevBoards => prevBoards.map(board => board.id === activeBoardId ? updater(board) : board));
   };
 
+
+
+  
   // --- Board Management ---
   const addBoard = async () => {
     const newBoardData = {
@@ -123,7 +126,7 @@ export const useTaskboard = () => {
       columns: [
           { title: 'To Do', color: '#42A5F5' }
       ],
-      cards: [],
+      cards: [], // Asegurarse de que el nuevo tablero tenga un array de tarjetas
     };
 
     try {
@@ -142,6 +145,7 @@ export const useTaskboard = () => {
         ...createdBoard,
         id: createdBoard._id,
         columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
+        cards: createdBoard.cards || [], // Asegurar que las tarjetas sean un array
       };
 
       setBoards(prevBoards => [...prevBoards, newBoard]);
@@ -152,11 +156,26 @@ export const useTaskboard = () => {
     }
   };
 
-  const editBoard = (boardId, newTitle) => {
+  const editBoard = async (boardId, newTitle) => {
     if (newTitle && newTitle.trim() !== '') {
+      const trimmedTitle = newTitle.trim();
+      // Actualización optimista en la UI
       setBoards(prevBoards =>
-        prevBoards.map(b => (b.id === boardId ? { ...b, title: newTitle.trim() } : b))
+        prevBoards.map(b => (b.id === boardId ? { ...b, title: trimmedTitle } : b))
       );
+
+      try {
+        const response = await fetch(`http://localhost:5001/api/boards/${boardId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: trimmedTitle }),
+        });
+
+        if (!response.ok) throw new Error('Error al actualizar el tablero en el servidor');
+      } catch (error) {
+        console.error("Error en editBoard:", error);
+        // Opcional: Revertir el cambio en la UI si la llamada a la API falla
+      }
     }
   };
 
