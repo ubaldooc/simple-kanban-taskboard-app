@@ -36,7 +36,7 @@ export const useTaskboard = () => {
   useEffect(() => {
     const fetchBoards = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/boards');
+        const response = await fetch('http://localhost:5001/api/boards/list');
         if (!response.ok) throw new Error('Network response was not ok');
         
         let data = await response.json();
@@ -60,9 +60,10 @@ export const useTaskboard = () => {
           // Transforma los datos del backend (_id) al formato del frontend (id)
           data = data.map(board => ({
             ...board,
-            id: board._id,
-            columns: board.columns.map(col => ({ ...col, id: col._id })),
-            cards: board.cards.map(card => ({ ...card, id: card._id })),
+            id: board._id, // El _id viene por defecto
+            // Inicializamos columns y cards como arrays vacíos. Se cargarán bajo demanda.
+            columns: [],
+            cards: [],
           }));
         }
 

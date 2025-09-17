@@ -48,25 +48,38 @@ app.get('/', (req, res) => {
 
 // --- API Routes ---
 
-// // GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
-// app.get('/api/boards', async (req, res) => {
-//   try {
-//     const boards = await Board.find({})
-//       .populate({
-//         path: 'columns',
-//         populate: {
-//           path: 'cards',
-//           model: 'Card'
-//         }
-//       });
+// GET /api/boards/list - Devuelve solo los IDs y títulos de los tableros.
+app.get('/api/boards/list', async (req, res) => {
+  try {
+    // .select('title') pide a MongoDB que devuelva solo el campo 'title' (el _id se incluye por defecto)
+    const boardList = await Board.find({}).select('title');
+    res.status(200).json(boardList);
+  } catch (error) {
+    console.error('Error al obtener la lista de tableros:', error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener la lista de tableros.' });
+  }
+});
+
+
+// GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
+app.get('/api/boards', async (req, res) => {
+  try {
+    const boards = await Board.find({})
+      .populate({
+        path: 'columns',
+        populate: {
+          path: 'cards',
+          model: 'Card'
+        }
+      });
     
-//     // Si no hay tableros, se devolverá un array vacío, lo cual es correcto.
-//     res.status(200).json(boards);
-//   } catch (error) {
-//     console.error('Error al obtener los tableros:', error);
-//     res.status(500).json({ message: 'Error interno del servidor al obtener los tableros.' });
-//   }
-// });
+    // Si no hay tableros, se devolverá un array vacío, lo cual es correcto.
+    res.status(200).json(boards);
+  } catch (error) {
+    console.error('Error al obtener los tableros:', error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener los tableros.' });
+  }
+});
 
 
 
@@ -113,5 +126,33 @@ app.put('/api/boards/:id', async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar el tablero:', error);
     res.status(500).json({ message: 'Error interno del servidor al actualizar el tablero.' });
+  }
+});
+
+
+// DELETE /api/boards/:id - Elimina un tablero y su contenido asociado
+app.delete('/api/boards/:id', async (req, res) => {
+  try {
+    const boardId = req.params.id;
+
+    // 1. Encontrar el tablero para obtener sus columnas
+    const board = await Board.findById(boardId);
+    if (!board) {
+      return res.status(404).json({ message: 'Tablero no encontrado.' });
+    }
+
+    // 2. Eliminar todas las tarjetas que pertenecen a las columnas de este tablero
+    await Card.deleteMany({ board: boardId });
+
+    // 3. Eliminar todas las columnas del tablero
+    await Column.deleteMany({ board: boardId });
+
+    // 4. Finalmente, eliminar el tablero
+    await Board.findByIdAndDelete(boardId);
+
+    res.status(200).json({ message: 'Tablero y todo su contenido eliminados exitosamente.' });
+  } catch (error) {
+    console.error('Error al eliminar el tablero:', error);
+    res.status(500).json({ message: 'Error interno del servidor al eliminar el tablero.' });
   }
 });
