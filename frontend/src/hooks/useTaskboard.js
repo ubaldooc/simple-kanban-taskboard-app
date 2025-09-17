@@ -121,38 +121,61 @@ export const useTaskboard = () => {
   
   // --- Board Management ---
   const addBoard = async () => {
-    const newBoardData = {
+    // 1. Crear un tablero temporal con un ID único del lado del cliente
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const newBoardOptimistic = {
+      id: tempId,
       title: 'Nuevo Tablero',
       columns: [
-          { title: 'To Do', color: '#42A5F5' }
+        { id: `temp-col-${crypto.randomUUID()}`, title: 'To Do', color: '#42A5F5' }
       ],
-      cards: [], // Asegurarse de que el nuevo tablero tenga un array de tarjetas
+      cards: [],
     };
 
+    // 2. Actualización optimista: Añadir el tablero temporal al estado de React
+    setBoards(prevBoards => [...prevBoards, newBoardOptimistic]);
+    setActiveBoardId(tempId);
+    setNewBoardIdToEdit(tempId);
+
     try {
+      // 3. Enviar los datos al backend (sin el ID temporal)
+      const newBoardDataForBackend = {
+        title: newBoardOptimistic.title,
+        columns: newBoardOptimistic.columns.map(({ title, color }) => ({ title, color })),
+      };
+
       const response = await fetch('http://localhost:5001/api/boards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBoardData),
+        body: JSON.stringify(newBoardDataForBackend),
       });
 
       if (!response.ok) throw new Error('Error al crear el tablero');
 
       const createdBoard = await response.json();
       
-      // Transforma la respuesta del backend al formato del frontend
-      const newBoard = {
-        ...createdBoard,
-        id: createdBoard._id,
-        columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
-        cards: createdBoard.cards || [], // Asegurar que las tarjetas sean un array
-      };
+      // 4. Reemplazar el tablero temporal con el tablero real del backend
+      setBoards(prevBoards => prevBoards.map(board => {
+        if (board.id === tempId) {
+          // Transforma la respuesta del backend al formato del frontend
+          return {
+            ...createdBoard,
+            id: createdBoard._id,
+            columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
+            cards: createdBoard.cards || [],
+          };
+        }
+        return board;
+      }));
 
-      setBoards(prevBoards => [...prevBoards, newBoard]);
-      setActiveBoardId(newBoard.id);
-      setNewBoardIdToEdit(newBoard.id);
+      // 5. Actualizar el ID activo y el ID a editar al ID permanente
+      setActiveBoardId(createdBoard._id);
+      setNewBoardIdToEdit(createdBoard._id);
+
     } catch (error) {
       console.error("Error en addBoard:", error);
+      // Opcional: Revertir la actualización optimista si falla la llamada a la API
+      setBoards(prevBoards => prevBoards.filter(board => board.id !== tempId));
     }
   };
 

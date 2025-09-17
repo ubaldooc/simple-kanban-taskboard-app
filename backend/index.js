@@ -43,14 +43,22 @@ app.get('/', (req, res) => {
   res.send('¡Hola, mundo desde el backend!');
 });
 
+
+
+
 // --- API Routes ---
 
 // // GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
 // app.get('/api/boards', async (req, res) => {
 //   try {
 //     const boards = await Board.find({})
-//       .populate('columns')
-//       .populate('cards');
+//       .populate({
+//         path: 'columns',
+//         populate: {
+//           path: 'cards',
+//           model: 'Card'
+//         }
+//       });
     
 //     // Si no hay tableros, se devolverá un array vacío, lo cual es correcto.
 //     res.status(200).json(boards);
@@ -107,8 +115,3 @@ app.put('/api/boards/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al actualizar el tablero.' });
   }
 });
-
-
-
-
-
