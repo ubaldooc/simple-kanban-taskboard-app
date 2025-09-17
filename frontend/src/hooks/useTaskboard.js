@@ -44,6 +44,7 @@ export const useTaskboard = () => {
         // Si la base de datos está vacía, crea un tablero por defecto
         if (data.length === 0) {
           // TODO: Crear este tablero por defecto en el backend y volver a fetchear
+          // Por ahora, lo creamos en el frontend para demostración.
           data = [{
             id: `board-${crypto.randomUUID()}`,
             title: 'Mi Primer Tablero',
@@ -116,18 +117,39 @@ export const useTaskboard = () => {
   };
 
   // --- Board Management ---
-  const addBoard = () => {
-    const newBoard = {
-      id: `board-${crypto.randomUUID()}`,
+  const addBoard = async () => {
+    const newBoardData = {
       title: 'Nuevo Tablero',
       columns: [
-          { id: `col-${crypto.randomUUID()}`, title: 'To Do', color: '#42A5F5' }
+          { title: 'To Do', color: '#42A5F5' }
       ],
       cards: [],
     };
-    setBoards(prevBoards => [...prevBoards, newBoard]);
-    setActiveBoardId(newBoard.id);
-    setNewBoardIdToEdit(newBoard.id);
+
+    try {
+      const response = await fetch('http://localhost:5001/api/boards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBoardData),
+      });
+
+      if (!response.ok) throw new Error('Error al crear el tablero');
+
+      const createdBoard = await response.json();
+      
+      // Transforma la respuesta del backend al formato del frontend
+      const newBoard = {
+        ...createdBoard,
+        id: createdBoard._id,
+        columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
+      };
+
+      setBoards(prevBoards => [...prevBoards, newBoard]);
+      setActiveBoardId(newBoard.id);
+      setNewBoardIdToEdit(newBoard.id);
+    } catch (error) {
+      console.error("Error en addBoard:", error);
+    }
   };
 
   const editBoard = (boardId, newTitle) => {
