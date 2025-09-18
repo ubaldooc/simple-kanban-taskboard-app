@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { arrayMove } from '@dnd-kit/sortable';
 
 // --- Helper Functions ---
@@ -211,14 +212,40 @@ export const useTaskboard = () => {
     setBoardToDelete(boardId);
   };
 
-  const confirmDeleteBoard = () => {
+  const confirmDeleteBoard = async () => {
     if (boardToDelete) {
-      const newBoards = boards.filter(b => b.id !== boardToDelete);
-      setBoards(newBoards);
-      if (activeBoardId === boardToDelete) {
-        setActiveBoardId(newBoards[0]?.id || null);
-      }
+      const originalBoards = boards; // Guarda el estado original para poder revertirlo
+      const boardIdToDelete = boardToDelete; // Guarda el ID antes de limpiar el estado
+      
+      // Actualización optimista: elimina el tablero de la UI inmediatamente para una mejor UX
+      setBoards(prevBoards => prevBoards.filter(b => b.id !== boardIdToDelete));
       setBoardToDelete(null);
+      
+      try {
+        const response = await fetch(`http://localhost:5001/api/boards/${boardIdToDelete}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          // Si la API falla, la respuesta no será 'ok'. Lanza un error para ir al catch.
+          // let errorMessage = `Error del servidor: ${response.status} ${response.statusText}`;
+          let errorMessage = `No se pudo elimina el tablero revisa tu conexion a internet`;
+          // Intenta leer el cuerpo del error solo si es JSON
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.indexOf("application/json") !== -1) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+        toast.success('Tablero eliminado correctamente.');
+        // Si todo va bien, la UI ya está actualizada, no se necesita hacer nada más.
+      } catch (error) {
+        console.error("Error en confirmDeleteBoard:", error);
+        // Reversión: Si la API falla, restaura los tableros al estado original.
+        toast.error(error.message || 'No se pudo eliminar el tablero.');
+        setBoards(originalBoards);
+      }
     }
   };
 

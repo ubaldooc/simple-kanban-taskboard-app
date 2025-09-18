@@ -8,6 +8,7 @@ import DeleteZone from './DeleteZone.jsx';
 import ConfirmationModal from './ConfirmationModal.jsx';
 import useHotkeys from '../hooks/useHotkeys.js';
 import ColumnOptionsDropdown from './ColumnOptionsDropdown.jsx';
+import { Toaster } from 'react-hot-toast';
 import BoardSelector from './BoardSelector.jsx';
 import ProfileDropdown from './ProfileDropdown.jsx';
 import logoImage from '../assets/logo.png';
@@ -193,6 +194,20 @@ export const TaskboardView = () => {
 
   return (
     <div className={`task-board-container ${isDragging ? 'is-dragging' : ''}`}>
+      {/* Contenedor para las notificaciones flotantes */}
+      <Toaster
+        position="bottom-right"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            background: '#333',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+          },
+        }}
+      />
       <header className="task-board-header">
         <div className="header-left">
           <img src={logoImage} alt="Taskboard Logo" className="header-logo" />

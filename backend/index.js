@@ -134,21 +134,24 @@ app.put('/api/boards/:id', async (req, res) => {
 app.delete('/api/boards/:id', async (req, res) => {
   try {
     const boardId = req.params.id;
+    
+    // Validación: Comprobar si el ID es un ObjectId válido de MongoDB
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ message: 'El ID del tablero proporcionado no es válido.' });
+    }
 
-    // 1. Encontrar el tablero para obtener sus columnas
-    const board = await Board.findById(boardId);
-    if (!board) {
+    // 1. Intenta eliminar el tablero y comprueba si existía en un solo paso.
+    const deletedBoard = await Board.findByIdAndDelete(boardId);
+    
+    // Si no se encontró ningún tablero para eliminar, devuelve 404.
+    if (!deletedBoard) {
       return res.status(404).json({ message: 'Tablero no encontrado.' });
     }
 
-    // 2. Eliminar todas las tarjetas que pertenecen a las columnas de este tablero
+    // 2. Si el tablero existía y fue eliminado, procede a limpiar su contenido asociado.
     await Card.deleteMany({ board: boardId });
-
-    // 3. Eliminar todas las columnas del tablero
     await Column.deleteMany({ board: boardId });
 
-    // 4. Finalmente, eliminar el tablero
-    await Board.findByIdAndDelete(boardId);
 
     res.status(200).json({ message: 'Tablero y todo su contenido eliminados exitosamente.' });
   } catch (error) {
