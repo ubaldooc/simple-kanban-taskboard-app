@@ -228,8 +228,8 @@ export const useTaskboard = () => {
 
         if (!response.ok) {
           // Si la API falla, la respuesta no será 'ok'. Lanza un error para ir al catch.
-          // let errorMessage = `Error del servidor: ${response.status} ${response.statusText}`;
-          let errorMessage = `No se pudo elimina el tablero revisa tu conexion a internet`;
+          let errorMessage = `Error del servidor: ${response.status} ${response.statusText}`;
+          // let errorMessage = `No se pudo elimina el tablero revisa tu conexion a internet`;
           // Intenta leer el cuerpo del error solo si es JSON
           const contentType = response.headers.get("content-type");
           if (contentType && contentType.indexOf("application/json") !== -1) {
