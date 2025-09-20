@@ -33,14 +33,21 @@ const BoardSchema = new Schema({
   columns: [{ type: Schema.Types.ObjectId, ref: 'Column' }],
 }, { timestamps: true });
 
+// --- User Schema ---
+// Representa a un usuario de la aplicación.
+const UserSchema = new Schema({
+  // En una app real, aquí irían email, password hash, etc.
+  name: { type: String, required: true },
+  // Referencia al último tablero que el usuario tuvo activo.
+  lastActiveBoard: { type: Schema.Types.ObjectId, ref: 'Board', default: null },
+}, { timestamps: true });
 
 // --- Models ---
 // Exportamos los modelos para poder usarlos en otras partes de la aplicación.
 export const Card = mongoose.model('Card', CardSchema);
 export const Column = mongoose.model('Column', ColumnSchema);
 export const Board = mongoose.model('Board', BoardSchema);
-
-
+export const User = mongoose.model('User', UserSchema);
 
 
 

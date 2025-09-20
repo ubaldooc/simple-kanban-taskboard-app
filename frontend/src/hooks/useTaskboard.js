@@ -7,16 +7,7 @@ import { arrayMove } from '@dnd-kit/sortable';
 export const useTaskboard = () => {
   // --- State Management ---
   const [boards, setBoards] = useState([]);
-  const [activeBoardId, setActiveBoardIdState] = useState(() => {
-    // 1. Intentar obtener el último ID activo desde localStorage
-    const lastActiveBoardId = localStorage.getItem('lastActiveBoardId');
-    if (lastActiveBoardId) {
-      return lastActiveBoardId;
-    }
-    // 2. Si no hay, usar el ID del primer tablero como predeterminado
-    // El ID se establecerá después de la carga de datos.
-    return null;
-  });
+  const [activeBoardId, setActiveBoardIdState] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [editingCardId, setEditingCardId] = useState(null);
@@ -62,17 +53,25 @@ export const useTaskboard = () => {
   // Cargar datos desde el backend al iniciar
   useEffect(() => {
     const fetchBoards = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5001/api/boards/list');
-        if (!response.ok) throw new Error('Network response was not ok');
+        // Hacemos las dos peticiones en paralelo para más eficiencia
+        const [boardsResponse, prefsResponse] = await Promise.all([
+          fetch('http://localhost:5001/api/boards/list'),
+          fetch('http://localhost:5001/api/user/preferences')
+        ]);
+
+        if (!boardsResponse.ok) throw new Error('No se pudo cargar la lista de tableros.');
+        if (!prefsResponse.ok) throw new Error('No se pudieron cargar las preferencias del usuario.');
         
-        let data = await response.json();
+        let boardsData = await boardsResponse.json();
+        const prefsData = await prefsResponse.json();
 
         // Si la base de datos está vacía, crea un tablero por defecto
-        if (data.length === 0) {
+        if (boardsData.length === 0) {
           // TODO: Crear este tablero por defecto en el backend y volver a fetchear
           // Por ahora, lo creamos en el frontend para demostración.
-          data = [{
+          boardsData = [{
             id: `board-${crypto.randomUUID()}`,
             title: 'Mi Primer Tablero',
             columns: [
@@ -85,7 +84,7 @@ export const useTaskboard = () => {
           }];
         } else {
           // Transforma los datos del backend (_id) al formato del frontend (id)
-          data = data.map(board => ({
+          boardsData = boardsData.map(board => ({
             ...board,
             id: board._id, // El _id viene por defecto
             // Inicializamos columns y cards como arrays vacíos. Se cargarán bajo demanda.
@@ -94,12 +93,12 @@ export const useTaskboard = () => {
           }));
         }
 
-        setBoards(data);
+        setBoards(boardsData);
 
-        const lastActiveId = localStorage.getItem('lastActiveBoardId');
-        const idToLoad = lastActiveId && data.some(b => b.id === lastActiveId) ? lastActiveId : data[0]?.id;
+        const lastActiveId = prefsData.lastActiveBoardId;
+        const idToLoad = lastActiveId && boardsData.some(b => b.id === lastActiveId) ? lastActiveId : boardsData[0]?.id;
 
-        // Si no hay un activeBoardId en localStorage, establece el primero de la lista
+        // Establece el tablero activo y carga sus detalles
         if (idToLoad) {
           setActiveBoardId(idToLoad);
           fetchBoardDetails(idToLoad); // Carga los detalles del tablero activo
@@ -132,9 +131,8 @@ export const useTaskboard = () => {
       // Si el tablero activo no existe (p. ej. fue eliminado), o no hay ninguno seleccionado
       if (!boardExists) {
         // Selecciona el primero de la lista como fallback
-        setActiveBoardIdState(boards[0].id);
-        // No guardamos este cambio en localStorage para no sobreescribir la última selección del usuario
-        // si solo fue una eliminación temporal. El siguiente setActiveBoardId explícito lo hará.
+        const fallbackId = boards[0]?.id || null;
+        setActiveBoardId(fallbackId);
       }
     } else {
       // Si no hay tableros, el ID activo debe ser null
@@ -142,10 +140,17 @@ export const useTaskboard = () => {
     }
   }, [boards, activeBoardId]); // Se ejecuta si los tableros o el ID activo cambian
 
-  // --- Wrappers para actualizar estado y localStorage ---
+  // --- Wrappers para actualizar estado y guardar en DB ---
   const setActiveBoardId = (id) => {
     setActiveBoardIdState(id);
-    localStorage.setItem('lastActiveBoardId', id);
+    // Guarda la preferencia en el backend en lugar de localStorage
+    fetch('http://localhost:5001/api/user/preferences', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lastActiveBoardId: id }),
+    }).catch(error => {
+      console.error('No se pudo guardar la preferencia del tablero activo:', error);
+    });
   };
 
   // --- Helper to update the active board ---

@@ -3,7 +3,7 @@ import 'dotenv/config'; // Carga las variables de entorno desde .env
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import { Board, Column, Card } from './src/models/models.js';
+import { Board, Column, Card, User } from './src/models/models.js';
 
 // --- Configuración inicial ---
 // Crea una instancia de la aplicación de Express
@@ -27,6 +27,15 @@ const startServer = async () => {
   try {
     await mongoose.connect(MONGO_URI);
     console.log('Conectado a MongoDB exitosamente.');
+
+    // Simulación de usuario: Asegurarse de que nuestro usuario de prueba exista.
+    const userExists = await User.findOne({ name: 'Default User' });
+    if (!userExists) {
+      const defaultUser = new User({ name: 'Default User' });
+      await defaultUser.save();
+      console.log('Usuario de prueba creado.');
+    }
+
     app.listen(port, () => {
       console.log(`Servidor escuchando en http://localhost:${port}`);
     });
@@ -63,6 +72,40 @@ app.get('/api/boards/list', async (req, res) => {
   }
 });
 
+// --- User Preference Routes ---
+
+// GET /api/user/preferences - Obtiene las preferencias del usuario (en este caso, el último tablero)
+app.get('/api/user/preferences', async (req, res) => {
+  try {
+    // En una app real, obtendríamos el ID del usuario desde el token de autenticación.
+    // Aquí, usamos nuestro usuario por defecto.
+    const user = await User.findOne({ name: 'Default User' });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+    res.status(200).json({ lastActiveBoardId: user.lastActiveBoard });
+  } catch (error) {
+    console.error('Error al obtener las preferencias del usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
+// PUT /api/user/preferences - Actualiza las preferencias del usuario
+app.put('/api/user/preferences', async (req, res) => {
+  try {
+    const { lastActiveBoardId } = req.body;
+    // Usamos nuestro usuario por defecto.
+    await User.findOneAndUpdate(
+      { name: 'Default User' },
+      { lastActiveBoard: lastActiveBoardId },
+      { new: true }
+    );
+    res.status(200).json({ message: 'Preferencia actualizada.' });
+  } catch (error) {
+    console.error('Error al actualizar las preferencias del usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
 
 // GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
 app.get('/api/boards', async (req, res) => {
