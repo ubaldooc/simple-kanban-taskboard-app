@@ -152,6 +152,31 @@ app.put('/api/boards/reorder', async (req, res) => {
   }
 });
 
+// GET /api/boards/:id - Devuelve un tablero específico con sus columnas y tarjetas
+app.get('/api/boards/:id', async (req, res) => {
+  try {
+    const boardId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ message: 'El ID del tablero no es válido.' });
+    }
+
+    const board = await Board.findById(boardId)
+      .populate({
+        path: 'columns',
+        populate: { path: 'cards', model: 'Card' } // Anidamos populate para las tarjetas
+      });
+
+    if (!board) {
+      return res.status(404).json({ message: 'Tablero no encontrado.' });
+    }
+
+    res.status(200).json(board);
+  } catch (error) {
+    console.error('Error al obtener el tablero:', error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener el tablero.' });
+  }
+});
+
 // PUT /api/boards/:id - Actualiza el título de un tablero
 app.put('/api/boards/:id', async (req, res) => {
   try {

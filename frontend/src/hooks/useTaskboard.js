@@ -33,6 +33,32 @@ export const useTaskboard = () => {
 
   // --- Effects ---
 
+  // Carga los datos completos (columnas y tarjetas) de un tablero específico
+  const fetchBoardDetails = async (boardId) => {
+    if (!boardId) return;
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/boards/${boardId}`);
+      if (!response.ok) throw new Error('No se pudieron cargar los detalles del tablero.');
+
+      const detailedBoard = await response.json();
+
+      // Actualiza el tablero específico en el estado con sus datos completos
+      setBoards(prevBoards => prevBoards.map(board =>
+        board.id === detailedBoard._id
+          ? {
+              ...board, // Mantiene el 'id' del frontend
+              columns: detailedBoard.columns.map(col => ({ ...col, id: col._id })),
+              cards: detailedBoard.cards || [],
+            }
+          : board
+      ));
+    } catch (error) {
+      console.error("Error al cargar detalles del tablero:", error);
+      toast.error(error.message);
+    }
+  };
+
   // Cargar datos desde el backend al iniciar
   useEffect(() => {
     const fetchBoards = async () => {
@@ -69,9 +95,14 @@ export const useTaskboard = () => {
         }
 
         setBoards(data);
+
+        const lastActiveId = localStorage.getItem('lastActiveBoardId');
+        const idToLoad = lastActiveId && data.some(b => b.id === lastActiveId) ? lastActiveId : data[0]?.id;
+
         // Si no hay un activeBoardId en localStorage, establece el primero de la lista
-        if (!localStorage.getItem('lastActiveBoardId')) {
-          setActiveBoardId(data[0]?.id || null);
+        if (idToLoad) {
+          setActiveBoardId(idToLoad);
+          fetchBoardDetails(idToLoad); // Carga los detalles del tablero activo
         }
       } catch (error) {
         console.error("Error al cargar los tableros:", error);
@@ -85,10 +116,14 @@ export const useTaskboard = () => {
   }, []); // El array vacío asegura que se ejecute solo una vez
 
   useEffect(() => {
-    if (activeBoard) {
-      document.title = `${activeBoard.title} - Taskboard`;
+    // Cargar detalles cuando el tablero activo cambia y no tiene columnas cargadas
+    if (activeBoard && activeBoard.columns.length === 0) {
+      // Evita recargar si es un tablero nuevo temporal
+      if (!activeBoard.id.startsWith('temp-')) {
+        fetchBoardDetails(activeBoard.id);
+      }
     }
-  }, [activeBoard]);
+  }, [activeBoardId]); // Se dispara cuando cambia el ID del tablero activo
 
   // Efecto para validar el activeBoardId cuando los tableros cambian
   useEffect(() => {
