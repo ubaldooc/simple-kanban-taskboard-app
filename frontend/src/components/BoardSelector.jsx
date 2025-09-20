@@ -17,12 +17,6 @@ const BoardSelector = () => {
     setNewBoardIdToEdit,
   } = useTaskboardContext();
 
-  const onBoardSelect = setActiveBoardId;
-  const onBoardAdd = addBoard;
-  const onBoardEdit = editBoard;
-  const onBoardDelete = requestDeleteBoard;
-  const onReorderBoards = reorderBoards;
-  const onEditModeEntered = () => setNewBoardIdToEdit(null);
   const [isOpen, setIsOpen] = useState(false);
   const [editingBoardId, setEditingBoardId] = useState(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -31,10 +25,10 @@ const BoardSelector = () => {
 
   const saveEdit = useCallback(() => {
     if (editingBoardId && editingTitle.trim()) {
-      onBoardEdit(editingBoardId, editingTitle.trim());
+      editBoard(editingBoardId, editingTitle.trim());
     }
     setEditingBoardId(null);
-  }, [editingBoardId, editingTitle, onBoardEdit]);
+  }, [editingBoardId, editingTitle, editBoard]);
 
   // Hook para cerrar el dropdown si se hace clic fuera
   useEffect(() => {
@@ -60,20 +54,20 @@ const BoardSelector = () => {
       if (newBoard) {
         setIsOpen(true); // Asegura que el dropdown esté abierto
         setEditingBoardId(newBoard.id);
-        setEditingTitle(newBoard.title);
-        onEditModeEntered(); // Notifica al padre que se ha entrado en modo edición
+        setEditingTitle(newBoard.title); // Pre-rellena el input con el título
+        setNewBoardIdToEdit(null); // Resetea el estado en el hook principal
       }
     }
-  }, [newBoardIdToEdit, boards, onEditModeEntered, setEditingTitle]);
+  }, [newBoardIdToEdit, boards, setNewBoardIdToEdit]);
 
   const handleSelect = (boardId) => {
     if (editingBoardId) return; // No cambiar de tablero mientras se edita
-    onBoardSelect(boardId);
+    setActiveBoardId(boardId);
     setIsOpen(false);
   };
 
   const handleAdd = () => {
-    onBoardAdd();
+    addBoard();
     // No cerramos el dropdown para que el usuario vea el nuevo tablero
   };
 
@@ -95,31 +89,42 @@ const BoardSelector = () => {
     }
   };
 
-  // --- DND Kit Logic ---
+  // --- DND Kit Logic ---  LOGICA PARA REORDENAR BOARDS
   const sensors = useSensors(useSensor(PointerSensor, {
     activationConstraint: { distance: 5 }, // Requiere mover 5px para iniciar el arrastre
   }));
 
   const handleDragStart = (event) => {
+    // Prevenir el inicio del arrastre si se está editando un tablero
+    if (editingBoardId) {
+      setActiveDragItem(null);
+      return;
+    }
     const { active } = event;
     setActiveDragItem(boards.find(b => b.id === active.id));
   };
 
   const handleDragEnd = (event) => {
-    setActiveDragItem(null);
     const { active, over } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = boards.findIndex(b => b.id === active.id);
-      const newIndex = boards.findIndex(b => b.id === over.id);
-      if (oldIndex !== -1 && newIndex !== -1) {
-        onReorderBoards(oldIndex, newIndex);
-      }
+    setActiveDragItem(null);
+
+    // Si no se soltó sobre un elemento válido o se soltó en el mismo lugar, no hacer nada.
+    if (!over || active.id === over.id) {
+      return;
     }
+
+    const oldIndex = boards.findIndex(b => b.id === active.id);
+    const newIndex = boards.findIndex(b => b.id === over.id);
+
+    reorderBoards(oldIndex, newIndex);
   };
 
+
+  
+  // LOGICA PARA ELIMINAR BOARDS
   const handleDelete = (e, boardId) => {
     e.stopPropagation(); // Evita que el dropdown se cierre
-    onBoardDelete(boardId);
+    requestDeleteBoard(boardId);
     setIsOpen(false);
   };
 

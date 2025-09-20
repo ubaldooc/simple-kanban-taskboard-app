@@ -127,13 +127,12 @@ export const useTaskboard = () => {
     const tempId = `temp-${crypto.randomUUID()}`;
     const newBoardOptimistic = {
       id: tempId,
-      title: 'Nuevo Tablero',
+      title: 'Nuevo Tablero...', // Título temporal
       columns: [
         { id: `temp-col-${crypto.randomUUID()}`, title: 'To Do', color: '#42A5F5' }
       ],
       cards: [],
     };
-
     // 2. Actualización optimista: Añadir el tablero temporal al estado de React
     setBoards(prevBoards => [...prevBoards, newBoardOptimistic]);
     setActiveBoardId(tempId);
@@ -142,8 +141,9 @@ export const useTaskboard = () => {
     try {
       // 3. Enviar los datos al backend (sin el ID temporal)
       const newBoardDataForBackend = {
-        title: newBoardOptimistic.title,
-        columns: newBoardOptimistic.columns.map(({ title, color }) => ({ title, color })),
+        title: 'Nuevo Tablero', // Título por defecto en el backend
+        // Enviamos las columnas que queremos crear
+        columns: [{ title: 'To Do', color: '#42A5F5' }],
       };
 
       const response = await fetch('http://localhost:5001/api/boards', {
@@ -172,10 +172,12 @@ export const useTaskboard = () => {
 
       // 5. Actualizar el ID activo y el ID a editar al ID permanente
       setActiveBoardId(createdBoard._id);
+      // Inicia la edición del título del nuevo tablero
       setNewBoardIdToEdit(createdBoard._id);
 
     } catch (error) {
       console.error("Error en addBoard:", error);
+      toast.error('No se pudo crear el tablero.');
       // Opcional: Revertir la actualización optimista si falla la llamada a la API
       setBoards(prevBoards => prevBoards.filter(board => board.id !== tempId));
     }
@@ -204,10 +206,46 @@ export const useTaskboard = () => {
     }
   };
 
-  const reorderBoards = (oldIndex, newIndex) => {
-    setBoards(prevBoards => arrayMove(prevBoards, oldIndex, newIndex));
+
+
+
+  // FUNCION PARA CAMBIAR EL ORDEN DE LOS BOARDS EN EL DROPDOWN DE BOARDS
+  const reorderBoards = async (oldIndex, newIndex) => {
+    const originalBoards = boards; // Guardar una copia del estado original
+    // 1. Actualización optimista en la UI
+    const newOrderedBoards = arrayMove(boards, oldIndex, newIndex);
+    setBoards(newOrderedBoards);
+
+    // 2. Preparar los datos para el backend (solo los IDs en el nuevo orden)
+    const boardIds = newOrderedBoards.map(board => board.id);
+
+    try {
+      // 3. Enviar el nuevo orden al backend
+      const response = await fetch('http://localhost:5001/api/boards/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ boardIds }),
+      });
+
+      // console.log(boardIds);
+      
+
+      if (!response.ok) {
+        throw new Error('Error al guardar el orden de los tableros en el servidor.');
+      }
+      toast.success('Orden de tableros guardado.');
+    } catch (error) {
+      console.error("Error en reorderBoards:", error);
+      // Reversión: Si la API falla, podrías revertir al orden original.
+      // Por simplicidad, aquí solo mostramos un error.
+      toast.error('No se pudo guardar el nuevo orden.');
+      setBoards(originalBoards); // Revertir al estado anterior guardado
+    }
   };
 
+
+
+  // ELIMINAR BOARDS, TABLEROS. 
   const requestDeleteBoard = (boardId) => {
     setBoardToDelete(boardId);
   };

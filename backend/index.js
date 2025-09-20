@@ -11,7 +11,7 @@ const app = express();
 // Usa el puerto del .env o 5001 como valor por defecto
 const port =  5001;
 // Usa la URI de MongoDB del .env o una local como valor por defecto
-const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboardversion2';
+const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboardversionvv6';
 
 
 // Middleware para habilitar CORS
@@ -87,24 +87,37 @@ app.get('/api/boards', async (req, res) => {
 // POST /api/boards - Crea un nuevo tablero
 app.post('/api/boards', async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title, columns } = req.body;
     if (!title) {
       return res.status(400).json({ message: 'El título es requerido.' });
     }
+
     // 1. Crear el nuevo tablero
     const newBoard = new Board({ title });
-    // 2. Crear una columna por defecto para el nuevo tablero
-    const defaultColumn = new Column({
-      title: 'To Do',
-      color: '#42A5F5',
-      board: newBoard._id
-    });
-    await defaultColumn.save();
-    // 3. Asignar la columna al tablero y guardar el tablero
-    newBoard.columns.push(defaultColumn._id);
+
+    // 2. Si se proporcionan columnas, crearlas y asociarlas.
+    if (columns && Array.isArray(columns) && columns.length > 0) {
+      const createdColumns = await Promise.all(
+        columns.map(async (col) => {
+          const newColumn = new Column({
+            title: col.title || 'Nueva Columna',
+            color: col.color || '#8b949e',
+            board: newBoard._id,
+          });
+          await newColumn.save();
+          return newColumn;
+        })
+      );
+      // Asignar los IDs de las columnas creadas al tablero
+      newBoard.columns = createdColumns.map(col => col._id);
+    }
+
+    // 3. Guardar el tablero (con o sin columnas)
     await newBoard.save();
-    // 4. Poblar el nuevo tablero con su columna para devolverlo completo
+
+    // 4. Poblar el nuevo tablero con sus columnas para devolverlo completo
     const populatedBoard = await Board.findById(newBoard._id).populate('columns');
+
     res.status(201).json(populatedBoard);
   } catch (error) {
     console.error('Error al crear el tablero:', error);
@@ -112,6 +125,25 @@ app.post('/api/boards', async (req, res) => {
   }
 });
 
+// PUT /api/boards/reorder - Actualiza el orden de los tableros
+app.put('/api/boards/reorder', async (req, res) => {
+  try {
+    const { boardIds } = req.body;
+    if (!boardIds || !Array.isArray(boardIds)) {
+      return res.status(400).json({ message: 'Se requiere un array de IDs de tableros.' });
+    }
+
+    // Actualiza el campo 'order' de cada tablero según su posición en el array
+    const updatePromises = boardIds.map((id, index) =>
+      Board.findByIdAndUpdate(id, { order: index })
+    );
+    await Promise.all(updatePromises);
+
+    res.status(200).json({ message: 'Orden de los tableros actualizado correctamente.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error interno del servidor al reordenar los tableros.' });
+  }
+});
 
 // PUT /api/boards/:id - Actualiza el título de un tablero
 app.put('/api/boards/:id', async (req, res) => {
