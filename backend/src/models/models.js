@@ -27,6 +27,8 @@ const ColumnSchema = new Schema({
 // El tablero es el contenedor principal.
 const BoardSchema = new Schema({
   title: { type: String, required: true, default: 'Nuevo Tablero' },
+  // Campo para mantener el orden de los tableros.
+  order: { type: Number, default: 0 },
   // Array de referencias a los documentos de las columnas para mantener el orden.
   columns: [{ type: Schema.Types.ObjectId, ref: 'Column' }],
 }, { timestamps: true });
@@ -83,5 +85,3 @@ export const Board = mongoose.model('Board', BoardSchema);
 // export const Card = mongoose.model('Card', CardSchema);
 // export const Column = mongoose.model('Column', ColumnSchema);
 // export const Board = mongoose.model('Board', BoardSchema);
-
-

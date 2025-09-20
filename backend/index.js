@@ -51,8 +51,11 @@ app.get('/', (req, res) => {
 // GET /api/boards/list - Devuelve solo los IDs y títulos de los tableros.
 app.get('/api/boards/list', async (req, res) => {
   try {
-    // .select('title') pide a MongoDB que devuelva solo el campo 'title' (el _id se incluye por defecto)
-    const boardList = await Board.find({}).select('title');
+    // .sort({ order: 1 }) ordena los tableros por el campo 'order' de forma ascendente.
+    // .select('title') pide a MongoDB que devuelva solo el campo 'title' (el _id se incluye por defecto).
+    const boardList = await Board.find()
+      .sort({ order: 1 })
+      .select('title');
     res.status(200).json(boardList);
   } catch (error) {
     console.error('Error al obtener la lista de tableros:', error);
@@ -92,8 +95,12 @@ app.post('/api/boards', async (req, res) => {
       return res.status(400).json({ message: 'El título es requerido.' });
     }
 
-    // 1. Crear el nuevo tablero
-    const newBoard = new Board({ title });
+    // 1. Contar cuántos tableros existen para asignar el siguiente 'order'
+    const boardCount = await Board.countDocuments();
+
+    // 2. Crear el nuevo tablero con el título y el orden correctos
+    const newBoard = new Board({ title, order: boardCount });
+
 
     // 2. Si se proporcionan columnas, crearlas y asociarlas.
     if (columns && Array.isArray(columns) && columns.length > 0) {
@@ -183,8 +190,18 @@ app.delete('/api/boards/:id', async (req, res) => {
     // 2. Si el tablero existía y fue eliminado, procede a limpiar su contenido asociado.
     await Card.deleteMany({ board: boardId });
     await Column.deleteMany({ board: boardId });
+    
+    // 3. Reordenar los tableros restantes para eliminar huecos en la secuencia 'order'.
+    //    a. Obtener todos los tableros que quedan, ordenados por su 'order' actual.
+    const remainingBoards = await Board.find().sort({ order: 'asc' });
 
+    //    b. Actualizar el 'order' de cada tablero a su nuevo índice.
+    const reorderPromises = remainingBoards.map((board, index) =>
+      Board.findByIdAndUpdate(board._id, { order: index })
+    );
+    await Promise.all(reorderPromises);
 
+    
     res.status(200).json({ message: 'Tablero y todo su contenido eliminados exitosamente.' });
   } catch (error) {
     console.error('Error al eliminar el tablero:', error);
