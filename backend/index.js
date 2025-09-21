@@ -206,6 +206,7 @@ app.get('/api/boards/:id', async (req, res) => {
     const board = await Board.findById(boardId)
       .populate({
         path: 'columns',
+        options: { sort: { 'order': 1 } }, // <-- ¡Este es el cambio clave!
         populate: { path: 'cards', model: 'Card' } // Anidamos populate para las tarjetas
       });
 
@@ -277,6 +278,32 @@ app.delete('/api/boards/:id', async (req, res) => {
   }
 });
 
+// PUT /api/boards/:boardId/reorder-columns - Actualiza el orden de las columnas en un tablero
+app.put('/api/boards/:boardId/reorder-columns', async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const { columnIds } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ message: 'El ID del tablero no es válido.' });
+    }
+    if (!columnIds || !Array.isArray(columnIds)) {
+      return res.status(400).json({ message: 'Se requiere un array de IDs de columnas.' });
+    }
+
+    // Actualiza el campo 'order' de cada columna según su posición en el array
+    const updatePromises = columnIds.map((id, index) =>
+      Column.findByIdAndUpdate(id, { order: index })
+    );
+    await Promise.all(updatePromises);
+
+    res.status(200).json({ message: 'Orden de las columnas actualizado correctamente.' });
+  } catch (error) {
+    console.error('Error al reordenar las columnas:', error);
+    res.status(500).json({ message: 'Error interno del servidor al reordenar las columnas.' });
+  }
+});
+
 // POST /api/boards/:boardId/columns - Crea una nueva columna en un tablero específico
 app.post('/api/boards/:boardId/columns', async (req, res) => {
   try {
@@ -293,10 +320,14 @@ app.post('/api/boards/:boardId/columns', async (req, res) => {
       return res.status(400).json({ message: 'El título de la columna es requerido.' });
     }
 
-    // 3. Crear la nueva columna
+    // 3. Contar cuántas columnas existen en el tablero para asignar el siguiente 'order'
+    const columnCount = await Column.countDocuments({ board: boardId });
+
+    // 4. Crear la nueva columna
     const newColumn = new Column({
       title: title.trim(),
       color: color, // Si no se proporciona, usará el default del schema
+      order: columnCount,
       board: boardId,
     });
     await newColumn.save();

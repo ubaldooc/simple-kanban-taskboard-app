@@ -17,6 +17,8 @@ const CardSchema = new Schema({
 const ColumnSchema = new Schema({
   title: { type: String, required: true, default: 'Nueva Columna' },
   color: { type: String, default: '#8b949e' },
+  // Campo para mantener el orden de las columnas dentro de un tablero.
+  order: { type: Number, default: 0 },
   // Referencia al tablero al que pertenece.
   board: { type: Schema.Types.ObjectId, ref: 'Board', required: true },
   // Array de referencias a las tarjetas que contiene, para mantener el orden.

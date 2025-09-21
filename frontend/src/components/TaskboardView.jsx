@@ -28,6 +28,7 @@ export const TaskboardView = () => {
     addBoard,
     editBoard,
     reorderBoards,
+    reorderColumns,
     requestDeleteBoard,
     confirmDeleteBoard,
     boardToDelete,
@@ -160,11 +161,9 @@ export const TaskboardView = () => {
   
     // --- Manejo de reordenamiento de COLUMNAS ---
     if (activeType === 'Column') {
-      updateActiveBoard(board => {
-        const oldIndex = board.columns.findIndex(c => c.id === active.id);
-        const newIndex = board.columns.findIndex(c => c.id === over.id);
-        return { ...board, columns: arrayMove(board.columns, oldIndex, newIndex) };
-      });
+      const oldIndex = columns.findIndex(c => c.id === active.id);
+      const newIndex = columns.findIndex(c => c.id === over.id);
+      reorderColumns(oldIndex, newIndex);
     }
   
     // --- Manejo de reordenamiento de TARJETAS ---

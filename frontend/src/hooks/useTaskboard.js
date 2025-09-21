@@ -284,6 +284,30 @@ export const useTaskboard = () => {
   };
 
 
+  const reorderColumns = async (oldIndex, newIndex) => {
+    if (!activeBoardId) return;
+
+    const originalColumns = activeBoard.columns;
+    // 1. Actualización optimista
+    const reorderedColumns = arrayMove(originalColumns, oldIndex, newIndex);
+    updateActiveBoard(board => ({ ...board, columns: reorderedColumns }));
+
+    // 2. Preparar datos y llamar a la API
+    const columnIds = reorderedColumns.map(c => c.id);
+    try {
+      const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/reorder-columns`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ columnIds }),
+      });
+      if (!response.ok) throw new Error('No se pudo guardar el orden de las columnas.');
+    } catch (error) {
+      toast.error(error.message);
+      // Revertir si falla
+      updateActiveBoard(board => ({ ...board, columns: originalColumns }));
+    }
+  };
+
 
   // ELIMINAR BOARDS, TABLEROS. 
   const requestDeleteBoard = (boardId) => {
@@ -496,6 +520,7 @@ export const useTaskboard = () => {
     addBoard,
     editBoard,
     reorderBoards,
+    reorderColumns,
     requestDeleteBoard,
     confirmDeleteBoard,
     boardToDelete,
