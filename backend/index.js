@@ -345,3 +345,33 @@ app.put('/api/columns/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al actualizar la columna.' });
   }
 });
+
+// DELETE /api/columns/:id - Elimina una columna y su contenido asociado
+app.delete('/api/columns/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+    }
+
+    // 1. Encuentra y elimina la columna. 'deletedColumn' contendrá el documento eliminado.
+    const deletedColumn = await Column.findByIdAndDelete(id);
+
+    if (!deletedColumn) {
+      return res.status(404).json({ message: 'Columna no encontrada.' });
+    }
+
+    // 2. Elimina todas las tarjetas que pertenecían a esa columna.
+    await Card.deleteMany({ column: id });
+
+    // 3. Elimina la referencia de la columna del array 'columns' en el tablero correspondiente.
+    // Usamos $pull para quitar el ID de la columna del array.
+    await Board.findByIdAndUpdate(deletedColumn.board, { $pull: { columns: id } });
+
+    res.status(200).json({ message: 'Columna y sus tarjetas eliminadas exitosamente.' });
+  } catch (error) {
+    console.error('Error al eliminar la columna:', error);
+    res.status(500).json({ message: 'Error interno del servidor al eliminar la columna.' });
+  }
+});

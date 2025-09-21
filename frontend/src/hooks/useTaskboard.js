@@ -425,26 +425,63 @@ export const useTaskboard = () => {
     }
   };
 
-  const updateColumnColor = (id, newColor) => {
+  const updateColumnColor = async (id, newColor) => {
+    const originalColumns = activeBoard.columns;
+
+    // Actualización optimista
     updateActiveBoard(board => ({
       ...board,
       columns: board.columns.map(c => c.id === id ? { ...c, color: newColor } : c)
     }));
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/columns/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ color: newColor }),
+      });
+      if (!response.ok) throw new Error('No se pudo guardar el nuevo color.');
+      toast.success('Color de columna guardado.');
+    } catch (error) {
+      toast.error(error.message);
+      // Revertir si falla la API
+      updateActiveBoard(board => ({ ...board, columns: originalColumns }));
+    }
   };
 
   const handleDeleteColumnRequest = (columnId) => setColumnToDelete(columnId);
 
-  const confirmDeleteColumn = () => {
+  const confirmDeleteColumn = async () => {
     if (columnToDelete) {
-      setExitingItemIds(prev => [...prev, columnToDelete]);
+      const columnIdToDelete = columnToDelete;
+      const originalBoard = activeBoard;
+
+      // Actualización optimista con animación
+      setExitingItemIds(prev => [...prev, columnIdToDelete]);
       setColumnToDelete(null);
+
       setTimeout(() => {
         updateActiveBoard(board => ({
           ...board,
-          columns: board.columns.filter(col => col.id !== columnToDelete),
-          cards: board.cards.filter(card => card.column !== columnToDelete),
+          columns: board.columns.filter(col => col.id !== columnIdToDelete),
+          cards: board.cards.filter(card => card.column !== columnIdToDelete),
         }));
       }, 400);
+
+      try {
+        const response = await fetch(`http://localhost:5001/api/columns/${columnIdToDelete}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) throw new Error('No se pudo eliminar la columna del servidor.');
+
+        toast.success('Columna eliminada.');
+      } catch (error) {
+        toast.error(error.message);
+        // Revertir si la API falla
+        setBoards(prevBoards => prevBoards.map(b => b.id === activeBoardId ? originalBoard : b));
+        setExitingItemIds(prev => prev.filter(id => id !== columnIdToDelete));
+      }
     }
   };
 
