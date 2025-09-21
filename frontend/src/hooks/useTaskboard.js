@@ -328,10 +328,42 @@ export const useTaskboard = () => {
   };
 
   // --- Item Management ---
-  const addColumn = () => {
-    const newColumn = { id: `col-${crypto.randomUUID()}`, title: '', color: '#8b949e' };
-    updateActiveBoard(board => ({ ...board, columns: [...board.columns, newColumn] }));
-    setEditingColumnId(newColumn.id);
+  const addColumn = async () => {
+    if (!activeBoardId) return;
+
+    // 1. Crear una columna temporal para la actualización optimista
+    const tempId = `temp-col-${crypto.randomUUID()}`;
+    const newColumnOptimistic = { id: tempId, title: '', color: '#8b949e', cards: [] };
+
+    // 2. Actualización optimista: añadir la columna a la UI
+    updateActiveBoard(board => ({ ...board, columns: [...board.columns, newColumnOptimistic] }));
+    setEditingColumnId(tempId); // Entrar en modo edición
+
+    try {
+      // 3. Enviar la petición al backend para crear la columna con un título por defecto
+      const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/columns`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Nueva Columna' }), // El backend se encarga del color por defecto
+      });
+
+      if (!response.ok) throw new Error('No se pudo crear la columna.');
+
+      const createdColumn = await response.json();
+
+      // 4. Reemplazar la columna temporal con la real del backend
+      updateActiveBoard(board => ({
+        ...board,
+        columns: board.columns.map(col =>
+          col.id === tempId ? { ...createdColumn, id: createdColumn._id } : col
+        ),
+      }));
+      setEditingColumnId(createdColumn._id); // Actualizar el ID en edición al ID permanente
+    } catch (error) {
+      toast.error(error.message);
+      // Revertir la actualización optimista si falla
+      updateActiveBoard(board => ({ ...board, columns: board.columns.filter(col => col.id !== tempId) }));
+    }
   };
 
   const addCard = (columnId) => {
@@ -355,11 +387,42 @@ export const useTaskboard = () => {
     }));
   };
 
-  const updateColumnTitle = (id, newTitle) => {
+  const updateColumnTitle = async (id, newTitle) => {
+    const trimmedTitle = newTitle.trim();
+    const originalColumns = activeBoard.columns;
+    const columnToUpdate = originalColumns.find(c => c.id === id);
+    if (!columnToUpdate) return;
+
+    // Si el título está vacío, descarta la columna
+    if (trimmedTitle === '') {
+      // Si la columna era temporal (aún no guardada en DB), solo la quita de la UI
+      if (id.startsWith('temp-col-')) {
+        updateActiveBoard(board => ({ ...board, columns: board.columns.filter(col => col.id !== id) }));
+      } else {
+        // Si ya existe en la DB, solicita su eliminación (esto es un caso de borde, podría implementarse una ruta DELETE)
+        handleDeleteColumnRequest(id);
+      }
+      return;
+    }
+
+    // Actualización optimista
     updateActiveBoard(board => ({
       ...board,
-      columns: board.columns.map(c => c.id === id ? { ...c, title: newTitle } : c)
+      columns: board.columns.map(c => c.id === id ? { ...c, title: trimmedTitle } : c)
     }));
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/columns/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: trimmedTitle }),
+      });
+      if (!response.ok) throw new Error('No se pudo guardar el nuevo título.');
+    } catch (error) {
+      toast.error(error.message);
+      // Revertir si falla la API
+      updateActiveBoard(board => ({ ...board, columns: originalColumns }));
+    }
   };
 
   const updateColumnColor = (id, newColor) => {

@@ -276,3 +276,72 @@ app.delete('/api/boards/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al eliminar el tablero.' });
   }
 });
+
+// POST /api/boards/:boardId/columns - Crea una nueva columna en un tablero específico
+app.post('/api/boards/:boardId/columns', async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const { title, color } = req.body;
+
+    // 1. Validar que el ID del tablero sea válido
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ message: 'El ID del tablero no es válido.' });
+    }
+
+    // 2. Validar que se haya proporcionado un título
+    if (!title || title.trim() === '') {
+      return res.status(400).json({ message: 'El título de la columna es requerido.' });
+    }
+
+    // 3. Crear la nueva columna
+    const newColumn = new Column({
+      title: title.trim(),
+      color: color, // Si no se proporciona, usará el default del schema
+      board: boardId,
+    });
+    await newColumn.save();
+
+    // 4. Añadir la referencia de la nueva columna al array 'columns' del tablero
+    await Board.findByIdAndUpdate(boardId, { $push: { columns: newColumn._id } });
+
+    res.status(201).json(newColumn);
+  } catch (error) {
+    console.error('Error al crear la columna:', error);
+    res.status(500).json({ message: 'Error interno del servidor al crear la columna.' });
+  }
+});
+
+// PUT /api/columns/:id - Actualiza el título de una columna
+app.put('/api/columns/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, color } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+    }
+
+    const updateData = {};
+    if (title && title.trim() !== '') {
+      updateData.title = title.trim();
+    }
+    if (color) {
+      updateData.color = color;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: 'No se proporcionaron datos para actualizar.' });
+    }
+
+    const updatedColumn = await Column.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json(updatedColumn);
+  } catch (error) {
+    console.error('Error al actualizar la columna:', error);
+    res.status(500).json({ message: 'Error interno del servidor al actualizar la columna.' });
+  }
+});
