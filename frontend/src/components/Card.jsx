@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
-const Card = ({ card }) => {
+const CardComponent = ({ card }) => {
   const {
     updateCardTitle,
     editingCardId,
@@ -108,4 +108,8 @@ const Card = ({ card }) => {
   );
 };
 
+// Envolvemos el componente con React.memo para optimizar el rendimiento.
+// Evita que la tarjeta se vuelva a renderizar si sus props no han cambiado,
+// lo cual es crucial durante las operaciones de arrastrar y soltar.
+const Card = memo(CardComponent);
 export default Card;

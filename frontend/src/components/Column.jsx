@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import Card from './Card.jsx';
 import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
-const Column = ({ column, cards, onToggleOptions }) => {
+const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   const {
 
     editingColumnId,
@@ -129,4 +129,8 @@ const Column = ({ column, cards, onToggleOptions }) => {
   );
 };
 
+// Envolvemos el componente con React.memo para optimizar el rendimiento.
+// Evita que la columna se vuelva a renderizar innecesariamente durante
+// el arrastre de tarjetas en otras columnas.
+const Column = memo(ColumnComponent);
 export default Column;
