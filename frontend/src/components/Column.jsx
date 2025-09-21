@@ -21,14 +21,22 @@ const Column = ({ column, cards, onToggleOptions }) => {
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
       const textarea = titleInputRef.current;
-      textarea.focus();
-      // Mover el cursor al final del contenido en un div contentEditable
-      const range = document.createRange();
-      const sel = window.getSelection();
-      range.selectNodeContents(textarea);
-      range.collapse(false); // false para colapsar al final
-      sel.removeAllRanges();
-      sel.addRange(range);
+      // La animación se aplica solo si la columna es nueva (título original vacío).
+      const isNewlyCreated = column.title === 'Nueva Columna' || column.title === '';
+
+      if (isNewlyCreated) {
+        // Para una columna nueva, selecciona todo el texto.
+        textarea.focus();
+        window.getSelection()?.selectAllChildren(textarea);
+      } else {
+        // Para una columna existente, mueve el cursor al final.
+        textarea.focus();
+        const range = document.createRange();
+        range.selectNodeContents(textarea);
+        range.collapse(false); // Colapsa al final.
+        window.getSelection()?.removeAllRanges();
+        window.getSelection()?.addRange(range);
+      }
     }
   }, [isEditing]);
 
@@ -81,14 +89,14 @@ const Column = ({ column, cards, onToggleOptions }) => {
 
   // La animación se aplica solo si la columna está en modo edición Y su título original está vacío.
   // Esto diferencia una columna nueva de una existente que se está editando.
-  const isNewlyCreated = isEditing && column.title === '';
+  const isNewlyCreatedAnimation = isEditing && column.title === '';
   const isExiting = exitingItemIds.includes(column.id);
 
   return (
     <div
       ref={setNodeRef} style={style}
       className={`column ${isDragging ? 'is-dragging-column' : ''} ${isEditing ? 'column-editing' : ''} ${
-        isNewlyCreated ? 'item-enter-animation' : ''
+        isNewlyCreatedAnimation ? 'item-enter-animation' : ''
       } ${isExiting ? 'item-exit-animation' : ''}`}>
       <div className="column-header" {...attributes} {...listeners} >
         <div className="column-title-wrapper" onDoubleClick={handleTitleDoubleClick}>
