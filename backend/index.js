@@ -207,14 +207,26 @@ app.get('/api/boards/:id', async (req, res) => {
       .populate({
         path: 'columns',
         options: { sort: { 'order': 1 } }, // <-- ¡Este es el cambio clave!
-        populate: { path: 'cards', model: 'Card' } // Anidamos populate para las tarjetas
+        populate: {
+          path: 'cards',
+          model: 'Card',
+          options: { sort: { 'order': 1 } } // Ordenamos las tarjetas también
+        }
       });
 
     if (!board) {
       return res.status(404).json({ message: 'Tablero no encontrado.' });
     }
 
-    res.status(200).json(board);
+    // Aplanamos las tarjetas para que estén en un solo array a nivel del tablero
+    const boardObject = board.toObject();
+    boardObject.cards = board.columns.reduce((allCards, column) => {
+      // Asegurarse de que column.cards es un array antes de concatenar
+      const columnCards = Array.isArray(column.cards) ? column.cards : [];
+      return allCards.concat(columnCards);
+    }, []);
+
+    res.status(200).json(boardObject);
   } catch (error) {
     console.error('Error al obtener el tablero:', error);
     res.status(500).json({ message: 'Error interno del servidor al obtener el tablero.' });
@@ -376,6 +388,52 @@ app.put('/api/columns/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al actualizar la columna.' });
   }
 });
+
+
+
+// CREAR CARD
+// POST /api/columns/:columnId/cards - Crea una nueva tarjeta en una columna
+app.post('/api/columns/:columnId/cards', async (req, res) => {
+  try {
+    const { columnId } = req.params;
+    const { title } = req.body;
+
+    // 1. Validar que el ID de la columna sea válido
+    if (!mongoose.Types.ObjectId.isValid(columnId)) {
+      return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+    }
+
+    // 2. Validar que se haya proporcionado un título
+    if (!title || title.trim() === '') {
+      return res.status(400).json({ message: 'El título de la tarjeta es requerido.' });
+    }
+
+    // 3. Encontrar la columna para obtener el ID del tablero
+    const parentColumn = await Column.findById(columnId);
+    if (!parentColumn) {
+      return res.status(404).json({ message: 'La columna especificada no existe.' });
+    }
+
+    // 4. Crear la nueva tarjeta
+    const newCard = new Card({
+      title: title.trim(),
+      column: columnId,
+      board: parentColumn.board, // Asignamos el ID del tablero desde la columna padre
+    });
+    await newCard.save();
+
+    // 5. Añadir la referencia de la nueva tarjeta al array 'cards' de la columna
+    await Column.findByIdAndUpdate(columnId, { $push: { cards: newCard._id } });
+
+    res.status(201).json(newCard);
+  } catch (error) {
+    console.error('Error al crear la tarjeta:', error);
+    res.status(500).json({ message: 'Error interno del servidor al crear la tarjeta.' });
+  }
+});
+
+
+
 
 // DELETE /api/columns/:id - Elimina una columna y su contenido asociado
 app.delete('/api/columns/:id', async (req, res) => {

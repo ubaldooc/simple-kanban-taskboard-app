@@ -40,7 +40,7 @@ export const useTaskboard = () => {
           ? {
               ...board, // Mantiene el 'id' del frontend
               columns: detailedBoard.columns.map(col => ({ ...col, id: col._id })),
-              cards: detailedBoard.cards || [],
+              cards: (detailedBoard.cards || []).map(card => ({ ...card, id: card._id })),
             }
           : board
       ));
@@ -390,18 +390,62 @@ export const useTaskboard = () => {
     }
   };
 
-  const addCard = (columnId) => {
-    const newCard = { id: `${crypto.randomUUID()}`, title: '', column: columnId };
-    updateActiveBoard(board => ({ ...board, cards: [...board.cards, newCard] }));
-    setEditingCardId(newCard.id);
-    return newCard.id; // Devolvemos el ID para la lógica de encadenamiento
+  const addCard = async (columnId) => {
+    // 1. Crear una tarjeta temporal para la UI
+    const tempId = `temp-card-${crypto.randomUUID()}`;
+    const newCardOptimistic = { id: tempId, title: '', column: columnId };
+
+    // 2. Actualización optimista: añadir la tarjeta a la UI y entrar en modo edición
+    updateActiveBoard(board => ({ ...board, cards: [...board.cards, newCardOptimistic] }));
+    setEditingCardId(tempId);
+
+    // Devolvemos el ID temporal para que el componente Card pueda usarlo
+    return tempId;
   };
 
-  const updateCardTitle = (id, newTitle) => {
-    updateActiveBoard(board => ({
-      ...board,
-      cards: board.cards.map(c => c.id === id ? { ...c, title: newTitle } : c)
-    }));
+  const updateCardTitle = async (cardId, newTitle) => {
+    const trimmedTitle = newTitle.trim();
+    const originalCards = activeBoard.cards;
+    const cardToUpdate = originalCards.find(c => c.id === cardId);
+
+    // Si el título está vacío, simplemente eliminamos la tarjeta (lógica de cancelación)
+    if (trimmedTitle === '') {
+      deleteCard(cardId); // deleteCard se encargará de la API si es necesario
+      return;
+    }
+
+    // Si la tarjeta es nueva (ID temporal), la creamos en el backend
+    if (cardId.startsWith('temp-card-')) {
+      try {
+        const response = await fetch(`http://localhost:5001/api/columns/${cardToUpdate.column}/cards`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: trimmedTitle }),
+        });
+        if (!response.ok) throw new Error('No se pudo crear la tarjeta.');
+        const createdCard = await response.json();
+
+        // Reemplazar la tarjeta temporal con la real del backend
+        updateActiveBoard(board => ({
+          ...board,
+          cards: board.cards.map(c => c.id === cardId ? { ...createdCard, id: createdCard._id } : c)
+        }));
+      } catch (error) {
+        toast.error(error.message);
+        // Revertir: eliminar la tarjeta temporal si la creación falla
+        updateActiveBoard(board => ({ ...board, cards: originalCards.filter(c => c.id !== cardId) }));
+      }
+    } else {
+      // Si la tarjeta ya existe, actualizamos su título
+      // Actualización optimista
+      updateActiveBoard(board => ({
+        ...board,
+        cards: board.cards.map(c => c.id === cardId ? { ...c, title: trimmedTitle } : c)
+      }));
+
+      // TODO: Implementar la llamada a la API PUT /api/cards/:cardId
+      // Por ahora, solo hacemos la actualización optimista.
+    }
   };
 
   const deleteCard = (id) => {
