@@ -7,6 +7,8 @@ const { Schema } = mongoose;
 const CardSchema = new Schema({
   title: { type: String, required: true, default: 'Nueva Tarjeta' },
   // Referencia a la columna a la que pertenece.
+  // Campo para mantener el orden de las tarjetas dentro de una columna.
+  order: { type: Number, default: 0 },
   column: { type: Schema.Types.ObjectId, ref: 'Column', required: true },
   // Referencia al tablero para facilitar las consultas.
   board: { type: Schema.Types.ObjectId, ref: 'Board', required: true },

@@ -414,11 +414,15 @@ app.post('/api/columns/:columnId/cards', async (req, res) => {
       return res.status(404).json({ message: 'La columna especificada no existe.' });
     }
 
-    // 4. Crear la nueva tarjeta
+    // 4. Contar cuántas tarjetas existen en la columna para asignar el siguiente 'order'
+    const cardCount = await Card.countDocuments({ column: columnId });
+
+    // 5. Crear la nueva tarjeta
     const newCard = new Card({
       title: title.trim(),
       column: columnId,
       board: parentColumn.board, // Asignamos el ID del tablero desde la columna padre
+      order: cardCount,
     });
     await newCard.save();
 
@@ -432,6 +436,43 @@ app.post('/api/columns/:columnId/cards', async (req, res) => {
   }
 });
 
+// PUT /api/cards/:id - Actualiza una tarjeta (título, columna, orden)
+app.put('/api/cards/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, column, order } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'El ID de la tarjeta no es válido.' });
+    }
+
+    const updateData = {};
+    if (title && title.trim() !== '') {
+      updateData.title = title.trim();
+    }
+    // Aquí podrías añadir lógica para mover la tarjeta a otra columna
+    // y para reordenar, pero por ahora nos centramos en el título.
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: 'No se proporcionaron datos para actualizar.' });
+    }
+
+    const updatedCard = await Card.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCard) {
+      return res.status(404).json({ message: 'Tarjeta no encontrada.' });
+    }
+
+    res.status(200).json(updatedCard);
+  } catch (error) {
+    console.error('Error al actualizar la tarjeta:', error);
+    res.status(500).json({ message: 'Error interno del servidor al actualizar la tarjeta.' });
+  }
+});
 
 
 

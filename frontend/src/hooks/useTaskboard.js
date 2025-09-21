@@ -443,8 +443,21 @@ export const useTaskboard = () => {
         cards: board.cards.map(c => c.id === cardId ? { ...c, title: trimmedTitle } : c)
       }));
 
-      // TODO: Implementar la llamada a la API PUT /api/cards/:cardId
-      // Por ahora, solo hacemos la actualización optimista.
+      // Llamada a la API para persistir el cambio
+      try {
+        const response = await fetch(`http://localhost:5001/api/cards/${cardId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: trimmedTitle }),
+        });
+
+        if (!response.ok) throw new Error('No se pudo actualizar el título de la tarjeta.');
+        // No es necesario hacer nada con la respuesta si la actualización optimista fue exitosa
+      } catch (error) {
+        toast.error(error.message);
+        // Revertir el cambio si la API falla
+        updateActiveBoard(board => ({ ...board, cards: originalCards }));
+      }
     }
   };
 
