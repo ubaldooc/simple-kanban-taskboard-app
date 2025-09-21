@@ -357,7 +357,7 @@ export const useTaskboard = () => {
 
     // 1. Crear una columna temporal para la actualización optimista
     const tempId = `temp-col-${crypto.randomUUID()}`;
-    const newColumnOptimistic = { id: tempId, title: '', color: '#8b949e', cards: [] };
+    const newColumnOptimistic = { id: tempId, title: '', color: '#8b949e', cards: [] }; // Título vacío aquí
 
     // 2. Actualización optimista: añadir la columna a la UI
     updateActiveBoard(board => ({ ...board, columns: [...board.columns, newColumnOptimistic] }));
@@ -412,21 +412,14 @@ export const useTaskboard = () => {
   };
 
   const updateColumnTitle = async (id, newTitle) => {
-    const trimmedTitle = newTitle.trim();
+    let trimmedTitle = newTitle.trim();
     const originalColumns = activeBoard.columns;
     const columnToUpdate = originalColumns.find(c => c.id === id);
     if (!columnToUpdate) return;
 
-    // Si el título está vacío, descarta la columna
+    // Si el título está vacío, se le asigna un título por defecto.
     if (trimmedTitle === '') {
-      // Si la columna era temporal (aún no guardada en DB), solo la quita de la UI
-      if (id.startsWith('temp-col-')) {
-        updateActiveBoard(board => ({ ...board, columns: board.columns.filter(col => col.id !== id) }));
-      } else {
-        // Si ya existe en la DB, solicita su eliminación (esto es un caso de borde, podría implementarse una ruta DELETE)
-        handleDeleteColumnRequest(id);
-      }
-      return;
+      trimmedTitle = 'Columna'; // Título por defecto
     }
 
     // Actualización optimista

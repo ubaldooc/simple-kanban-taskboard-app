@@ -167,7 +167,7 @@ body {
     cursor: grab;
 }
 
-textarea.column-title-input {
+div.column-title-input {
     width: 100%;
     background-color: transparent;
     border: none;
@@ -179,14 +179,15 @@ textarea.column-title-input {
     padding: 2px 4px;
     margin: -2px -4px; /* Compensar el padding */
     border-radius: 4px;
-    resize: none;
-    overflow: hidden;
+    resize: none; /* Deshabilita el redimensionamiento manual */
+    overflow-y: auto; /* Muestra scrollbar si el texto es muy largo */
     white-space: pre-wrap;
     word-break: break-word;
-    line-height: 1.18;
+    line-height: 1.2;
+    max-height: 70px; /* Altura máxima para evitar que crezca demasiado */
 }
 
-textarea.column-title-input:focus {
+div.column-title-input:focus {
     background-color: #21262d;
     box-shadow: 0 0 0 2px #58a6ff inset;
 }

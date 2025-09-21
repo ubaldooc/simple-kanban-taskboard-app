@@ -22,12 +22,13 @@ const Column = ({ column, cards, onToggleOptions }) => {
     if (isEditing && titleInputRef.current) {
       const textarea = titleInputRef.current;
       textarea.focus();
-      // Ajustar altura inicial al contenido
-      const len = textarea.value.length;
-      textarea.setSelectionRange(len, len); // Mueve el cursor al final
-
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
+      // Mover el cursor al final del contenido en un div contentEditable
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(textarea);
+      range.collapse(false); // false para colapsar al final
+      sel.removeAllRanges();
+      sel.addRange(range);
     }
   }, [isEditing]);
 
@@ -54,16 +55,9 @@ const Column = ({ column, cards, onToggleOptions }) => {
     onToggleOptions(column.id, rect);
   };
 
-  const handleTitleChange = (e) => {
-    setTitle(e.target.value);
-    // Auto-ajustar la altura del textarea
-    const textarea = titleInputRef.current;
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  };
-
   const handleTitleBlur = () => {
-    const finalTitle = title.trim() === '' ? 'Nueva Columna' : title;
+    let finalTitle = titleInputRef.current.innerText.trim();
+    if (finalTitle === '') finalTitle = 'Columna'; // Asigna título por defecto si está vacío
     if (column.title !== finalTitle) {
       updateColumnTitle(column.id, finalTitle);
     }
@@ -75,7 +69,7 @@ const Column = ({ column, cards, onToggleOptions }) => {
       e.preventDefault(); // Evita el salto de línea
       handleTitleBlur();
     } else if (e.key === 'Escape') {
-      setTitle(column.title); // Revert changes
+      if (titleInputRef.current) titleInputRef.current.innerText = column.title;
       setEditingColumnId(null);
     }
   };
@@ -99,15 +93,15 @@ const Column = ({ column, cards, onToggleOptions }) => {
       <div className="column-header" {...attributes} {...listeners} >
         <div className="column-title-wrapper" onDoubleClick={handleTitleDoubleClick}>
           {isEditing ? ( 
-            <textarea
+            <div
               ref={titleInputRef}
-              value={title}
-              onChange={handleTitleChange}
+              contentEditable={true}
+              suppressContentEditableWarning={true}
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
               className="column-title-input" 
               spellCheck="false"
-            />
+            >{column.title}</div>
           ) : (
             <h2>{column.title}</h2>
           )}
