@@ -43,6 +43,7 @@ export const TaskboardView = () => {
     setColumnToDelete,
     setEditingCardId,
     editingColumnId,
+    deleteCard,
     setEditingColumnId,
     newBoardIdToEdit,
     setNewBoardIdToEdit,
@@ -148,12 +149,7 @@ export const TaskboardView = () => {
     // --- Manejo de eliminación de tarjetas ---
     if (over.id === 'delete-zone' && activeType === 'Card') {
         setExitingItemIds(prev => [...prev, active.id]);
-        setTimeout(() => {
-            updateActiveBoard(board => ({
-                ...board,
-                cards: board.cards.filter(card => card.id !== active.id)
-            }));
-        }, ANIMATION_DURATION);
+        setTimeout(() => deleteCard(active.id), ANIMATION_DURATION);
         return;
     }
   

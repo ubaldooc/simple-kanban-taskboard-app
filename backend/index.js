@@ -57,6 +57,8 @@ app.get('/', (req, res) => {
 
 // --- API Routes ---
 
+// CARGAR LISTA DE BOARDS
+
 // GET /api/boards/list - Devuelve solo los IDs y títulos de los tableros.
 app.get('/api/boards/list', async (req, res) => {
   try {
@@ -71,6 +73,9 @@ app.get('/api/boards/list', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al obtener la lista de tableros.' });
   }
 });
+
+
+
 
 // --- User Preference Routes ---
 
@@ -290,6 +295,7 @@ app.delete('/api/boards/:id', async (req, res) => {
   }
 });
 
+
 // PUT /api/boards/:boardId/reorder-columns - Actualiza el orden de las columnas en un tablero
 app.put('/api/boards/:boardId/reorder-columns', async (req, res) => {
   try {
@@ -315,6 +321,8 @@ app.put('/api/boards/:boardId/reorder-columns', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al reordenar las columnas.' });
   }
 });
+
+
 
 // POST /api/boards/:boardId/columns - Crea una nueva columna en un tablero específico
 app.post('/api/boards/:boardId/columns', async (req, res) => {
@@ -354,6 +362,8 @@ app.post('/api/boards/:boardId/columns', async (req, res) => {
   }
 });
 
+
+
 // PUT /api/columns/:id - Actualiza el título de una columna
 app.put('/api/columns/:id', async (req, res) => {
   try {
@@ -390,8 +400,45 @@ app.put('/api/columns/:id', async (req, res) => {
 });
 
 
+// DELETE /api/columns/:id - Elimina una columna y su contenido asociado
+app.delete('/api/columns/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
 
-// CREAR CARD
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+    }
+
+    // 1. Encuentra y elimina la columna. 'deletedColumn' contendrá el documento eliminado.
+    const deletedColumn = await Column.findByIdAndDelete(id);
+
+    if (!deletedColumn) {
+      return res.status(404).json({ message: 'Columna no encontrada.' });
+    }
+
+    // 2. Elimina todas las tarjetas que pertenecían a esa columna.
+    await Card.deleteMany({ column: id });
+
+    // 3. Elimina la referencia de la columna del array 'columns' en el tablero correspondiente.
+    // Usamos $pull para quitar el ID de la columna del array.
+    await Board.findByIdAndUpdate(deletedColumn.board, { $pull: { columns: id } });
+
+    res.status(200).json({ message: 'Columna y sus tarjetas eliminadas exitosamente.' });
+  } catch (error) {
+    console.error('Error al eliminar la columna:', error);
+    res.status(500).json({ message: 'Error interno del servidor al eliminar la columna.' });
+  }
+});
+
+
+
+
+
+
+          // CARD
+          // CARD
+          // CARD
+
 // POST /api/columns/:columnId/cards - Crea una nueva tarjeta en una columna
 app.post('/api/columns/:columnId/cards', async (req, res) => {
   try {
@@ -436,6 +483,11 @@ app.post('/api/columns/:columnId/cards', async (req, res) => {
   }
 });
 
+
+
+
+
+
 // PUT /api/cards/:id - Actualiza una tarjeta (título, columna, orden)
 app.put('/api/cards/:id', async (req, res) => {
   try {
@@ -476,32 +528,66 @@ app.put('/api/cards/:id', async (req, res) => {
 
 
 
-// DELETE /api/columns/:id - Elimina una columna y su contenido asociado
-app.delete('/api/columns/:id', async (req, res) => {
+
+
+// DELETE /api/cards/:id - Elimina una tarjeta
+app.delete('/api/cards/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+      return res.status(400).json({ message: 'El ID de la tarjeta no es válido.' });
     }
 
-    // 1. Encuentra y elimina la columna. 'deletedColumn' contendrá el documento eliminado.
-    const deletedColumn = await Column.findByIdAndDelete(id);
+    // 1. Encuentra y elimina la tarjeta. 'deletedCard' contendrá el documento eliminado.
+    const deletedCard = await Card.findByIdAndDelete(id);
 
-    if (!deletedColumn) {
-      return res.status(404).json({ message: 'Columna no encontrada.' });
+    if (!deletedCard) {
+      return res.status(404).json({ message: 'Tarjeta no encontrada.' });
     }
 
-    // 2. Elimina todas las tarjetas que pertenecían a esa columna.
-    await Card.deleteMany({ column: id });
+    // 2. Si la tarjeta fue eliminada, quita su referencia de la columna correspondiente.
+    if (deletedCard.column) {
+      await Column.findByIdAndUpdate(deletedCard.column, {
+        $pull: { cards: deletedCard._id },
+      });
+    }
 
-    // 3. Elimina la referencia de la columna del array 'columns' en el tablero correspondiente.
-    // Usamos $pull para quitar el ID de la columna del array.
-    await Board.findByIdAndUpdate(deletedColumn.board, { $pull: { columns: id } });
-
-    res.status(200).json({ message: 'Columna y sus tarjetas eliminadas exitosamente.' });
+    res.status(200).json({ message: 'Tarjeta eliminada exitosamente.' });
   } catch (error) {
-    console.error('Error al eliminar la columna:', error);
-    res.status(500).json({ message: 'Error interno del servidor al eliminar la columna.' });
+    console.error('Error al eliminar la tarjeta:', error);
+    res.status(500).json({ message: 'Error interno del servidor al eliminar la tarjeta.' });
   }
 });
+
+
+
+
+// REORDENAMIENTO DE CARDS
+app.delete( ruta, async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    // const { columnIds } = req.params;
+    const { cardIds } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ message: 'El ID del tablero no es válido.' });
+    }
+    if (!cardIds || !Array.isArray(cardIds)) {
+      return res.status(400).json({ message: 'Se requiere un array de IDs de cards.' });
+    }
+
+    const updatePromises = cardIds.map((id, index) =>
+      card.findByIdAndUpdate(id, { order: index })
+    );
+
+    await Promise.all(updatePromises);
+
+    res.status(200).json({ message: 'Orden de las cards actualizado correctamente.' });
+    
+  } catch (error) {
+    console.error('Error al eliminar la card:', error);
+    res.startServer(500).json({ message: 'Error interno del servidor al eliminar la card'})
+  }
+});
+

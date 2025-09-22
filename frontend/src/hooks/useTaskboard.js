@@ -461,11 +461,34 @@ export const useTaskboard = () => {
     }
   };
 
-  const deleteCard = (id) => {
+  const deleteCard = async (cardId) => {
+    // No intentar eliminar tarjetas temporales que no existen en el backend
+    if (cardId.startsWith('temp-card-')) {
+      updateActiveBoard(board => ({
+        ...board,
+        cards: board.cards.filter(c => c.id !== cardId)
+      }));
+      return;
+    }
+
+    const originalCards = activeBoard.cards;
+    // Actualización optimista
     updateActiveBoard(board => ({
       ...board,
-      cards: board.cards.filter(c => c.id !== id)
+      cards: board.cards.filter(c => c.id !== cardId)
     }));
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/cards/${cardId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('No se pudo eliminar la tarjeta.');
+      // No es necesario un toast de éxito para no ser muy intrusivo
+    } catch (error) {
+      toast.error(error.message);
+      // Revertir si la API falla
+      updateActiveBoard(board => ({ ...board, cards: originalCards }));
+    }
   };
 
   const updateColumnTitle = async (id, newTitle) => {
