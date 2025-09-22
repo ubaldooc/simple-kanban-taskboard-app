@@ -57,7 +57,6 @@ app.get('/', (req, res) => {
 
 // --- API Routes ---
 
-// CARGAR LISTA DE BOARDS
 
 // GET /api/boards/list - Devuelve solo los IDs y títulos de los tableros.
 app.get('/api/boards/list', async (req, res) => {
@@ -111,6 +110,16 @@ app.put('/api/user/preferences', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor.' });
   }
 });
+
+
+
+
+
+          // BOARDS
+          // BOARDS
+          // BOARDS
+          // BOARDS
+          // BOARDS
 
 // GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
 app.get('/api/boards', async (req, res) => {
@@ -180,6 +189,8 @@ app.post('/api/boards', async (req, res) => {
   }
 });
 
+
+
 // PUT /api/boards/reorder - Actualiza el orden de los tableros
 app.put('/api/boards/reorder', async (req, res) => {
   try {
@@ -199,6 +210,8 @@ app.put('/api/boards/reorder', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al reordenar los tableros.' });
   }
 });
+
+
 
 // GET /api/boards/:id - Devuelve un tablero específico con sus columnas y tarjetas
 app.get('/api/boards/:id', async (req, res) => {
@@ -238,6 +251,8 @@ app.get('/api/boards/:id', async (req, res) => {
   }
 });
 
+
+
 // PUT /api/boards/:id - Actualiza el título de un tablero
 app.put('/api/boards/:id', async (req, res) => {
   try {
@@ -253,6 +268,8 @@ app.put('/api/boards/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al actualizar el tablero.' });
   }
 });
+
+
 
 
 // DELETE /api/boards/:id - Elimina un tablero y su contenido asociado
@@ -295,6 +312,13 @@ app.delete('/api/boards/:id', async (req, res) => {
   }
 });
 
+
+
+          // COLUMNS
+          // COLUMNS
+          // COLUMNS
+          // COLUMNS
+          // COLUMNS
 
 // PUT /api/boards/:boardId/reorder-columns - Actualiza el orden de las columnas en un tablero
 app.put('/api/boards/:boardId/reorder-columns', async (req, res) => {
@@ -400,6 +424,7 @@ app.put('/api/columns/:id', async (req, res) => {
 });
 
 
+
 // DELETE /api/columns/:id - Elimina una columna y su contenido asociado
 app.delete('/api/columns/:id', async (req, res) => {
   try {
@@ -431,13 +456,58 @@ app.delete('/api/columns/:id', async (req, res) => {
 });
 
 
-
-
-
-
           // CARD
           // CARD
           // CARD
+          // CARD
+ 
+// PUT /api/boards/:boardId/reorder-cards - Actualiza el orden y/o la columna de las tarjetas
+app.put('/api/boards/:boardId/reorder-cards', async (req, res) => {
+  try {
+    const { boardId } = req.params;
+    const { cards } = req.body; // Esperamos un array de objetos { _id, order, column }
+
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return res.status(400).json({ message: 'El ID del tablero no es válido.' });
+    }
+    if (!cards || !Array.isArray(cards)) {
+      return res.status(400).json({ message: 'Se requiere un array de tarjetas.' });
+    }
+
+    // Preparamos las operaciones para bulkWrite.
+    // Esto es mucho más eficiente que hacer múltiples llamadas a la base de datos.
+    const bulkOps = cards.map(card => ({
+      updateOne: {
+        filter: { _id: card._id },
+        update: {
+          $set: {
+            order: card.order,
+            column: card.column
+          }
+        }
+      }
+    }));
+
+    // Si no hay operaciones, no hacemos nada.
+    if (bulkOps.length === 0) {
+      return res.status(200).json({ message: 'No hay tarjetas para actualizar.' });
+    }
+
+    // Ejecutamos todas las actualizaciones en una sola llamada a la base de datos.
+    await Card.bulkWrite(bulkOps);
+
+    // Nota: Esta implementación no actualiza el array `cards` dentro de cada `Column`.
+    // Esto está bien si el frontend no depende de ese array para el orden,
+    // y en su lugar confía en el `populate` con ordenamiento que ya tienes.
+
+    res.status(200).json({ message: 'Orden de las tarjetas actualizado correctamente.' });
+  } catch (error) {
+    console.error('Error al reordenar las tarjetas:', error);
+    res.status(500).json({ message: 'Error interno del servidor al reordenar las tarjetas.' });
+  }
+});
+
+
 
 // POST /api/columns/:columnId/cards - Crea una nueva tarjeta en una columna
 app.post('/api/columns/:columnId/cards', async (req, res) => {
@@ -485,9 +555,6 @@ app.post('/api/columns/:columnId/cards', async (req, res) => {
 
 
 
-
-
-
 // PUT /api/cards/:id - Actualiza una tarjeta (título, columna, orden)
 app.put('/api/cards/:id', async (req, res) => {
   try {
@@ -528,8 +595,6 @@ app.put('/api/cards/:id', async (req, res) => {
 
 
 
-
-
 // DELETE /api/cards/:id - Elimina una tarjeta
 app.delete('/api/cards/:id', async (req, res) => {
   try {
@@ -559,35 +624,3 @@ app.delete('/api/cards/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al eliminar la tarjeta.' });
   }
 });
-
-
-
-
-// REORDENAMIENTO DE CARDS
-app.delete( ruta, async (req, res) => {
-  try {
-    const { boardId } = req.params;
-    // const { columnIds } = req.params;
-    const { cardIds } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(boardId)) {
-      return res.status(400).json({ message: 'El ID del tablero no es válido.' });
-    }
-    if (!cardIds || !Array.isArray(cardIds)) {
-      return res.status(400).json({ message: 'Se requiere un array de IDs de cards.' });
-    }
-
-    const updatePromises = cardIds.map((id, index) =>
-      card.findByIdAndUpdate(id, { order: index })
-    );
-
-    await Promise.all(updatePromises);
-
-    res.status(200).json({ message: 'Orden de las cards actualizado correctamente.' });
-    
-  } catch (error) {
-    console.error('Error al eliminar la card:', error);
-    res.startServer(500).json({ message: 'Error interno del servidor al eliminar la card'})
-  }
-});
-

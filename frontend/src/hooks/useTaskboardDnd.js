@@ -8,6 +8,9 @@ export const useTaskboardDnd = () => {
   const {
     updateActiveBoard,
     setExitingItemIds,
+    deleteCard,
+    reorderCards,
+    reorderColumns,
   } = useTaskboardContext();
 
   const [active, setActive] = useState(null);
@@ -24,28 +27,38 @@ export const useTaskboardDnd = () => {
 
   const handleDragOver = (event) => {
     const { active, over } = event;
-    setIsOverDeleteZone(over?.id === 'delete-zone');
     if (!over || active.id === over.id) return;
 
+    setIsOverDeleteZone(over.id === 'delete-zone');
+
     const isActiveACard = active.data.current?.type === 'Card';
+    if (!isActiveACard) return;
+
+    // Lógica para mover una tarjeta sobre otra columna o tarjeta
     const isOverAColumn = over.data.current?.type === 'Column';
     const isOverACard = over.data.current?.type === 'Card';
 
-    if (isActiveACard) {
+    if (isOverAColumn || isOverACard) {
+      const overColumnId = isOverAColumn ? over.id : over.data.current.card.column;
+
       updateActiveBoard(board => {
         const activeIndex = board.cards.findIndex(c => c.id === active.id);
-        let overIndex;
+        const overIndex = isOverACard ? board.cards.findIndex(c => c.id === over.id) : board.cards.length;
 
-        if (isOverAColumn) {
-          board.cards[activeIndex].column = over.id;
-          return { ...board, cards: arrayMove(board.cards, activeIndex, activeIndex) };
+        // Si la tarjeta se mueve a una columna diferente
+        if (board.cards[activeIndex].column !== overColumnId) {
+          let newCards = [...board.cards];
+          newCards[activeIndex] = { ...newCards[activeIndex], column: overColumnId }; // Actualiza la columna
+
+          // Mueve la tarjeta a la nueva posición en el array general de tarjetas
+          const newIndex = isOverACard ? overIndex : board.cards.length -1;
+          
+          return { ...board, cards: arrayMove(newCards, activeIndex, newIndex) };
         }
-        
-        if (isOverACard) {
-          overIndex = board.cards.findIndex(c => c.id === over.id);
-          if (board.cards[activeIndex].column !== board.cards[overIndex].column) {
-            board.cards[activeIndex].column = board.cards[overIndex].column;
-          }
+
+        // Si se mueve dentro de la misma columna y sobre otra tarjeta
+        const isOverDifferentCard = isOverACard && active.id !== over.id;
+        if (isOverDifferentCard) {
           return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
         }
         return board;
@@ -61,23 +74,30 @@ export const useTaskboardDnd = () => {
 
     if (!over) return;
 
+    const activeType = active.data.current?.type;
+
+    // --- Manejo de eliminación de tarjetas ---
     if (over.id === 'delete-zone' && active.data.current?.type === 'Card') {
       setExitingItemIds(prev => [...prev, active.id]);
-      setTimeout(() => {
-        updateActiveBoard(board => ({
-          ...board,
-          cards: board.cards.filter(card => card.id !== active.id)
-        }));
-      }, ANIMATION_DURATION);
+      setTimeout(() => deleteCard(active.id), ANIMATION_DURATION);
       return;
     }
 
-    if (active.id !== over.id && active.data.current?.type === 'Column') {
-      updateActiveBoard(board => {
-        const oldIndex = board.columns.findIndex(c => c.id === active.id);
-        const newIndex = board.columns.findIndex(c => c.id === over.id);
-        return { ...board, columns: arrayMove(board.columns, oldIndex, newIndex) };
-      });
+    if (active.id === over.id) return;
+
+    // --- Manejo de reordenamiento de COLUMNAS ---
+    if (activeType === 'Column') {
+      // La lógica de reordenamiento de columnas se maneja en el componente BoardSelector y llama a reorderColumns directamente.
+      const oldIndex = active.data.current.sortable.index;
+      const newIndex = over.data.current.sortable.index;
+      reorderColumns(oldIndex, newIndex);
+    }
+
+    // --- Manejo de reordenamiento de TARJETAS ---
+    if (activeType === 'Card') {
+      // La lógica de reordenamiento ya se aplicó de forma optimista en handleDragOver.
+      // Aquí llamamos a la función que persiste los cambios en el backend.
+      reorderCards();
     }
   };
 

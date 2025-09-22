@@ -308,6 +308,43 @@ export const useTaskboard = () => {
     }
   };
 
+  const reorderCards = async () => {
+    if (!activeBoardId || !activeBoard) return;
+
+    // 1. Agrupar tarjetas por columna y asignarles su nuevo 'order'
+    const cardsByColumn = activeBoard.columns.reduce((acc, col) => {
+      acc[col.id] = [];
+      return acc;
+    }, {});
+
+    activeBoard.cards.forEach(card => {
+      if (cardsByColumn[card.column]) {
+        cardsByColumn[card.column].push(card);
+      }
+    });
+
+    // 2. Preparar los datos para la API: un array de tarjetas con su nuevo orden y columna
+    const cardsToUpdate = [];
+    Object.values(cardsByColumn).forEach(cardArray => {
+      cardArray.forEach((card, index) => {
+        cardsToUpdate.push({ _id: card.id, order: index, column: card.column });
+      });
+    });
+
+    // 3. Enviar la petición al backend (sin actualización optimista, ya que la UI ya está actualizada)
+    try {
+      await fetch(`http://localhost:5001/api/boards/${activeBoardId}/reorder-cards`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cards: cardsToUpdate }),
+      });
+    } catch (error) {
+      toast.error('No se pudo guardar el nuevo orden de las tarjetas.');
+      // Considera revertir el estado si la API falla, aunque es complejo.
+      // Por ahora, solo notificamos el error.
+    }
+  };
+
 
   // ELIMINAR BOARDS, TABLEROS. 
   const requestDeleteBoard = (boardId) => {
@@ -594,6 +631,7 @@ export const useTaskboard = () => {
     editBoard,
     reorderBoards,
     reorderColumns,
+    reorderCards,
     requestDeleteBoard,
     confirmDeleteBoard,
     boardToDelete,

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import '../App.css';
 import Column from './Column.jsx';
@@ -15,8 +15,6 @@ import logoImage from '../assets/logo.png';
 import { useTaskboardContext } from '../context/TaskboardContext';
 import { useTaskboardDnd } from '../hooks/useTaskboardDnd';
 
-const ANIMATION_DURATION = 400;
-
 export const TaskboardView = () => {
   const {
     boards,
@@ -26,36 +24,32 @@ export const TaskboardView = () => {
     activeBoardId,
     setActiveBoardId,
     addBoard,
-    editBoard,
-    reorderBoards,
-    reorderColumns,
     requestDeleteBoard,
     confirmDeleteBoard,
     boardToDelete,
     setBoardToDelete,
     addColumn,
     addCard,
-    updateColumnTitle,
     updateColumnColor,
+    isLoading,
     handleDeleteColumnRequest,
     confirmDeleteColumn,
     columnToDelete,
     setColumnToDelete,
-    setEditingCardId,
-    editingColumnId,
-    deleteCard,
     setEditingColumnId,
-    newBoardIdToEdit,
-    setNewBoardIdToEdit,
     exitingItemIds,
-    setExitingItemIds,
-    updateActiveBoard
   } = useTaskboardContext();
 
-  const [active, setActive] = useState(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isOverDeleteZone, setIsOverDeleteZone] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState({ columnId: null, position: null });
+
+  const {
+    active,
+    isDragging,
+    isOverDeleteZone,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+  } = useTaskboardDnd();
 
   // --- DND Kit Sensors ---
   const sensors = useSensors(
@@ -90,92 +84,6 @@ export const TaskboardView = () => {
   }), [boards, activeBoardId, addColumn, setActiveBoardId]);
 
   useHotkeys(hotkeys, [boards, activeBoardId]);
-
-  const handleCardCreationKeyDown = (e, columnId) => {
-    if (e.key === 'Enter' && !e.shiftKey) { // Enter sin Shift
-      addCard(columnId);
-    }
-  };
-
-  // --- Drag and Drop Handlers ---
-  const handleDragStart = (event) => {
-    const { active } = event;
-    if (active.data.current?.type === "Card" || active.data.current?.type === "Column") {
-      setIsDragging(true);
-      setActive(active);
-    }
-  };
-
-  const handleDragOver = (event) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-  
-    setIsOverDeleteZone(over.id === 'delete-zone');
-  
-    const isActiveACard = active.data.current?.type === 'Card';
-    if (!isActiveACard) return;
-  
-    // Lógica para mover una tarjeta sobre otra columna
-    const isOverAColumn = over.data.current?.type === 'Column';
-    const isOverACard = over.data.current?.type === 'Card';
-  
-    if (isOverAColumn || isOverACard) {
-      const overColumnId = isOverAColumn ? over.id : over.data.current.card.column;
-  
-      updateActiveBoard(board => {
-        const activeIndex = board.cards.findIndex(c => c.id === active.id);
-        if (board.cards[activeIndex].column !== overColumnId) {
-          // Solo actualiza la columna de la tarjeta, sin moverla en el array todavía.
-          // El reordenamiento final se hará en onDragEnd.
-          const newCards = [...board.cards];
-          newCards[activeIndex] = { ...newCards[activeIndex], column: overColumnId };
-          return { ...board, cards: newCards };
-        }
-        return board;
-      });
-    }
-  };
-
-  const handleDragEnd = (event) => {
-    setActive(null);
-    setIsDragging(false);
-    setIsOverDeleteZone(false);
-  
-    const { active, over } = event;
-    if (!over) return;
-  
-    const activeType = active.data.current?.type;
-  
-    // --- Manejo de eliminación de tarjetas ---
-    if (over.id === 'delete-zone' && activeType === 'Card') {
-        setExitingItemIds(prev => [...prev, active.id]);
-        setTimeout(() => deleteCard(active.id), ANIMATION_DURATION);
-        return;
-    }
-  
-    if (active.id === over.id) return;
-  
-    // --- Manejo de reordenamiento de COLUMNAS ---
-    if (activeType === 'Column') {
-      const oldIndex = columns.findIndex(c => c.id === active.id);
-      const newIndex = columns.findIndex(c => c.id === over.id);
-      reorderColumns(oldIndex, newIndex);
-    }
-  
-    // --- Manejo de reordenamiento de TARJETAS ---
-    if (activeType === 'Card') {
-      updateActiveBoard(board => {
-        const activeIndex = board.cards.findIndex(c => c.id === active.id);
-        const overIndex = board.cards.findIndex(c => c.id === over.id);
-        return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
-      });
-    }
-  };
-
-  // --- Render Logic ---
-  const activeCard = active && active.data.current?.type === 'Card' && cards.find(c => c.id === active.id);
-  const activeColumn = active && active.data.current?.type === 'Column' && columns.find(c => c.id === active.id);
-
   if (!activeBoard) {
     return (
       <div className="task-board-container">
@@ -187,107 +95,106 @@ export const TaskboardView = () => {
     );
   }
 
+  if (isLoading) {
+      return (
+      <div>Loading...</div>
+    )
+  }
+
+  // --- Render Logic ---
+  const activeCard = active && active.data.current?.type === 'Card' && cards.find(c => c.id === active.id);
+  const activeColumn = active && active.data.current?.type === 'Column' && columns.find(c => c.id === active.id);
+
   return (
-    <div className={`task-board-container ${isDragging ? 'is-dragging' : ''}`}>
-      {/* Contenedor para las notificaciones flotantes */}
-      <Toaster
-        position="bottom-right"
-        reverseOrder={false}
-        toastOptions={{
-          style: {
-            background: '#333',
-            color: '#fff',
-          },
-          success: {
-            duration: 3000,
-          },
-        }}
-      />
-      <header className="task-board-header">
-        <div className="header-left">
-          <img src={logoImage} alt="Taskboard Logo" className="header-logo" />
-          <BoardSelector
-            boards={boards}
-            activeBoard={activeBoard}
-            onBoardSelect={setActiveBoardId}
-            onBoardAdd={addBoard}
-            onBoardEdit={editBoard}
-            onBoardDelete={requestDeleteBoard}
-            onReorderBoards={reorderBoards}
-            newBoardIdToEdit={newBoardIdToEdit}
-            onEditModeEntered={() => setNewBoardIdToEdit(null)}
-          />
-        </div>
-        <div className="header-right">
-          <i className="fas fa-bell"></i>
-          <i className="fas fa-question-circle"></i>
-          <ProfileDropdown />
-        </div>
-      </header>
-
-      <main className={`task-board-main ${isOverDeleteZone ? 'no-scroll' : ''}`}>
-        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-          <SortableContext items={columns.map(col => col.id)}>
-            {columns.map(column => (
-              <Column
-                key={column.id}
-                column={column}
-                cards={cards.filter(card => card.column === column.id)}
-                onAddCard={addCard}
-                editingColumnId={editingColumnId}
-                setEditingColumnId={setEditingColumnId}
-                updateColumnTitle={updateColumnTitle}
-                exitingItemIds={exitingItemIds}
-                setEditingCardId={setEditingCardId}
-                onCardKeyDown={handleCardCreationKeyDown}
-                onToggleOptions={handleToggleColumnOptions}
-              />
-            ))}
-          </SortableContext>
-          <DeleteZone />
-          <DragOverlay>
-            {activeCard ? (
-              <Card card={activeCard} />
-            ) : activeColumn ? (
-              <Column
-                column={activeColumn}
-                cards={cards.filter(card => card.column === activeColumn.id)}
-                exitingItemIds={exitingItemIds}
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-        {activeDropdown.columnId && (
-          <ColumnOptionsDropdown
-            position={activeDropdown.position}
-            onClose={() => setActiveDropdown({ columnId: null, position: null })}
-            onRename={() => {
-              setEditingColumnId(activeDropdown.columnId);
-              setActiveDropdown({ columnId: null, position: null });
-            }}
-            onDelete={() => {
-              handleDeleteColumnRequest(activeDropdown.columnId);
-              setActiveDropdown({ columnId: null, position: null });
-            }}
-            onColorChange={(color) => {
-              updateColumnColor(activeDropdown.columnId, color);
-              setActiveDropdown({ columnId: null, position: null });
-            }}
-          />
-        )}
-
-        <div className="add-column-container">
-          <div className="add-column-btn" onClick={addColumn}>
-            <i className="fas fa-plus"></i> Añadir otra lista
+      <div className={`task-board-container ${isDragging ? 'is-dragging' : ''}`}>
+        {/* Contenedor para las notificaciones flotantes */}
+        <Toaster
+          position="bottom-right"
+          reverseOrder={false}
+          toastOptions={{
+            style: {
+              background: '#333',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+            },
+          }}
+        />
+        <header className="task-board-header">
+          <div className="header-left">
+            <img src={logoImage} alt="Taskboard Logo" className="header-logo" />
+            <BoardSelector />
           </div>
-        </div>
-      </main>
+          <div className="header-right">
+            <i className="fas fa-bell"></i>
+            <i className="fas fa-question-circle"></i>
+            <ProfileDropdown />
+          </div>
+        </header>
 
-      <footer className="task-board-footer">
-        <p><i className="fas fa-angle-left"></i> Backdoor Site code</p>
-      </footer>
+        <main className={`task-board-main ${isOverDeleteZone ? 'no-scroll' : ''}`}>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+            collisionDetection={closestCorners}
+          >
+            <SortableContext items={columns.map(col => col.id)}>
+              {columns.map(column => (
+                <Column
+                  key={column.id}
+                  column={column}
+                  cards={cards.filter(card => card.column === column.id)}
+                  onToggleOptions={handleToggleColumnOptions}
+                />
+              ))}
+            </SortableContext>
+            <DeleteZone />
+            <DragOverlay>
+              {activeCard ? (
+                <Card card={activeCard} />
+              ) : activeColumn ? (
+                <Column
+                  column={activeColumn}
+                  cards={cards.filter(card => card.column === activeColumn.id)}
+                  exitingItemIds={exitingItemIds}
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+          {activeDropdown.columnId && (
+            <ColumnOptionsDropdown
+              position={activeDropdown.position}
+              onClose={() => setActiveDropdown({ columnId: null, position: null })}
+              onRename={() => {
+                setEditingColumnId(activeDropdown.columnId);
+                setActiveDropdown({ columnId: null, position: null });
+              }}
+              onDelete={() => {
+                handleDeleteColumnRequest(activeDropdown.columnId);
+                setActiveDropdown({ columnId: null, position: null });
+              }}
+              onColorChange={(color) => {
+                updateColumnColor(activeDropdown.columnId, color);
+                setActiveDropdown({ columnId: null, position: null });
+              }}
+            />
+          )}
 
-      <ConfirmationModal
+          <div className="add-column-container">
+            <div className="add-column-btn" onClick={addColumn}>
+              <i className="fas fa-plus"></i> Añadir otra lista
+            </div>
+          </div>
+        </main>
+
+        <footer className="task-board-footer">
+          <p><i className="fas fa-angle-left"></i> Backdoor Site code</p>
+        </footer>
+
+        <ConfirmationModal
         isOpen={!!columnToDelete}
         onConfirm={confirmDeleteColumn}
         onCancel={() => setColumnToDelete(null)}
@@ -295,7 +202,7 @@ export const TaskboardView = () => {
         message="¿Estás seguro de que quieres eliminar esta columna? Todas las tarjetas dentro de ella también serán eliminadas. Esta acción no se puede deshacer."
       />
 
-      <ConfirmationModal
+        <ConfirmationModal
         isOpen={!!boardToDelete}
         onConfirm={confirmDeleteBoard}
         onCancel={() => setBoardToDelete(null)}
@@ -303,5 +210,5 @@ export const TaskboardView = () => {
         message="¿Estás seguro de que quieres eliminar este tablero? Esta acción no se puede deshacer."
       />
     </div>
-  );
-}
+    );
+  };
