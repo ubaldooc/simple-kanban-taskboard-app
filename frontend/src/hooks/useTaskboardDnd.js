@@ -34,33 +34,47 @@ export const useTaskboardDnd = () => {
     const isActiveACard = active.data.current?.type === 'Card';
     if (!isActiveACard) return;
 
-    // Lógica para mover una tarjeta sobre otra columna o tarjeta
+    const activeCard = active.data.current.card;
+
+    // --- Lógica para mover una tarjeta sobre otra columna o tarjeta ---
     const isOverAColumn = over.data.current?.type === 'Column';
     const isOverACard = over.data.current?.type === 'Card';
 
     if (isOverAColumn || isOverACard) {
-      const overColumnId = isOverAColumn ? over.id : over.data.current.card.column;
+      const overId = over.id;
+      const overCard = isOverACard ? over.data.current.card : null;
+      const overColumnId = isOverAColumn ? overId : overCard.column;
 
+      // Si la tarjeta activa y la tarjeta sobre la que se arrastra son la misma, no hacer nada.
+      if (active.id === overId) return;
+
+      // Actualización optimista del estado
       updateActiveBoard(board => {
         const activeIndex = board.cards.findIndex(c => c.id === active.id);
-        const overIndex = isOverACard ? board.cards.findIndex(c => c.id === over.id) : board.cards.length;
 
-        // Si la tarjeta se mueve a una columna diferente
-        if (board.cards[activeIndex].column !== overColumnId) {
-          let newCards = [...board.cards];
-          newCards[activeIndex] = { ...newCards[activeIndex], column: overColumnId }; // Actualiza la columna
+        // Caso 1: Mover a una columna diferente
+        if (activeCard.column !== overColumnId) {
+          const overIndex = isOverACard
+            ? board.cards.findIndex(c => c.id === overId)
+            : board.cards.findIndex(c => c.column === overColumnId) + board.cards.filter(c => c.column === overColumnId).length;
 
-          // Mueve la tarjeta a la nueva posición en el array general de tarjetas
-          const newIndex = isOverACard ? overIndex : board.cards.length - 1;
-          
-          return { ...board, cards: arrayMove(newCards, activeIndex, newIndex) };
-        }
+          // Actualiza la columna de la tarjeta activa
+          board.cards[activeIndex].column = overColumnId;
 
-        // Si se mueve dentro de la misma columna y sobre otra tarjeta
-        const isOverDifferentCard = isOverACard && active.id !== over.id;
-        if (isOverDifferentCard && board.cards[activeIndex].column === board.cards[overIndex].column) {
+          // Mueve la tarjeta en el array
           return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
         }
+
+        // Caso 2: Reordenar dentro de la misma columna
+        if (isOverACard && activeCard.column === overCard.column) {
+          const overIndex = board.cards.findIndex(c => c.id === overId);
+          // Si los índices son diferentes, reordena
+          if (activeIndex !== overIndex) {
+            return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
+          }
+        }
+
+        // Si no se cumple ninguna condición, devuelve el estado sin cambios
         return board;
       });
     }

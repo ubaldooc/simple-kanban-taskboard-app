@@ -17,7 +17,7 @@ export const useTaskboard = () => {
   const [newBoardIdToEdit, setNewBoardIdToEdit] = useState(null);
   const [exitingItemIds, setExitingItemIds] = useState([]);
 
-  // --- Derived State ---
+  // --- Derived State ---    GUARDAR ESTADO
   const activeBoard = boards.find(b => b.id === activeBoardId);
   const columns = activeBoard ? activeBoard.columns : [];
   const cards = activeBoard?.cards || [];
@@ -161,6 +161,8 @@ export const useTaskboard = () => {
 
 
   
+
+
   // --- Board Management ---
 
 
@@ -320,30 +322,31 @@ export const useTaskboard = () => {
   const reorderCards = async () => {
     if (!activeBoardId || !activeBoard) return;
   
-    const originalBoardState = activeBoard; // Guardar el estado actual para posible reversión
+    const originalCards = activeBoard.cards; // Guardar el estado original para posible reversión
   
-    // 1. Agrupar tarjetas por columna y asignarles su nuevo 'order' basado en su posición actual en el array
-    const cardsByColumn = activeBoard.columns.reduce((acc, col) => {
-      acc[col.id] = [];
-      return acc;
-    }, {});
-  
+    // 1. Crear un mapa para acceder fácilmente a las tarjetas por su columna
+    const cardsByColumn = new Map();
+    activeBoard.columns.forEach(col => cardsByColumn.set(col.id, []));
     activeBoard.cards.forEach(card => {
-      if (cardsByColumn[card.column]) {
-        cardsByColumn[card.column].push(card);
+      // Asegurarse de que la tarjeta pertenece a una columna existente
+      if (cardsByColumn.has(card.column)) {
+        cardsByColumn.get(card.column).push(card);
       }
     });
-  
-    // 2. Preparar los datos para la API: un array de tarjetas con su nuevo orden y columna
+
+    // 2. Preparar los datos para la API: un array plano de tarjetas con su nuevo orden y columna.
+    // El orden se calcula basándose en la posición de la tarjeta dentro de su columna en el estado actual.
     const cardsToUpdate = [];
-    Object.values(cardsByColumn).forEach(cardArray => {
+    cardsByColumn.forEach((cardArray, columnId) => {
       cardArray.forEach((card, index) => {
-        // El `_id` es el `id` que usamos en el frontend, que corresponde al `_id` del backend.
-        // `order` es el nuevo índice dentro de la columna.
-        cardsToUpdate.push({ _id: card.id, order: index, column: card.column });
+        cardsToUpdate.push({ 
+          _id: card.id, // El ID de la tarjeta
+          order: index, // El nuevo índice de orden dentro de la columna
+          column: columnId // El ID de la columna a la que pertenece
+        });
       });
     });
-
+    
     // 3. Enviar la petición al backend (sin actualización optimista, ya que la UI ya está actualizada)
     try {
       const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/reorder-cards`, {
@@ -352,11 +355,12 @@ export const useTaskboard = () => {
         body: JSON.stringify({ cards: cardsToUpdate }),
       });
       if (!response.ok) throw new Error('No se pudo guardar el nuevo orden de las tarjetas.');
+      // Opcional: 
       toast.success('Orden de tarjetas guardado.');
     } catch (error) {
       toast.error(error.message);
       // Revertir el estado al original si la API falla
-      setBoards(prevBoards => prevBoards.map(b => b.id === activeBoardId ? originalBoardState : b));
+      updateActiveBoard(board => ({ ...board, cards: originalCards }));
     }
   };
 
