@@ -54,12 +54,23 @@ export const useTaskboardDnd = () => {
 
         // Caso 1: Mover a una columna diferente
         if (activeCard.column !== overColumnId) {
-          const overIndex = isOverACard
-            ? board.cards.findIndex(c => c.id === overId)
-            : board.cards.findIndex(c => c.column === overColumnId) + board.cards.filter(c => c.column === overColumnId).length;
-
-          // Actualiza la columna de la tarjeta activa
+          // Actualiza la columna de la tarjeta activa en el estado
           board.cards[activeIndex].column = overColumnId;
+          
+          // Calcula el nuevo índice de forma más robusta.
+          // Si se arrastra sobre una tarjeta, se inserta en esa posición.
+          // Si se arrastra sobre una columna (o una zona vacía de ella), se inserta al final de esa columna.
+          let overIndex;
+          if (isOverACard) {
+            overIndex = board.cards.findIndex(c => c.id === overId);
+          } else {
+            // Encuentra el índice de la última tarjeta de la columna de destino.
+            const lastCardInColumnIndex = board.cards.map(c => c.column).lastIndexOf(overColumnId);
+            // El nuevo índice será justo después de la última tarjeta.
+            overIndex = lastCardInColumnIndex >= 0 ? lastCardInColumnIndex + 1 : activeIndex;
+          }
+
+          if (activeIndex === overIndex) return board; // Evita movimientos innecesarios
 
           // Mueve la tarjeta en el array
           return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
@@ -97,20 +108,20 @@ export const useTaskboardDnd = () => {
       return;
     }
 
-    if (active.id === over.id) return;
-
     // --- Manejo de reordenamiento de COLUMNAS ---
     if (activeType === 'Column') {
-      // La lógica de reordenamiento de columnas se maneja en el componente BoardSelector (para el dropdown)
-      // y se actualiza de forma optimista en handleDragOver. Aquí solo persistimos.
-      reorderColumns(active.data.current.sortable.index, over.data.current.sortable.index); // Persiste el orden final
+      // Solo persistimos si la columna realmente cambió de posición.
+      if (active.id !== over.id) {
+        reorderColumns(active.data.current.sortable.index, over.data.current.sortable.index);
+      }
     }
 
     // --- Manejo de reordenamiento de TARJETAS ---
     if (activeType === 'Card') {
-      // Para reordenar las tarjetas, simplemente manda una peticion para el backend para guardar
-      // las tarjetas.
-      // La lógica de reordenamiento ya se aplicó de forma optimista en handleDragOver.
+      // La lógica de reordenamiento visual ya se aplicó de forma optimista en `handleDragOver`.
+      // Aquí, sin importar si `active.id` y `over.id` son iguales,
+      // siempre llamamos a `reorderCards` para que el estado actual de la UI (que es el correcto)
+      // se guarde en el backend.
       // Aquí llamamos a la función que persiste los cambios en el backend.
       reorderCards();
     }
