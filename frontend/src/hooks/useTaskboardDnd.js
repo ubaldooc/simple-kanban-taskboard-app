@@ -51,14 +51,14 @@ export const useTaskboardDnd = () => {
           newCards[activeIndex] = { ...newCards[activeIndex], column: overColumnId }; // Actualiza la columna
 
           // Mueve la tarjeta a la nueva posición en el array general de tarjetas
-          const newIndex = isOverACard ? overIndex : board.cards.length -1;
+          const newIndex = isOverACard ? overIndex : board.cards.length - 1;
           
           return { ...board, cards: arrayMove(newCards, activeIndex, newIndex) };
         }
 
         // Si se mueve dentro de la misma columna y sobre otra tarjeta
         const isOverDifferentCard = isOverACard && active.id !== over.id;
-        if (isOverDifferentCard) {
+        if (isOverDifferentCard && board.cards[activeIndex].column === board.cards[overIndex].column) {
           return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
         }
         return board;
@@ -87,14 +87,15 @@ export const useTaskboardDnd = () => {
 
     // --- Manejo de reordenamiento de COLUMNAS ---
     if (activeType === 'Column') {
-      // La lógica de reordenamiento de columnas se maneja en el componente BoardSelector y llama a reorderColumns directamente.
-      const oldIndex = active.data.current.sortable.index;
-      const newIndex = over.data.current.sortable.index;
-      reorderColumns(oldIndex, newIndex);
+      // La lógica de reordenamiento de columnas se maneja en el componente BoardSelector (para el dropdown)
+      // y se actualiza de forma optimista en handleDragOver. Aquí solo persistimos.
+      reorderColumns(active.data.current.sortable.index, over.data.current.sortable.index); // Persiste el orden final
     }
 
     // --- Manejo de reordenamiento de TARJETAS ---
     if (activeType === 'Card') {
+      // Para reordenar las tarjetas, simplemente manda una peticion para el backend para guardar
+      // las tarjetas.
       // La lógica de reordenamiento ya se aplicó de forma optimista en handleDragOver.
       // Aquí llamamos a la función que persiste los cambios en el backend.
       reorderCards();

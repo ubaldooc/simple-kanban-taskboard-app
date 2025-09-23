@@ -162,6 +162,9 @@ export const useTaskboard = () => {
 
   
   // --- Board Management ---
+
+
+  // AGREGAR BOARDS
   const addBoard = async () => {
     // 1. Crear un tablero temporal con un ID único del lado del cliente
     const tempId = `temp-${crypto.randomUUID()}`;
@@ -223,6 +226,9 @@ export const useTaskboard = () => {
     }
   };
 
+
+
+    // EDITAR BOARD TITULO
   const editBoard = async (boardId, newTitle) => {
     if (newTitle && newTitle.trim() !== '') {
       const trimmedTitle = newTitle.trim();
@@ -249,7 +255,7 @@ export const useTaskboard = () => {
 
 
 
-  // FUNCION PARA CAMBIAR EL ORDEN DE LOS BOARDS EN EL DROPDOWN DE BOARDS
+  // REORDENAR BOARDS EN DROPDOWN
   const reorderBoards = async (oldIndex, newIndex) => {
     const originalBoards = boards; // Guardar una copia del estado original
     // 1. Actualización optimista en la UI
@@ -267,9 +273,6 @@ export const useTaskboard = () => {
         body: JSON.stringify({ boardIds }),
       });
 
-      // console.log(boardIds);
-      
-
       if (!response.ok) {
         throw new Error('Error al guardar el orden de los tableros en el servidor.');
       }
@@ -284,6 +287,8 @@ export const useTaskboard = () => {
   };
 
 
+
+  // REORDENAR COLUMNAS
   const reorderColumns = async (oldIndex, newIndex) => {
     if (!activeBoardId) return;
 
@@ -308,42 +313,53 @@ export const useTaskboard = () => {
     }
   };
 
+
+
+
+  // REORDENAR CARDS
   const reorderCards = async () => {
     if (!activeBoardId || !activeBoard) return;
-
-    // 1. Agrupar tarjetas por columna y asignarles su nuevo 'order'
+  
+    const originalBoardState = activeBoard; // Guardar el estado actual para posible reversión
+  
+    // 1. Agrupar tarjetas por columna y asignarles su nuevo 'order' basado en su posición actual en el array
     const cardsByColumn = activeBoard.columns.reduce((acc, col) => {
       acc[col.id] = [];
       return acc;
     }, {});
-
+  
     activeBoard.cards.forEach(card => {
       if (cardsByColumn[card.column]) {
         cardsByColumn[card.column].push(card);
       }
     });
-
+  
     // 2. Preparar los datos para la API: un array de tarjetas con su nuevo orden y columna
     const cardsToUpdate = [];
     Object.values(cardsByColumn).forEach(cardArray => {
       cardArray.forEach((card, index) => {
+        // El `_id` es el `id` que usamos en el frontend, que corresponde al `_id` del backend.
+        // `order` es el nuevo índice dentro de la columna.
         cardsToUpdate.push({ _id: card.id, order: index, column: card.column });
       });
     });
 
     // 3. Enviar la petición al backend (sin actualización optimista, ya que la UI ya está actualizada)
     try {
-      await fetch(`http://localhost:5001/api/boards/${activeBoardId}/reorder-cards`, {
+      const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/reorder-cards`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cards: cardsToUpdate }),
       });
+      if (!response.ok) throw new Error('No se pudo guardar el nuevo orden de las tarjetas.');
+      toast.success('Orden de tarjetas guardado.');
     } catch (error) {
-      toast.error('No se pudo guardar el nuevo orden de las tarjetas.');
-      // Considera revertir el estado si la API falla, aunque es complejo.
-      // Por ahora, solo notificamos el error.
+      toast.error(error.message);
+      // Revertir el estado al original si la API falla
+      setBoards(prevBoards => prevBoards.map(b => b.id === activeBoardId ? originalBoardState : b));
     }
   };
+
 
 
   // ELIMINAR BOARDS, TABLEROS. 
@@ -388,7 +404,13 @@ export const useTaskboard = () => {
     }
   };
 
+
+
+  
   // --- Item Management ---
+
+
+  // AGREGAR COLUMNA
   const addColumn = async () => {
     if (!activeBoardId) return;
 
@@ -427,6 +449,10 @@ export const useTaskboard = () => {
     }
   };
 
+
+
+
+    // AGREGAR CARDS
   const addCard = async (columnId) => {
     // 1. Crear una tarjeta temporal para la UI
     const tempId = `temp-card-${crypto.randomUUID()}`;
@@ -440,6 +466,9 @@ export const useTaskboard = () => {
     return tempId;
   };
 
+
+
+  // ACTUALIZAR CARD TITULO
   const updateCardTitle = async (cardId, newTitle) => {
     const trimmedTitle = newTitle.trim();
     const originalCards = activeBoard.cards;
@@ -498,6 +527,8 @@ export const useTaskboard = () => {
     }
   };
 
+
+  // ELIMINAR CARDS
   const deleteCard = async (cardId) => {
     // No intentar eliminar tarjetas temporales que no existen en el backend
     if (cardId.startsWith('temp-card-')) {
@@ -528,6 +559,8 @@ export const useTaskboard = () => {
     }
   };
 
+
+  // ACTUALIZAR COLUMNA TITULO
   const updateColumnTitle = async (id, newTitle) => {
     let trimmedTitle = newTitle.trim();
     const originalColumns = activeBoard.columns;
@@ -559,6 +592,9 @@ export const useTaskboard = () => {
     }
   };
 
+
+
+  // ACTUALIZAR COLUMNA COLOR
   const updateColumnColor = async (id, newColor) => {
     const originalColumns = activeBoard.columns;
 
@@ -583,8 +619,12 @@ export const useTaskboard = () => {
     }
   };
 
+
   const handleDeleteColumnRequest = (columnId) => setColumnToDelete(columnId);
 
+
+
+  // MODAL ELIMINAR COLUMNA
   const confirmDeleteColumn = async () => {
     if (columnToDelete) {
       const columnIdToDelete = columnToDelete;
