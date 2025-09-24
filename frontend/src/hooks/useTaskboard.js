@@ -34,13 +34,17 @@ export const useTaskboard = () => {
 
       const detailedBoard = await response.json();
 
+      // --- ¡Solución! Ordenar las tarjetas en el frontend ---
+      // El backend devuelve un array plano de tarjetas. Lo ordenamos por su campo 'order'.
+      const sortedCards = (detailedBoard.cards || []).sort((a, b) => a.order - b.order);
+
       // Actualiza el tablero específico en el estado con sus datos completos
       setBoards(prevBoards => prevBoards.map(board =>
         board.id === detailedBoard._id
           ? {
               ...board, // Mantiene el 'id' del frontend
               columns: detailedBoard.columns.map(col => ({ ...col, id: col._id })),
-              cards: (detailedBoard.cards || []).map(card => ({ ...card, id: card._id })),
+              cards: sortedCards.map(card => ({ ...card, id: card._id })),
             }
           : board
       ));

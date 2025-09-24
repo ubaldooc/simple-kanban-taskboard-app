@@ -51,38 +51,26 @@ export const useTaskboardDnd = () => {
       // Actualización optimista del estado
       updateActiveBoard(board => {
         const activeIndex = board.cards.findIndex(c => c.id === active.id);
+        const overIndex = board.cards.findIndex(c => c.id === overId);
 
-        // Caso 1: Mover a una columna diferente
-        if (activeCard.column !== overColumnId) {
-          // Actualiza la columna de la tarjeta activa en el estado
-          board.cards[activeIndex].column = overColumnId;
-          
-          // Calcula el nuevo índice de forma más robusta.
-          // Si se arrastra sobre una tarjeta, se inserta en esa posición.
-          // Si se arrastra sobre una columna (o una zona vacía de ella), se inserta al final de esa columna.
-          let overIndex;
-          if (isOverACard) {
-            overIndex = board.cards.findIndex(c => c.id === overId);
-          } else {
-            // Encuentra el índice de la última tarjeta de la columna de destino.
-            const lastCardInColumnIndex = board.cards.map(c => c.column).lastIndexOf(overColumnId);
-            // El nuevo índice será justo después de la última tarjeta.
-            overIndex = lastCardInColumnIndex >= 0 ? lastCardInColumnIndex + 1 : activeIndex;
-          }
-
-          if (activeIndex === overIndex) return board; // Evita movimientos innecesarios
-
-          // Mueve la tarjeta en el array
-          return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
+        // Si no se encuentra la tarjeta sobre la que se arrastra, no hacer nada.
+        // Esto puede pasar si se arrastra sobre una columna vacía, lo manejaremos de otra forma.
+        if (overIndex === -1) {
+            // Si se arrastra sobre una columna (y no una tarjeta), actualiza la columna de la tarjeta activa.
+            if (isOverAColumn && board.cards[activeIndex].column !== overColumnId) {
+                board.cards[activeIndex].column = overColumnId;
+            }
+            return board; // Devuelve el tablero con la columna actualizada si es el caso.
         }
 
-        // Caso 2: Reordenar dentro de la misma columna
-        if (isOverACard && activeCard.column === overCard.column) {
-          const overIndex = board.cards.findIndex(c => c.id === overId);
-          // Si los índices son diferentes, reordena
-          if (activeIndex !== overIndex) {
-            return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
-          }
+        if (board.cards[activeIndex].column !== overColumnId) {
+          // Actualiza la columna de la tarjeta activa en el estado
+          board.cards[activeIndex].column = overColumnId;
+        }
+
+        // Si se arrastra sobre otra tarjeta, reordena.
+        if (activeIndex !== overIndex) {
+          return { ...board, cards: arrayMove(board.cards, activeIndex, overIndex) };
         }
 
         // Si no se cumple ninguna condición, devuelve el estado sin cambios

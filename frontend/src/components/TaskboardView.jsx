@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestCorners } from '@dnd-kit/core';
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import '../App.css';
 import Column from './Column.jsx';
@@ -139,7 +139,7 @@ export const TaskboardView = () => {
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
-            collisionDetection={closestCorners}
+            collisionDetection={closestCenter}
           >
             <SortableContext items={columns.map(col => col.id)}>
               {columns.map(column => (
