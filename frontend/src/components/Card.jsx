@@ -21,13 +21,12 @@ const CardComponent = ({ card }) => {
       const editableDiv = inputRef.current;
       editableDiv.focus();
 
-      // Mover el cursor al final del contenido
+      // Seleccionar todo el texto al entrar en modo de edición
       const range = document.createRange();
       const sel = window.getSelection();
       range.selectNodeContents(editableDiv);
-      range.collapse(false); // false para colapsar al final
-      sel.removeAllRanges();
-      sel.addRange(range);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
     }
   }, [isEditing]);
 

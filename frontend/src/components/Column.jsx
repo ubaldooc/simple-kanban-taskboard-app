@@ -21,21 +21,15 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
       const textarea = titleInputRef.current;
-      // La animación se aplica solo si la columna es nueva (título original vacío).
-      const isNewlyCreated = column.title === 'Nueva Columna' || column.title === '';
-
-      if (isNewlyCreated) {
-        // Para una columna nueva, selecciona todo el texto.
-        textarea.focus();
-        window.getSelection()?.selectAllChildren(textarea);
-      } else {
-        // Para una columna existente, mueve el cursor al final.
-        textarea.focus();
+      textarea.focus();
+      
+      // Seleccionar todo el texto al entrar en modo de edición.
+      const selection = window.getSelection();
+      if (selection) {
         const range = document.createRange();
         range.selectNodeContents(textarea);
-        range.collapse(false); // Colapsa al final.
-        window.getSelection()?.removeAllRanges();
-        window.getSelection()?.addRange(range);
+        selection.removeAllRanges();
+        selection.addRange(range);
       }
     }
   }, [isEditing]);
