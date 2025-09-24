@@ -703,8 +703,8 @@ div.column-title-input:focus {
     padding: 5px;
     max-height: 420px;
     overflow-y: auto;
-    /* scrollbar-width: thin; */
-    /* scrollbar-color: #a11b1b #ffffff; */
+    scrollbar-width: thin;
+    scrollbar-color: #a11b1b #ffffff;
 }
 /* Renombramos 'li' a una clase más específica para evitar conflictos */
 .board-list-item {
