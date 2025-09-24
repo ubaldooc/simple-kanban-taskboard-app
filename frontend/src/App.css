@@ -268,8 +268,8 @@ div.column-title-input:focus {
     box-shadow: none;
 }
 
-/* Estilo para la tarjeta original mientras se está arrastrando */
-.is-dragging-card {
+/* Estilo para la tarjeta original (fuente) mientras se está arrastrando */
+.card.is-dragging-source {
     opacity: 0.3;
     background-color: transparent;
     box-shadow: none !important; /* Aseguramos que no haya sombra */
@@ -493,7 +493,8 @@ div.column-title-input:focus {
     pointer-events: none; /* No interfiere con el scroll cuando está oculto */
 }
 
-.task-board-container.is-dragging .delete-zone {
+/* Se hace visible solo cuando se arrastra una TARJETA */
+.task-board-container.is-dragging-card .delete-zone {
     transform: translateX(0);
     pointer-events: auto; /* Se puede interactuar con él al arrastrar */
 }

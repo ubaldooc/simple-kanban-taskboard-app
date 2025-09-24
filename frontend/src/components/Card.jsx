@@ -87,8 +87,8 @@ const CardComponent = ({ card }) => {
       style={style}
       {...attributes}
       {...listeners}
-      // Aplica la animación si la tarjeta se acaba de crear y la clase de arrastre
-      className={`card ${isEditing ? 'card-editing' : ''} ${isEditingInitial ? 'item-enter-animation' : ''} ${isDragging ? 'is-dragging-card' : ''}`}
+      // is-dragging-source hace que la tarjeta original se vuelva transparente durante el arrastre
+      className={`card ${isEditing ? 'card-editing' : ''} ${isEditingInitial ? 'item-enter-animation' : ''} ${isDragging ? 'is-dragging-source' : ''}`}
       onDoubleClick={handleDoubleClick}
     >
       {isEditing ? (

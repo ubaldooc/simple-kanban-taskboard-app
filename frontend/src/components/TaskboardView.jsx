@@ -106,8 +106,11 @@ export const TaskboardView = () => {
   const activeCard = active && active.data.current?.type === 'Card' && cards.find(c => c.id === active.id);
   const activeColumn = active && active.data.current?.type === 'Column' && columns.find(c => c.id === active.id);
 
+  // Determina si se está arrastrando una tarjeta para mostrar la zona de eliminación
+  const isCardDragging = isDragging && active?.data.current?.type === 'Card';
+
   return (
-      <div className={`task-board-container ${isDragging ? 'is-dragging' : ''}`}>
+      <div className={`task-board-container ${isDragging ? 'is-dragging' : ''} ${isCardDragging ? 'is-dragging-card' : ''}`}>
         {/* Contenedor para las notificaciones flotantes */}
         <Toaster
           position="bottom-right"
