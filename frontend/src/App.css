@@ -5,6 +5,10 @@
     box-sizing: border-box;
 }
 
+html {
+
+}
+
 
 
 body {
@@ -12,21 +16,25 @@ body {
     font-family: Arial, sans-serif;
     background-color: #0d1117; /* Color de fondo oscuro */
     color: #e6edf3; /* Color de texto claro */
-    /* display: flex; */ /* Lo quitamos para permitir que el contenido se desborde */
-    /* justify-content: center; */
-    /* align-items: center; */
-    min-height: 100vh; /* Asegura que el body ocupe al menos toda la altura */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    /* min-height: calc(100vh - 20px); */
+    min-width: calc(100vh - 20px);
     box-sizing: border-box;
     background-image: url('./assets/background.jpg'); /* Imagen de fondo  */
     background-size: cover;
     background-position: center;
-    background-attachment: fixed; /* Fija la imagen de fondo */
+    background-attachment: fixed;
+    /* overflow: hidden; */
 }
 
 #root {
     /* padding: 20px; */
     height: 100%;
-    /* width: 100%; */ /* Quitamos el ancho fijo para que pueda crecer */
+    width: 100%;
     /* height: calc(100% - 20px); */
     /* width: calc(100% - 20px); */
 
@@ -39,11 +47,13 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
-    /* La clave es establecer un ancho mínimo y permitir que crezca */
-    min-width: 100%; 
-    width: fit-content;
+    width: 100%;
+    height: 100%;
+    /* max-width: 1200px; */
+    /* min-height: 700px; */
+
     margin-top: 50px;
-    min-height: calc(100vh - 50px); /* Usar vh para una altura consistente */
+    height: calc(100% - 50px);
 
 
 }
@@ -97,15 +107,23 @@ body {
 }
 
 .task-board-main {
-    flex-grow: 1;
+    /* flex-grow: 1; */
     display: flex;
     padding: 20px;
     gap: 15px;
-    /* overflow-x: auto; */ /* Quitamos el scroll de aquí para que el contenedor pueda crecer */
+    /* overflow-x: auto; */
+    height: 100%;
+    width: 100%;
     position: relative; /* Necesario para posicionar la zona de eliminación */
-    /* width: 100%; */ /* Al quitar esto, el contenedor puede crecer */
+    /* width: 100%; */
 
     align-items: flex-start; /* Evita que las columnas se estiren durante el drag */
+    /* overflow-x: hidden; */
+    
+    overflow-y: auto;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #3d91ffca #ffffff;
 }
 
 /* Clase para deshabilitar el scroll horizontal cuando se arrastra sobre la zona de eliminación */
@@ -120,10 +138,9 @@ body {
     border-radius: 8px;
     padding: 15px;
     overflow-y: auto;
-    /* min-width: 190px; */
+    min-width: 220px;
     width: 220px;
     /* max-width: 260px; */
-    /* height: 100%; */
     height: fit-content;
     display: flex;
     flex-direction: column;
@@ -169,7 +186,7 @@ div.column-title-input {
     margin: -2px -4px; /* Compensar el padding */
     border-radius: 4px;
     resize: none; /* Deshabilita el redimensionamiento manual */
-    overflow-y: auto; /* Muestra scrollbar si el texto es muy largo */
+    /* overflow-y: auto; */
     white-space: pre-wrap;
     word-break: break-word;
     line-height: 1.2;
@@ -406,23 +423,39 @@ div.column-title-input:focus {
     text-transform: uppercase;
 }
 
+.task-board-footer {
+    background-color: rgba(0, 0, 0, 0.4); /* Fondo semi-transparente para el footer */
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 0.8em;
+    color: #b0c2d3;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    display: none;
+}
+
+.task-board-footer i {
+    margin-right: 5px;
+}
+
+/* Scrollbar personalizado para navegadores Webkit */
 .task-board-main::-webkit-scrollbar {
     height: 8px;
 }
 
 .task-board-main::-webkit-scrollbar-track {
-    background: #161b22; /* Un fondo más oscuro y sólido */
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
 }
 
 .task-board-main::-webkit-scrollbar-thumb {
-    background-color: #484f58; /* Un gris medio de la paleta de GitHub */
+    background-color: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
-    border: 2px solid #161b22; /* Borde del mismo color que el track */
+    border: 2px solid rgba(0, 0, 0, 0.3);
 }
 
 .task-board-main::-webkit-scrollbar-thumb:hover {
-    background-color: #58a6ff; /* El color de acento azul al pasar el ratón */
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .column-option {
@@ -670,8 +703,8 @@ div.column-title-input:focus {
     padding: 5px;
     max-height: 420px;
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #a11b1b #ffffff; /* thumb y track */
+    /* scrollbar-width: thin; */
+    /* scrollbar-color: #a11b1b #ffffff; */
 }
 /* Renombramos 'li' a una clase más específica para evitar conflictos */
 .board-list-item {
