@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 
 const ColumnOptionsDropdown = ({
+  container,
   position,
   onClose,
   onRename,
@@ -26,11 +27,24 @@ const ColumnOptionsDropdown = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  const style = {
-    position: 'absolute',
-    top: `${position.bottom + 5}px`, // 5px debajo del botón
-    left: `${position.right - 200}px`, // Alinear a la derecha (ancho aprox. 200px)
-  };
+  // Calculamos el estilo de posicionamiento relativo al contenedor (.task-board-main)
+  const style = useMemo(() => {
+    if (!position || !container) return {};
+
+    const containerRect = container.getBoundingClientRect();
+
+    // 'position' contiene las coordenadas del botón de opciones relativas al viewport.
+    // 'containerRect' contiene las coordenadas del .task-board-main relativas al viewport.
+
+    // Calculamos 'top' relativo al contenedor: (bottom del botón - top del contenedor) + scroll actual + margen
+    const relativeTop = position.bottom - containerRect.top + container.scrollTop + 5;
+    
+    // Calculamos 'left' relativo al contenedor.
+    // (Posición X del botón relativa al viewport - Posición X del contenedor relativa al viewport) + scroll horizontal.
+    const relativeLeft = (position.left - containerRect.left) + container.scrollLeft;
+
+    return { position: 'absolute', top: `${relativeTop}px`, left: `${relativeLeft}px` };
+  }, [position, container]);
 
   // Usamos un Portal para renderizar el dropdown en el body
   return ReactDOM.createPortal(
@@ -51,7 +65,7 @@ const ColumnOptionsDropdown = ({
       <hr className="dropdown-divider" />
       <div className="column-option" onClick={onDelete}>Eliminar columna</div>
     </div>,
-    document.body // El contenedor del portal
+    container // El contenedor del portal ahora es el div .task-board-main
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors, closestCenter } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import '../App.css';
@@ -41,6 +41,7 @@ export const TaskboardView = () => {
   } = useTaskboardContext();
 
   const [activeDropdown, setActiveDropdown] = useState({ columnId: null, position: null });
+  const mainContainerRef = useRef(null);
 
   const {
     active,
@@ -133,7 +134,7 @@ export const TaskboardView = () => {
           </div>
         </header>
 
-        <main className={`task-board-main ${isOverDeleteZone ? 'no-scroll' : ''}`}>
+        <main ref={mainContainerRef} className={`task-board-main ${isOverDeleteZone ? 'no-scroll' : ''}`}>
           <DndContext
             sensors={sensors}
             onDragStart={handleDragStart}
@@ -164,8 +165,9 @@ export const TaskboardView = () => {
               ) : null}
             </DragOverlay>
           </DndContext>
-          {activeDropdown.columnId && (
+          {activeDropdown.columnId && mainContainerRef.current && (
             <ColumnOptionsDropdown
+              container={mainContainerRef.current}
               position={activeDropdown.position}
               onClose={() => setActiveDropdown({ columnId: null, position: null })}
               onRename={() => {
