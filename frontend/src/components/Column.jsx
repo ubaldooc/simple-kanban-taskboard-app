@@ -12,6 +12,8 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     exitingItemIds,
     addColumn,
     onAddCard,
+    handleDeleteColumnRequest,
+    deleteColumn, // Importamos la función de eliminación directa
   } = useTaskboardContext();
   const titleInputRef = useRef(null);
   const optionsButtonRef = useRef(null); // Ref para el botón de opciones
@@ -59,9 +61,22 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
 
   const handleTitleBlur = () => {
     let finalTitle = titleInputRef.current.innerText.trim();
-    if (finalTitle === '') finalTitle = 'Columna'; // Asigna título por defecto si está vacío
-    if (column.title !== finalTitle) {
-      updateColumnTitle(column.id, finalTitle);
+    if (finalTitle === '') {
+      if (cards.length === 0) {
+        // Si no hay título Y no hay tarjetas, eliminar la columna directamente
+        deleteColumn(column.id);
+      } else {
+        // Si no hay título pero sí hay tarjetas, asignar título por defecto
+        finalTitle = 'Columna';
+        if (column.title !== finalTitle) {
+          updateColumnTitle(column.id, finalTitle);
+        }
+      }
+    } else {
+      // Si hay título, actualizarlo si ha cambiado
+      if (column.title !== finalTitle) {
+        updateColumnTitle(column.id, finalTitle);
+      }
     }
     setEditingColumnId(null);
   };
@@ -70,9 +85,11 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Evita el salto de línea
       titleInputRef.current.blur(); // Llama a handleTitleBlur indirectamente
-      // Si el título original estaba vacío, significa que es una columna nueva.
-      // En ese caso, al presionar Enter, creamos otra columna.
-      if (column.title === '') {
+
+      // Si es una columna nueva (título original vacío) Y el usuario ha escrito un título,
+      // entonces creamos una nueva columna para una experiencia de usuario más fluida.
+      // Si el título se deja vacío, no se crea una nueva columna.
+      if (column.title === '' && titleInputRef.current.innerText.trim() !== '') {
         addColumn();
       }
     } else if (e.key === 'Escape') {

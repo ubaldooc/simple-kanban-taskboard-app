@@ -630,6 +630,39 @@ export const useTaskboard = () => {
 
   const handleDeleteColumnRequest = (columnId) => setColumnToDelete(columnId);
 
+  // ELIMINAR COLUMNA DIRECTAMENTE (sin modal)
+  const deleteColumn = async (columnIdToDelete) => {
+    if (!columnIdToDelete) return;
+
+    const originalBoard = activeBoard;
+
+    // Actualización optimista con animación
+    setExitingItemIds(prev => [...prev, columnIdToDelete]);
+
+    setTimeout(() => {
+      updateActiveBoard(board => ({
+        ...board,
+        columns: board.columns.filter(col => col.id !== columnIdToDelete),
+        cards: board.cards.filter(card => card.column !== columnIdToDelete),
+      }));
+    }, 400); // Duración de la animación de salida
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/columns/${columnIdToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('No se pudo eliminar la columna del servidor.');
+
+      // No mostramos toast de éxito porque es una acción automática
+    } catch (error) {
+      toast.error(error.message);
+      // Revertir si la API falla
+      setBoards(prevBoards => prevBoards.map(b => b.id === activeBoardId ? originalBoard : b));
+      setExitingItemIds(prev => prev.filter(id => id !== columnIdToDelete));
+    }
+  };
+
 
 
   // MODAL ELIMINAR COLUMNA
@@ -691,6 +724,7 @@ export const useTaskboard = () => {
     deleteCard,
     updateColumnTitle,
     updateColumnColor,
+    deleteColumn, // Exportamos la nueva función
     handleDeleteColumnRequest,
     confirmDeleteColumn,
     columnToDelete,
