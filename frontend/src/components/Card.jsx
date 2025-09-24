@@ -73,7 +73,11 @@ const CardComponent = ({ card }) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Evita que se inserte un salto de línea
       inputRef.current?.blur(); // Guarda la tarjeta actual
-      onAddCard(card.column); // Crea una nueva tarjeta en la misma columna
+      // Si el título original estaba vacío, es una tarjeta nueva.
+      // En ese caso, al presionar Enter, creamos otra tarjeta.
+      if (card.title === '') {
+        onAddCard(card.column);
+      }
     }
   };
 
