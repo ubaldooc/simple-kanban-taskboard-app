@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 
 const ColumnOptionsDropdown = ({
@@ -10,6 +10,7 @@ const ColumnOptionsDropdown = ({
   onColorChange,
 }) => {
   const dropdownRef = useRef(null);
+  const [style, setStyle] = useState({ opacity: 0 }); // Inicia invisible
 
   const columnColors = [
     '#EF5350', '#AB47BC', '#5C6BC0', '#42A5F5',
@@ -27,26 +28,30 @@ const ColumnOptionsDropdown = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
-  // Calculamos el estilo de posicionamiento relativo al contenedor (.task-board-main)
-  const style = useMemo(() => {
-    if (!position || !container) return {};
+  // Usamos useLayoutEffect para calcular la posición después de que el DOM se haya renderizado
+  // pero antes de que el navegador pinte. Esto evita parpadeos.
+  useLayoutEffect(() => {
+    if (position && container && dropdownRef.current) {
+      const containerRect = container.getBoundingClientRect();
+      const dropdownWidth = dropdownRef.current.offsetWidth;
 
-    const containerRect = container.getBoundingClientRect();
+      // Calculamos 'top' relativo al contenedor: (bottom del botón - top del contenedor) + scroll actual + margen
+      const relativeTop = position.bottom - containerRect.top + container.scrollTop + 5;
 
-    // 'position' contiene las coordenadas del botón de opciones relativas al viewport.
-    // 'containerRect' contiene las coordenadas del .task-board-main relativas al viewport.
+      // Calculamos 'left' para alinear el borde derecho del dropdown con el borde derecho del botón.
+      // (Posición X del borde derecho del botón relativa al contenido) - (ancho del dropdown)
+      const relativeLeft = 
+        (position.right - containerRect.left + container.scrollLeft) - dropdownWidth;
 
-    // Calculamos 'top' relativo al contenedor: (bottom del botón - top del contenedor) + scroll actual + margen
-    const relativeTop = position.bottom - containerRect.top + container.scrollTop + 5;
-    
-    // Calculamos 'left' relativo al contenedor.
-    // (Posición X del botón relativa al viewport - Posición X del contenedor relativa al viewport) + scroll horizontal.
-    const relativeLeft = (position.left - containerRect.left) + container.scrollLeft;
-
-    return { position: 'absolute', top: `${relativeTop}px`, left: `${relativeLeft}px` };
+      setStyle({
+        position: 'absolute',
+        top: `${relativeTop}px`,
+        left: `${relativeLeft}px`,
+      });
+    }
   }, [position, container]);
 
-  // Usamos un Portal para renderizar el dropdown en el body
+  // Usamos un Portal para renderizar el dropdown en el contenedor principal
   return ReactDOM.createPortal(
     <div ref={dropdownRef} className="column-options-dropdown" style={style}>
       <div className="column-option" onClick={onRename}>Renombrar columna</div>
