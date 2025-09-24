@@ -10,6 +10,7 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     setEditingColumnId,
     updateColumnTitle,
     exitingItemIds,
+    addColumn,
     onAddCard,
   } = useTaskboardContext();
   const [title, setTitle] = useState(column.title);
@@ -69,7 +70,8 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   const handleTitleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Evita el salto de línea
-      handleTitleBlur();
+      titleInputRef.current.blur(); // Llama a handleTitleBlur indirectamente
+      addColumn(); // Crea la nueva columna
     } else if (e.key === 'Escape') {
       if (titleInputRef.current) titleInputRef.current.innerText = column.title;
       setEditingColumnId(null);

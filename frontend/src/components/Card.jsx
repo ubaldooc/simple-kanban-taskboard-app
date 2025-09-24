@@ -72,7 +72,8 @@ const CardComponent = ({ card }) => {
     // Guardar con Enter, permitir nueva línea con Shift+Enter
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Evita que se inserte un salto de línea
-      inputRef.current.blur();
+      inputRef.current?.blur(); // Guarda la tarjeta actual
+      onAddCard(card.column); // Crea una nueva tarjeta en la misma columna
     }
   };
 
