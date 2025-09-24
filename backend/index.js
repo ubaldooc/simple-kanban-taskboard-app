@@ -359,15 +359,15 @@ app.post('/api/boards/:boardId/columns', async (req, res) => {
       return res.status(400).json({ message: 'El ID del tablero no es válido.' });
     }
 
-    // 2. Validar que se haya proporcionado un título
-    if (!title || title.trim() === '') {
+    // 2. Validar que se haya proporcionado un título (ahora se permiten títulos vacíos)
+    if (title === null || title === undefined) {
       return res.status(400).json({ message: 'El título de la columna es requerido.' });
     }
 
     // 3. Contar cuántas columnas existen en el tablero para asignar el siguiente 'order'
     const columnCount = await Column.countDocuments({ board: boardId });
 
-    // 4. Crear la nueva columna
+    // 4. Crear la nueva columna (permitiendo que el título sea una cadena vacía)
     const newColumn = new Column({
       title: title.trim(),
       color: color, // Si no se proporciona, usará el default del schema

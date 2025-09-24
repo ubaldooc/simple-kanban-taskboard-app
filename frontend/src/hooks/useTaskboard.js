@@ -435,7 +435,7 @@ export const useTaskboard = () => {
       const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/columns`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'Nueva Columna' }), // El backend se encarga del color por defecto
+        body: JSON.stringify({ title: '' }), // Enviamos un título vacío
       });
 
       if (!response.ok) throw new Error('No se pudo crear la columna.');

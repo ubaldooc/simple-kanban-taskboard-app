@@ -17,7 +17,7 @@ const CardSchema = new Schema({
 // --- Column Schema ---
 // Las columnas organizan las tarjetas.
 const ColumnSchema = new Schema({
-  title: { type: String, required: true, default: 'Nueva Columna' },
+  title: { type: String, default: 'Nueva Columna' },
   color: { type: String, default: '#8b949e' },
   // Campo para mantener el orden de las columnas dentro de un tablero.
   order: { type: Number, default: 0 },

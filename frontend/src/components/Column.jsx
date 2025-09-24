@@ -13,7 +13,6 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     addColumn,
     onAddCard,
   } = useTaskboardContext();
-  const [title, setTitle] = useState(column.title);
   const titleInputRef = useRef(null);
   const optionsButtonRef = useRef(null); // Ref para el botón de opciones
   
@@ -71,7 +70,11 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Evita el salto de línea
       titleInputRef.current.blur(); // Llama a handleTitleBlur indirectamente
-      addColumn(); // Crea la nueva columna
+      // Si el título original estaba vacío, significa que es una columna nueva.
+      // En ese caso, al presionar Enter, creamos otra columna.
+      if (column.title === '') {
+        addColumn();
+      }
     } else if (e.key === 'Escape') {
       if (titleInputRef.current) titleInputRef.current.innerText = column.title;
       setEditingColumnId(null);
