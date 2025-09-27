@@ -11,7 +11,7 @@ const app = express();
 // Usa el puerto del .env o 5001 como valor por defecto
 const port =  5001;
 // Usa la URI de MongoDB del .env o una local como valor por defecto
-const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboardversionvv6';
+const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboard2';
 
 
 // Middleware para habilitar CORS
@@ -83,11 +83,15 @@ app.get('/api/user/preferences', async (req, res) => {
   try {
     // En una app real, obtendríamos el ID del usuario desde el token de autenticación.
     // Aquí, usamos nuestro usuario por defecto.
-    const user = await User.findOne({ name: 'Default User' });
+    let user = await User.findOne({ name: 'Default User' });
+
+    // Si el usuario no existe (p.ej. base de datos nueva), lo creamos.
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado.' });
+      console.log('Usuario por defecto no encontrado, creándolo...');
+      user = new User({ name: 'Default User' });
+      await user.save();
     }
-    res.status(200).json({ lastActiveBoardId: user.lastActiveBoard });
+    res.status(200).json({ lastActiveBoardId: user.lastActiveBoard || null });
   } catch (error) {
     console.error('Error al obtener las preferencias del usuario:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
@@ -161,18 +165,33 @@ app.post('/api/boards', async (req, res) => {
 
     // 2. Si se proporcionan columnas, crearlas y asociarlas.
     if (columns && Array.isArray(columns) && columns.length > 0) {
-      const createdColumns = await Promise.all(
-        columns.map(async (col) => {
-          const newColumn = new Column({
-            title: col.title || 'Nueva Columna',
-            color: col.color || '#8b949e',
-            board: newBoard._id,
-          });
-          await newColumn.save();
-          return newColumn;
-        })
-      );
-      // Asignar los IDs de las columnas creadas al tablero
+      const columnCreationPromises = columns.map(async (colData, colIndex) => {
+        const newColumn = new Column({
+          title: colData.title || 'Nueva Columna',
+          color: colData.color || '#8b949e',
+          board: newBoard._id,
+          order: colIndex, // Asignar orden a la columna
+        });
+
+        // Si la columna tiene tarjetas, crearlas
+        if (colData.cards && Array.isArray(colData.cards) && colData.cards.length > 0) {
+          const cardCreationPromises = colData.cards.map((cardData, cardIndex) =>
+            new Card({
+              title: cardData.title,
+              board: newBoard._id,
+              column: newColumn._id,
+              order: cardIndex, // Asignar orden a la tarjeta
+            }).save()
+          );
+          const createdCards = await Promise.all(cardCreationPromises);
+          newColumn.cards = createdCards.map(card => card._id);
+        }
+
+        await newColumn.save();
+        return newColumn;
+      });
+
+      const createdColumns = await Promise.all(columnCreationPromises);
       newBoard.columns = createdColumns.map(col => col._id);
     }
 
@@ -180,7 +199,12 @@ app.post('/api/boards', async (req, res) => {
     await newBoard.save();
 
     // 4. Poblar el nuevo tablero con sus columnas para devolverlo completo
-    const populatedBoard = await Board.findById(newBoard._id).populate('columns');
+    const populatedBoard = await Board.findById(newBoard._id).populate({
+      path: 'columns',
+      populate: {
+        path: 'cards'
+      }
+    });
 
     res.status(201).json(populatedBoard);
   } catch (error) {

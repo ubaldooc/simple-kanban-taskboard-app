@@ -71,21 +71,48 @@ export const useTaskboard = () => {
         let boardsData = await boardsResponse.json();
         const prefsData = await prefsResponse.json();
 
-        // Si la base de datos está vacía, crea un tablero por defecto
+        // Si la base de datos está vacía, crea un tablero por defecto en el backend
         if (boardsData.length === 0) {
-          // TODO: Crear este tablero por defecto en el backend y volver a fetchear
-          // Por ahora, lo creamos en el frontend para demostración.
-          boardsData = [{
-            id: `board-${crypto.randomUUID()}`,
-            title: 'Mi Primer Tablero',
-            columns: [
-              { id: 'ideas', title: 'Ideas', color: '#AB47BC' },
-              { id: 'todo', title: 'To Do', color: '#42A5F5' },
-            ],
-            cards: [
-              { id: '1', title: '¡Bienvenido!', column: 'ideas' },
-            ],
-          }];
+          try {
+            const defaultBoardResponse = await fetch('http://localhost:5001/api/boards', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                title: 'Mi Primer Tablero',
+                columns: [
+                  { 
+                    title: 'Tareas por hacer', 
+                    color: '#42A5F5',
+                    cards: [
+                      { title: '¡Bienvenido a tu nuevo tablero!' },
+                      { title: 'Haz doble clic en el título de una columna para cambiarlo.' },
+                      { title: 'Arrastra esta tarjeta a otra columna.' },
+                    ]
+                  },
+                  { title: 'En proceso', color: '#FFA726' },
+                  { 
+                    title: 'Completado', 
+                    color: '#66BB6A',
+                    cards: [{ title: 'Arrastra tarjetas aquí para marcarlas como completadas.' }]
+                  },
+                ],
+              }),
+            });
+            if (!defaultBoardResponse.ok) throw new Error('No se pudo crear el tablero por defecto.');
+            
+            const createdBoard = await defaultBoardResponse.json();
+            // Transforma el tablero recién creado al formato del frontend
+            boardsData = [{
+              ...createdBoard,
+              id: createdBoard._id,
+              columns: [], // Se cargarán bajo demanda
+              cards: [],
+            }];
+
+          } catch (creationError) {
+            console.error("Error al crear el tablero por defecto:", creationError);
+            toast.error(creationError.message);
+          }
         } else {
           // Transforma los datos del backend (_id) al formato del frontend (id)
           boardsData = boardsData.map(board => ({
