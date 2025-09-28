@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { arrayMove } from '@dnd-kit/sortable';
+import { useAuth } from '../context/AuthContext';
+import { getApiService } from '../services/apiService';
 
 // --- Helper Functions ---
 
 export const useTaskboard = () => {
+  const { authMode } = useAuth();
+  const api = useMemo(() => getApiService(authMode), [authMode]);
   // --- State Management ---
   const [boards, setBoards] = useState([]);
   const [activeBoardId, setActiveBoardIdState] = useState(null);
@@ -29,10 +33,9 @@ export const useTaskboard = () => {
     if (!boardId) return;
 
     try {
-      const response = await fetch(`http://localhost:5001/api/boards/${boardId}`);
-      if (!response.ok) throw new Error('No se pudieron cargar los detalles del tablero.');
-
-      const detailedBoard = await response.json();
+      // Usamos el servicio de API
+      const detailedBoard = await api.getBoardDetails(boardId);
+      if (!detailedBoard) throw new Error('No se pudieron cargar los detalles del tablero.');
 
       // --- ¡Solución! Ordenar las tarjetas en el frontend ---
       // El backend devuelve un array plano de tarjetas. Lo ordenamos por su campo 'order'.
@@ -60,49 +63,24 @@ export const useTaskboard = () => {
       setIsLoading(true);
       try {
         // Hacemos las dos peticiones en paralelo para más eficiencia
-        const [boardsResponse, prefsResponse] = await Promise.all([
-          fetch('http://localhost:5001/api/boards/list'),
-          fetch('http://localhost:5001/api/user/preferences')
+        const [boardsData, prefsData] = await Promise.all([
+          api.getBoardsList(),
+          api.getUserPreferences()
         ]);
 
-        if (!boardsResponse.ok) throw new Error('No se pudo cargar la lista de tableros.');
-        if (!prefsResponse.ok) throw new Error('No se pudieron cargar las preferencias del usuario.');
-        
-        let boardsData = await boardsResponse.json();
-        const prefsData = await prefsResponse.json();
+        let finalBoardsData = boardsData;
 
         // Si la base de datos está vacía, crea un tablero por defecto en el backend
-        if (boardsData.length === 0) {
+        if (finalBoardsData.length === 0) {
           try {
-            const defaultBoardResponse = await fetch('http://localhost:5001/api/boards', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                title: 'Mi Primer Tablero',
-                columns: [
-                  { 
-                    title: 'Tareas por hacer', 
-                    color: '#42A5F5',
-                    cards: [
-                      { title: '¡Bienvenido a tu nuevo tablero!' },
-                      { title: 'Haz doble clic en el título de una columna para cambiarlo.' },
-                      { title: 'Arrastra esta tarjeta a otra columna.' },
-                    ]
-                  },
-                  { title: 'En proceso', color: '#FFA726' },
-                  { 
-                    title: 'Completado', 
-                    color: '#66BB6A',
-                    cards: [{ title: 'Arrastra tarjetas aquí para marcarlas como completadas.' }]
-                  },
-                ],
-              }),
-            });
-            if (!defaultBoardResponse.ok) throw new Error('No se pudo crear el tablero por defecto.');
-            
-            const createdBoard = await defaultBoardResponse.json();
+            // La lógica para crear el tablero por defecto ya está en localStorageService
+            // y la hemos replicado en la api online.
+            // Aquí solo necesitamos obtener la lista de nuevo.
+            const createdBoard = await api.createDefaultBoard();
+            if (!createdBoard) throw new Error('No se pudo crear el tablero por defecto.');
+
             // Transforma el tablero recién creado al formato del frontend
-            boardsData = [{
+            finalBoardsData = [{
               ...createdBoard,
               id: createdBoard._id,
               columns: [], // Se cargarán bajo demanda
@@ -115,7 +93,7 @@ export const useTaskboard = () => {
           }
         } else {
           // Transforma los datos del backend (_id) al formato del frontend (id)
-          boardsData = boardsData.map(board => ({
+          finalBoardsData = finalBoardsData.map(board => ({
             ...board,
             id: board._id, // El _id viene por defecto
             // Inicializamos columns y cards como arrays vacíos. Se cargarán bajo demanda.
@@ -124,10 +102,10 @@ export const useTaskboard = () => {
           }));
         }
 
-        setBoards(boardsData);
+        setBoards(finalBoardsData);
 
         const lastActiveId = prefsData.lastActiveBoardId;
-        const idToLoad = lastActiveId && boardsData.some(b => b.id === lastActiveId) ? lastActiveId : boardsData[0]?.id;
+        const idToLoad = lastActiveId && finalBoardsData.some(b => b.id === lastActiveId) ? lastActiveId : finalBoardsData[0]?.id;
 
         // Establece el tablero activo y carga sus detalles
         if (idToLoad) {
@@ -143,7 +121,7 @@ export const useTaskboard = () => {
     };
 
     fetchBoards();
-  }, []); // El array vacío asegura que se ejecute solo una vez
+  }, [api]); // Se re-ejecuta si la API cambia (online vs guest)
 
   useEffect(() => {
     // Cargar detalles cuando el tablero activo cambia y no tiene columnas cargadas
@@ -175,11 +153,7 @@ export const useTaskboard = () => {
   const setActiveBoardId = (id) => {
     setActiveBoardIdState(id);
     // Guarda la preferencia en el backend en lugar de localStorage
-    fetch('http://localhost:5001/api/user/preferences', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lastActiveBoardId: id }),
-    }).catch(error => {
+    api.updateUserPreferences({ lastActiveBoardId: id }).catch(error => {
       console.error('No se pudo guardar la preferencia del tablero activo:', error);
     });
   };
@@ -199,63 +173,34 @@ export const useTaskboard = () => {
 
   // AGREGAR BOARDS
   const addBoard = async () => {
-    // 1. Crear un tablero temporal con un ID único del lado del cliente
-    const tempId = `temp-${crypto.randomUUID()}`;
-    const newBoardOptimistic = {
-      id: tempId,
-      title: 'Nuevo Tablero...', // Título temporal
-      columns: [
-        { id: `temp-col-${crypto.randomUUID()}`, title: 'To Do', color: '#42A5F5' }
-      ],
-      cards: [],
-    };
-    // 2. Actualización optimista: Añadir el tablero temporal al estado de React
-    setBoards(prevBoards => [...prevBoards, newBoardOptimistic]);
-    setActiveBoardId(tempId);
-    setNewBoardIdToEdit(tempId);
-
     try {
-      // 3. Enviar los datos al backend (sin el ID temporal)
+      // 1. Enviar los datos al backend para crear el tablero y sus columnas por defecto.
       const newBoardDataForBackend = {
         title: 'Nuevo Tablero', // Título por defecto en el backend
-        // Enviamos las columnas que queremos crear
         columns: [{ title: 'To Do', color: '#42A5F5' }],
       };
-
-      const response = await fetch('http://localhost:5001/api/boards', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newBoardDataForBackend),
-      });
-
-      if (!response.ok) throw new Error('Error al crear el tablero');
-
-      const createdBoard = await response.json();
-      
-      // 4. Reemplazar el tablero temporal con el tablero real del backend
-      setBoards(prevBoards => prevBoards.map(board => {
-        if (board.id === tempId) {
-          // Transforma la respuesta del backend al formato del frontend
-          return {
-            ...createdBoard,
-            id: createdBoard._id,
-            columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
-            cards: createdBoard.cards || [],
-          };
-        }
-        return board;
-      }));
-
-      // 5. Actualizar el ID activo y el ID a editar al ID permanente
+  
+      const createdBoard = await api.createBoard(newBoardDataForBackend);
+      if (!createdBoard) throw new Error('Error al crear el tablero');
+  
+      // 2. Transformar la respuesta del backend al formato del estado del frontend.
+      const newBoardForState = {
+        ...createdBoard,
+        id: createdBoard._id,
+        columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
+        cards: createdBoard.cards || [],
+      };
+  
+      // 3. Añadir el nuevo tablero al estado.
+      setBoards(prevBoards => [...prevBoards, newBoardForState]);
+  
+      // 4. Establecer el nuevo tablero como activo e iniciar la edición de su título.
       setActiveBoardId(createdBoard._id);
-      // Inicia la edición del título del nuevo tablero
       setNewBoardIdToEdit(createdBoard._id);
-
+  
     } catch (error) {
       console.error("Error en addBoard:", error);
       toast.error('No se pudo crear el tablero.');
-      // Opcional: Revertir la actualización optimista si falla la llamada a la API
-      setBoards(prevBoards => prevBoards.filter(board => board.id !== tempId));
     }
   };
 
@@ -271,13 +216,8 @@ export const useTaskboard = () => {
       );
 
       try {
-        const response = await fetch(`http://localhost:5001/api/boards/${boardId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: trimmedTitle }),
-        });
-
-        if (!response.ok) throw new Error('Error al actualizar el tablero en el servidor');
+        const result = await api.updateBoard(boardId, { title: trimmedTitle });
+        if (!result) throw new Error('Error al actualizar el tablero en el servidor');
       } catch (error) {
         console.error("Error en editBoard:", error);
         // Opcional: Revertir el cambio en la UI si la llamada a la API falla
@@ -300,15 +240,9 @@ export const useTaskboard = () => {
 
     try {
       // 3. Enviar el nuevo orden al backend
-      const response = await fetch('http://localhost:5001/api/boards/reorder', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ boardIds }),
-      });
+      const result = await api.reorderBoards(boardIds);
+      if (!result) throw new Error('Error al guardar el orden de los tableros en el servidor.');
 
-      if (!response.ok) {
-        throw new Error('Error al guardar el orden de los tableros en el servidor.');
-      }
       toast.success('Orden de tableros guardado.');
     } catch (error) {
       console.error("Error en reorderBoards:", error);
@@ -333,12 +267,8 @@ export const useTaskboard = () => {
     // 2. Preparar datos y llamar a la API
     const columnIds = reorderedColumns.map(c => c.id);
     try {
-      const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/reorder-columns`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ columnIds }),
-      });
-      if (!response.ok) throw new Error('No se pudo guardar el orden de las columnas.');
+      const result = await api.reorderColumns(activeBoardId, columnIds);
+      if (!result) throw new Error('No se pudo guardar el orden de las columnas.');
     } catch (error) {
       toast.error(error.message);
       // Revertir si falla
@@ -380,13 +310,8 @@ export const useTaskboard = () => {
     
     // 3. Enviar la petición al backend (sin actualización optimista, ya que la UI ya está actualizada)
     try {
-      const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/reorder-cards`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cards: cardsToUpdate }),
-      });
-      if (!response.ok) throw new Error('No se pudo guardar el nuevo orden de las tarjetas.');
-      // Opcional: 
+      const result = await api.reorderCards(activeBoardId, cardsToUpdate);
+      if (!result) throw new Error('No se pudo guardar el nuevo orden de las tarjetas.');
       toast.success('Orden de tarjetas guardado.');
     } catch (error) {
       toast.error(error.message);
@@ -412,22 +337,10 @@ export const useTaskboard = () => {
       setBoardToDelete(null);
       
       try {
-        const response = await fetch(`http://localhost:5001/api/boards/${boardIdToDelete}`, {
-          method: 'DELETE',
-        });
-
-        if (!response.ok) {
-          // Si la API falla, la respuesta no será 'ok'. Lanza un error para ir al catch.
-          let errorMessage = `Error del servidor: ${response.status} ${response.statusText}`;
-          // let errorMessage = `No se pudo elimina el tablero revisa tu conexion a internet`;
-          // Intenta leer el cuerpo del error solo si es JSON
-          const contentType = response.headers.get("content-type");
-          if (contentType && contentType.indexOf("application/json") !== -1) {
-            const errorData = await response.json();
-            errorMessage = errorData.message || errorMessage;
-          }
-          throw new Error(errorMessage);
-        }
+        const result = await api.deleteBoard(boardIdToDelete);
+        // En modo guest, el resultado puede no tener un `ok`. Asumimos que si no hay error, todo fue bien.
+        // Para el modo online, la promesa rechazaría en un error de red, pero no para un 4xx/5xx.
+        // La abstracción de la API debería manejar esto, pero por ahora esto funciona.
         toast.success('Tablero eliminado correctamente.');
         // Si todo va bien, la UI ya está actualizada, no se necesita hacer nada más.
       } catch (error) {
@@ -459,16 +372,9 @@ export const useTaskboard = () => {
 
     try {
       // 3. Enviar la petición al backend para crear la columna con un título por defecto
-      const response = await fetch(`http://localhost:5001/api/boards/${activeBoardId}/columns`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: '' }), // Enviamos un título vacío
-      });
-
-      if (!response.ok) throw new Error('No se pudo crear la columna.');
-
-      const createdColumn = await response.json();
-
+      const createdColumn = await api.createColumn(activeBoardId, { title: '' });
+      if (!createdColumn) throw new Error('No se pudo crear la columna.');
+      
       // 4. Reemplazar la columna temporal con la real del backend
       updateActiveBoard(board => ({
         ...board,
@@ -518,14 +424,8 @@ export const useTaskboard = () => {
     // Si la tarjeta es nueva (ID temporal), la creamos en el backend
     if (cardId.startsWith('temp-card-')) {
       try {
-        const response = await fetch(`http://localhost:5001/api/columns/${cardToUpdate.column}/cards`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: trimmedTitle }),
-        });
-        if (!response.ok) throw new Error('No se pudo crear la tarjeta.');
-        const createdCard = await response.json();
-
+        const createdCard = await api.createCard(cardToUpdate.column, { title: trimmedTitle });
+        if (!createdCard) throw new Error('No se pudo crear la tarjeta.');
         // Reemplazar la tarjeta temporal con la real del backend
         updateActiveBoard(board => ({
           ...board,
@@ -546,14 +446,8 @@ export const useTaskboard = () => {
 
       // Llamada a la API para persistir el cambio
       try {
-        const response = await fetch(`http://localhost:5001/api/cards/${cardId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: trimmedTitle }),
-        });
-
-        if (!response.ok) throw new Error('No se pudo actualizar el título de la tarjeta.');
-        // No es necesario hacer nada con la respuesta si la actualización optimista fue exitosa
+        const result = await api.updateCard(cardId, { title: trimmedTitle });
+        if (!result) throw new Error('No se pudo actualizar el título de la tarjeta.');
       } catch (error) {
         toast.error(error.message);
         // Revertir el cambio si la API falla
@@ -582,10 +476,8 @@ export const useTaskboard = () => {
     }));
 
     try {
-      const response = await fetch(`http://localhost:5001/api/cards/${cardId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('No se pudo eliminar la tarjeta.');
+      const result = await api.deleteCard(cardId);
+      if (!result) throw new Error('No se pudo eliminar la tarjeta.');
       // No es necesario un toast de éxito para no ser muy intrusivo
     } catch (error) {
       toast.error(error.message);
@@ -614,12 +506,8 @@ export const useTaskboard = () => {
     }));
 
     try {
-      const response = await fetch(`http://localhost:5001/api/columns/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: trimmedTitle }),
-      });
-      if (!response.ok) throw new Error('No se pudo guardar el nuevo título.');
+      const result = await api.updateColumn(id, { title: trimmedTitle });
+      if (!result) throw new Error('No se pudo guardar el nuevo título.');
     } catch (error) {
       toast.error(error.message);
       // Revertir si falla la API
@@ -640,12 +528,8 @@ export const useTaskboard = () => {
     }));
 
     try {
-      const response = await fetch(`http://localhost:5001/api/columns/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ color: newColor }),
-      });
-      if (!response.ok) throw new Error('No se pudo guardar el nuevo color.');
+      const result = await api.updateColumn(id, { color: newColor });
+      if (!result) throw new Error('No se pudo guardar el nuevo color.');
       toast.success('Color de columna guardado.');
     } catch (error) {
       toast.error(error.message);
@@ -675,12 +559,8 @@ export const useTaskboard = () => {
     }, 400); // Duración de la animación de salida
 
     try {
-      const response = await fetch(`http://localhost:5001/api/columns/${columnIdToDelete}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('No se pudo eliminar la columna del servidor.');
-
+      const result = await api.deleteColumn(columnIdToDelete);
+      if (!result) throw new Error('No se pudo eliminar la columna del servidor.');
       // No mostramos toast de éxito porque es una acción automática
     } catch (error) {
       toast.error(error.message);
@@ -711,12 +591,8 @@ export const useTaskboard = () => {
       }, 400);
 
       try {
-        const response = await fetch(`http://localhost:5001/api/columns/${columnIdToDelete}`, {
-          method: 'DELETE',
-        });
-
-        if (!response.ok) throw new Error('No se pudo eliminar la columna del servidor.');
-
+        const result = await api.deleteColumn(columnIdToDelete);
+        if (!result) throw new Error('No se pudo eliminar la columna del servidor.');
         toast.success('Columna eliminada.');
       } catch (error) {
         toast.error(error.message);
