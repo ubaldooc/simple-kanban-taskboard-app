@@ -1,80 +1,92 @@
-import * as guestApi from '../hooks/localStorageService.js';
+import guestApi from '../hooks/localStorageService.js';
+
+const handleResponse = async (response) => {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+    throw new Error(errorData.message || `Error: ${response.status}`);
+  }
+  // Si la respuesta es 204 No Content, no hay cuerpo para parsear.
+  if (response.status === 204) {
+    return null;
+  }
+  return response.json();
+};
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
 // --- Implementación de la API "Online" (usando fetch) ---
 const onlineApi = {
   
-  getUserPreferences: () => fetch(`${API_BASE_URL}/user/preferences`).then(res => res.json()),
+  getUserPreferences: () => fetch(`${API_BASE_URL}/user/preferences`).then(handleResponse),
   
   updateUserPreferences: (prefs) => fetch(`${API_BASE_URL}/user/preferences`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(prefs),
-  }).then(res => res.json()),
+  }).then(handleResponse),
 
-  getBoardsList: () => fetch(`${API_BASE_URL}/boards/list`).then(res => res.json()),
+  getBoardsList: () => fetch(`${API_BASE_URL}/boards/list`).then(handleResponse),
   
-  getBoardDetails: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`).then(res => res.json()),
+  getBoardDetails: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`).then(handleResponse),
   
   createBoard: (boardData) => fetch(`${API_BASE_URL}/boards`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(boardData),
-  }).then(res => res.json()),
+  }).then(handleResponse),
   
   updateBoard: (boardId, updateData) => fetch(`${API_BASE_URL}/boards/${boardId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updateData),
-  }).then(res => res.json()),
+  }).then(handleResponse),
   
-  deleteBoard: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`, { method: 'DELETE' }).then(res => res.json()),
+  deleteBoard: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`, { method: 'DELETE' }).then(handleResponse),
   
   reorderBoards: (boardIds) => fetch(`${API_BASE_URL}/boards/reorder`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ boardIds }),
-  }).then(res => res.json()),
+  }).then(handleResponse),
 
   createColumn: (boardId, columnData) => fetch(`${API_BASE_URL}/boards/${boardId}/columns`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(columnData),
-  }).then(res => res.json()),
+  }).then(handleResponse),
   
   updateColumn: (columnId, updateData) => fetch(`${API_BASE_URL}/columns/${columnId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updateData),
-  }).then(res => res.json()),
+  }).then(handleResponse),
   
-  deleteColumn: (columnId) => fetch(`${API_BASE_URL}/columns/${columnId}`, { method: 'DELETE' }).then(res => res.json()),
+  deleteColumn: (columnId) => fetch(`${API_BASE_URL}/columns/${columnId}`, { method: 'DELETE' }).then(handleResponse),
   
   reorderColumns: (boardId, columnIds) => fetch(`${API_BASE_URL}/boards/${boardId}/reorder-columns`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ columnIds }),
-  }).then(res => res.json()),
+  }).then(handleResponse),
 
   createCard: (columnId, cardData) => fetch(`${API_BASE_URL}/columns/${columnId}/cards`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(cardData),
-  }).then(res => res.json()),
+  }).then(handleResponse),
   updateCard: (cardId, updateData) => fetch(`${API_BASE_URL}/cards/${cardId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updateData),
-  }).then(res => res.json()),
+  }).then(handleResponse),
   
-  deleteCard: (cardId) => fetch(`${API_BASE_URL}/cards/${cardId}`, { method: 'DELETE' }).then(res => res.json()),
+  deleteCard: (cardId) => fetch(`${API_BASE_URL}/cards/${cardId}`, { method: 'DELETE' }).then(handleResponse),
   
   reorderCards: (boardId, cards) => fetch(`${API_BASE_URL}/boards/${boardId}/reorder-cards`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cards }),
-  }).then(res => res.json()),
+  }).then(handleResponse),
 
   // Función para crear un tablero por defecto si la BD está vacía
   createDefaultBoard: () => fetch(`${API_BASE_URL}/boards`, {
@@ -88,7 +100,7 @@ const onlineApi = {
         { title: 'Completado', color: '#66BB6A' },
       ],
     }),
-  }).then(res => res.json()),
+  }).then(handleResponse),
 };
 
 /**
@@ -98,11 +110,7 @@ const onlineApi = {
  */
 export const getApiService = (authMode) => {
   if (authMode === 'guest') {
-    // El localStorageService puede tener una exportación por defecto (`export default apiObject`)
-    // o exportaciones nombradas (`export const func1...`).
-    // `guestApi.default` cubre el primer caso, y el `|| guestApi` cubre el segundo.
-    // Esto hace que el código sea más robusto sin importar cómo esté estructurado localStorageService.js.
-    return guestApi.default || guestApi;
+    return guestApi;
   }
   // Para el modo online, devolvemos las funciones que usan fetch
   return onlineApi;

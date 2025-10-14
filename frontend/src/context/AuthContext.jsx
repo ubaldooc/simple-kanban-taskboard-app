@@ -28,8 +28,7 @@ export const AuthProvider = ({ children }) => {
   // Función para iniciar sesión
   const login = async (email, password) => {
     try {
-      // NOTA: Necesitarás crear esta ruta en tu backend
-      const response = await fetch('http://localhost:5001/api/auth/login', {
+      const response = await fetch('http://localhost:5001/api/auth/login', {  // BUSCA LA RUTA CORRECTA Y CAMBIALA
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

@@ -95,19 +95,23 @@ const api = {
 
   createBoard: async (boardData) => {
     const db = _getData();
+    const newId = `board-${crypto.randomUUID()}`;
     const newBoard = {
-      id: `board-${crypto.randomUUID()}`,
-      _id: `board-${crypto.randomUUID()}`, // Simula _id
+      id: newId,
+      _id: newId, // Simula _id, asegurando que sea el mismo que el id
       title: boardData.title,
       order: db.boards.length, // Se añade al final
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     db.boards.push(newBoard);
 
     // Si se envían columnas para crear, las creamos también
     const createdColumns = (boardData.columns || []).map((col, index) => {
+      const newColId = `col-${crypto.randomUUID()}`;
       const newCol = {
-        id: `col-${crypto.randomUUID()}`,
-        _id: `col-${crypto.randomUUID()}`,
+        id: newColId,
+        _id: newColId,
         boardId: newBoard.id,
         title: col.title,
         color: col.color,
@@ -125,7 +129,11 @@ const api = {
     const db = _getData();
     const boardIndex = db.boards.findIndex(b => b.id === boardId);
     if (boardIndex !== -1) {
-      db.boards[boardIndex] = { ...db.boards[boardIndex], ...updateData };
+      db.boards[boardIndex] = { 
+        ...db.boards[boardIndex], 
+        ...updateData,
+        updatedAt: new Date().toISOString(), // Actualiza el timestamp
+      };
       _saveData(db);
       return db.boards[boardIndex];
     }

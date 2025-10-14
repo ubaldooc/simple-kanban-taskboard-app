@@ -1,15 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { arrayMove } from '@dnd-kit/sortable';
+
 import { useAuth } from '../context/AuthContext';
 import { getApiService } from '../services/apiService';
+
+
 
 // --- Helper Functions ---
 
 export const useTaskboard = () => {
-  const { authMode } = useAuth();
-  const api = useMemo(() => getApiService(authMode), [authMode]);
-  // --- State Management ---
+  const { authMode } = useAuth();  // Obtengo la propiedad authMode de ente todas las cosas que devuelve useAuth.    useAuth devuelve un objeto value con varias propiedades, las propiedades son: user, token, authMode, login y logout.Es lo mismo que poner const modo = useAuth().authMode  .
+  const api = useMemo(() => getApiService(authMode), [authMode]); //Esta línea declara una constante api y le asigna un valor de online u offline dependiendo del valor de authMode. Este valor se usara para hacer las llamadas a la API. Si authMode cambia, se recalcula el valor de api.
+
+  // console.log(authMode);
+  // console.log(api);
+  
+  
+  // --- State Management ---  DEFINIMOS LOS ESTADOS PRINCIPALES
   const [boards, setBoards] = useState([]);
   const [activeBoardId, setActiveBoardIdState] = useState(null);
 
@@ -21,13 +29,12 @@ export const useTaskboard = () => {
   const [newBoardIdToEdit, setNewBoardIdToEdit] = useState(null);
   const [exitingItemIds, setExitingItemIds] = useState([]);
 
-  // --- Derived State ---    GUARDAR ESTADO
+  // --- Derived State ---    
   const activeBoard = boards.find(b => b.id === activeBoardId);
   const columns = activeBoard ? activeBoard.columns : [];
   const cards = activeBoard?.cards || [];
 
   // --- Effects ---
-
   // Carga los datos completos (columnas y tarjetas) de un tablero específico
   const fetchBoardDetails = async (boardId) => {
     if (!boardId) return;
@@ -35,6 +42,8 @@ export const useTaskboard = () => {
     try {
       // Usamos el servicio de API
       const detailedBoard = await api.getBoardDetails(boardId);
+      // console.log(detailedBoard);
+      
       if (!detailedBoard) throw new Error('No se pudieron cargar los detalles del tablero.');
 
       // --- ¡Solución! Ordenar las tarjetas en el frontend ---
@@ -78,13 +87,13 @@ export const useTaskboard = () => {
             // Aquí solo necesitamos obtener la lista de nuevo.
             const createdBoard = await api.createDefaultBoard();
             if (!createdBoard) throw new Error('No se pudo crear el tablero por defecto.');
-
+            
             // Transforma el tablero recién creado al formato del frontend
             finalBoardsData = [{
               ...createdBoard,
               id: createdBoard._id,
-              columns: [], // Se cargarán bajo demanda
-              cards: [],
+              columns: (createdBoard.columns || []).map(col => ({ ...col, id: col._id })),
+              cards: (createdBoard.cards || []).map(card => ({ ...card, id: card._id })),
             }];
 
           } catch (creationError) {
@@ -109,8 +118,10 @@ export const useTaskboard = () => {
 
         // Establece el tablero activo y carga sus detalles
         if (idToLoad) {
+          // Llamamos a setActiveBoardId para guardar la preferencia.
           setActiveBoardId(idToLoad);
-          fetchBoardDetails(idToLoad); // Carga los detalles del tablero activo
+          // Y cargamos los detalles directamente aquí para evitar condiciones de carrera.
+          fetchBoardDetails(idToLoad);
         }
       } catch (error) {
         console.error("Error al cargar los tableros:", error);
@@ -125,13 +136,12 @@ export const useTaskboard = () => {
 
   useEffect(() => {
     // Cargar detalles cuando el tablero activo cambia y no tiene columnas cargadas
-    if (activeBoard && activeBoard.columns.length === 0) {
-      // Evita recargar si es un tablero nuevo temporal
-      if (!activeBoard.id.startsWith('temp-')) {
-        fetchBoardDetails(activeBoard.id);
-      }
+    // Esta lógica se ha movido al useEffect principal para mayor robustez.
+    // Mantenemos este efecto para otros casos, pero la carga inicial ya no depende de él.
+    if (activeBoard && activeBoard.columns.length === 0 && !activeBoard.id.startsWith('temp-')) {
+      fetchBoardDetails(activeBoard.id);
     }
-  }, [activeBoardId]); // Se dispara cuando cambia el ID del tablero activo
+  }, [activeBoard]); // Dependemos de `activeBoard` directamente, es más seguro que `activeBoardId`.
 
   // Efecto para validar el activeBoardId cuando los tableros cambian
   useEffect(() => {
