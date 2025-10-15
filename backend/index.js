@@ -28,14 +28,6 @@ const startServer = async () => {
     await mongoose.connect(MONGO_URI);
     console.log('Conectado a MongoDB exitosamente.');
 
-    // Simulación de usuario: Asegurarse de que nuestro usuario de prueba exista.
-    const userExists = await User.findOne({ name: 'Default User' });
-    if (!userExists) {
-      const defaultUser = new User({ name: 'Default User' });
-      await defaultUser.save();
-      console.log('Usuario de prueba creado.');
-    }
-
     app.listen(port, () => {
       console.log(`Servidor escuchando en http://localhost:${port}`);
     });

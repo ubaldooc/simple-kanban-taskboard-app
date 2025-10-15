@@ -77,39 +77,14 @@ export const useTaskboard = () => {
           api.getUserPreferences()
         ]);
 
-        let finalBoardsData = boardsData;
-
-        // Si la base de datos está vacía, crea un tablero por defecto en el backend
-        if (finalBoardsData.length === 0) {
-          try {
-            // La lógica para crear el tablero por defecto ya está en localStorageService
-            // y la hemos replicado en la api online.
-            // Aquí solo necesitamos obtener la lista de nuevo.
-            const createdBoard = await api.createDefaultBoard();
-            if (!createdBoard) throw new Error('No se pudo crear el tablero por defecto.');
-            
-            // Transforma el tablero recién creado al formato del frontend
-            finalBoardsData = [{
-              ...createdBoard,
-              id: createdBoard._id,
-              columns: (createdBoard.columns || []).map(col => ({ ...col, id: col._id })),
-              cards: (createdBoard.cards || []).map(card => ({ ...card, id: card._id })),
-            }];
-
-          } catch (creationError) {
-            console.error("Error al crear el tablero por defecto:", creationError);
-            toast.error(creationError.message);
-          }
-        } else {
-          // Transforma los datos del backend (_id) al formato del frontend (id)
-          finalBoardsData = finalBoardsData.map(board => ({
-            ...board,
-            id: board._id, // El _id viene por defecto
-            // Inicializamos columns y cards como arrays vacíos. Se cargarán bajo demanda.
-            columns: [],
-            cards: [],
-          }));
-        }
+        // Transforma los datos del backend (_id) al formato del frontend (id)
+        const finalBoardsData = boardsData.map(board => ({
+          ...board,
+          id: board._id, // El _id viene por defecto
+          // Inicializamos columns y cards como arrays vacíos. Se cargarán bajo demanda.
+          columns: [],
+          cards: [],
+        }));
 
         setBoards(finalBoardsData);
 

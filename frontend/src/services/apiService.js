@@ -88,19 +88,6 @@ const onlineApi = {
     body: JSON.stringify({ cards }),
   }).then(handleResponse),
 
-  // Función para crear un tablero por defecto si la BD está vacía
-  createDefaultBoard: () => fetch(`${API_BASE_URL}/boards`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      title: 'Mi Primer Tablero',
-      columns: [
-        { title: 'Tareas por hacer', color: '#42A5F5', cards: [{ title: '¡Bienvenido a tu nuevo tablero!' }] },
-        { title: 'En proceso', color: '#FFA726' },
-        { title: 'Completado', color: '#66BB6A' },
-      ],
-    }),
-  }).then(handleResponse),
 };
 
 /**

@@ -32,7 +32,7 @@ const _getData = () => {
     console.error("Error al leer desde localStorage:", error);
   }
   // Devuelve una estructura por defecto si no hay nada o hay un error
-  return { boards: [], columns: [], cards: [], preferences: {} };
+  return { boards: [], columns: [], cards: [], preferences: { lastActiveBoardId: null } };
 };
 
 /**
@@ -66,7 +66,7 @@ const api = {
   // --- Tableros (Boards) ---
   getBoardsList: async () => {
     const db = _getData();
-    // Devuelve solo la lista de tableros, ordenados por su campo 'order'
+    // Devuelve la lista de tableros ordenada. Si no hay, devuelve un array vacío.
     return [...db.boards].sort((a, b) => a.order - b.order);
   },
 
@@ -252,28 +252,6 @@ const api = {
     });
     _saveData(db);
     return { message: 'Orden de tarjetas actualizado' };
-  },
-
-  // --- Funciones especiales ---
-  createDefaultBoard: async () => {
-    const boardData = {
-      title: 'Mi Primer Tablero',
-      columns: [
-        { title: 'Tareas por hacer', color: '#42A5F5' },
-        { title: 'En proceso', color: '#FFA726' },
-        { title: 'Completado', color: '#66BB6A' },
-      ],
-    };
-    const createdBoard = await api.createBoard(boardData);
-    
-    // Añadir una tarjeta de bienvenida
-    const firstColumnId = createdBoard.columns[0]?.id;
-    if (firstColumnId) {
-      await api.createCard(firstColumnId, { title: '¡Bienvenido a tu nuevo tablero!' });
-    }
-
-    // Recargamos los detalles para devolver todo completo
-    return api.getBoardDetails(createdBoard.id);
   },
 };
 
