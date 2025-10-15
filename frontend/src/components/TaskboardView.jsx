@@ -84,17 +84,6 @@ export const TaskboardView = () => {
     },
   }), [boards, activeBoardId, addColumn, setActiveBoardId]);
 
-  useHotkeys(hotkeys, [boards, activeBoardId]);
-  if (!activeBoard) {
-    return (
-      <div className="task-board-container">
-        <header className="task-board-header">
-          <h1>No hay tableros</h1>
-          <button onClick={addBoard}>Crear un tablero</button>
-        </header>
-      </div>
-    );
-  }
 
   if (isLoading) {
       return (
@@ -188,11 +177,13 @@ export const TaskboardView = () => {
             />
           )}
 
-          <div className="add-column-container">
-            <div className="add-column-btn" onClick={addColumn}>
-              <i className="fas fa-plus"></i> Añadir otra lista
+          {activeBoard && (
+            <div className="add-column-container">
+              <div className="add-column-btn" onClick={addColumn}>
+                <i className="fas fa-plus"></i> Añadir otra lista
+              </div>
             </div>
-          </div>
+          )}
         </main>
 
         <footer className="task-board-footer">

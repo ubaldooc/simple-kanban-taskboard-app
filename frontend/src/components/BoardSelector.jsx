@@ -128,6 +128,17 @@ const BoardSelector = () => {
     setIsOpen(false);
   };
 
+  // Si no hay tableros, muestra un botón para crear el primero.
+  if (boards.length === 0) {
+    return (
+      <div className="board-selector">
+        <button className="create-first-board-btn" onClick={addBoard}>
+          <i className="fas fa-plus"></i> Crear primer tablero
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="board-selector" ref={selectorRef}>
       <div className="board-selector-active" onClick={() => setIsOpen(!isOpen)}>
