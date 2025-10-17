@@ -161,7 +161,7 @@ const BoardSelector = () => {
                   onSelect={handleSelect}
                   onStartEditing={startEditing}
                   onDelete={handleDelete}
-                  canDelete={boards.length > 1}
+                  canDelete={true}
                 />
               ))}
             </SortableContext>
@@ -174,7 +174,7 @@ const BoardSelector = () => {
               <SortableBoardItem
                 board={activeDragItem}
                 isDragging={true}
-                canDelete={boards.length > 1}
+                canDelete={true}
               />
             ) : null}
           </DragOverlay>
