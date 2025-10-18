@@ -40,8 +40,10 @@ const BoardSchema = new Schema({
 // --- User Schema ---
 // Representa a un usuario de la aplicación.
 const UserSchema = new Schema({
-  // En una app real, aquí irían email, password hash, etc.
   name: { type: String, required: true },
+  email: { type: String, unique: true, sparse: true }, // Asegura que el email sea único, pero permite nulos
+  googleId: { type: String, unique: true, sparse: true }, // ID único de Google, permite nulos
+  picture: { type: String }, // URL de la imagen de perfil de Google
   // Referencia al último tablero que el usuario tuvo activo.
   lastActiveBoard: { type: Schema.Types.ObjectId, ref: 'Board', default: null },
 }, { timestamps: true });

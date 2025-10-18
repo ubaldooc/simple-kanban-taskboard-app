@@ -3,6 +3,10 @@ import 'dotenv/config'; // Carga las variables de entorno desde .env
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+
+import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken'; 
+
 import { Board, Column, Card, User } from './src/models/models.js';
 
 // --- Configuración inicial ---
@@ -640,3 +644,67 @@ app.delete('/api/cards/:id', async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al eliminar la tarjeta.' });
   }
 });
+
+
+
+// --- Google OAuth2 Authentication Route PARA INICIAR SESION CON GOOGLE ---
+
+// Configura el cliente de Google OAuth2
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// POST /api/auth/google - Inicia sesión o registra un usuario con Google
+app.post('/api/auth/google', async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    return res.status(400).json({ message: 'ID Token de Google es requerido.' });
+  }
+
+  try {
+    // 1. Verificar el ID Token de Google
+    const ticket = await client.verifyIdToken({
+      idToken: idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // 2. Buscar o crear el usuario en la base de datos
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (!user) {
+      // Si no existe, crea un nuevo usuario
+      user = new User({
+        name: name || 'Usuario de Google',
+        email,
+        googleId,
+        picture,
+      });
+      await user.save();
+    } else if (!user.googleId) {
+      // Si el usuario existe por email pero no tiene googleId, lo actualiza
+      user.googleId = googleId;
+      user.picture = picture;
+      await user.save();
+    }
+
+    // 3. Generar un JWT para el usuario
+    const token = jwt.sign(
+      { userId: user._id, name: user.name, email: user.email, authMode: 'online' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' } // El token expira en 1 hora
+    );
+
+    res.status(200).json({ message: 'Inicio de sesión exitoso con Google.', token, user: { id: user._id, name: user.name, email: user.email, picture: user.picture } });
+
+  } catch (error) {
+    console.error('Error al verificar el ID Token de Google o al procesar el usuario:', error);
+    res.status(401).json({ message: 'Autenticación de Google fallida.' });
+  }
+});
+
+
+
+
+
+
