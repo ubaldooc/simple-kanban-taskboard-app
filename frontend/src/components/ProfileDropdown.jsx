@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import profileImage from '../assets/profile.png';
 
-const ProfileDropdown = () => {
+const ProfileDropdown = ({ isOnline = true }) => { // Asumimos online por defecto
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -29,12 +29,19 @@ const ProfileDropdown = () => {
             <img src={profileImage} alt="User Avatar" className="avatar-large" />
             <div className="user-info">
               <strong>Ubaldo Ocampo</strong>
-              <span>ubaldooc@gmail.com</span>
+              {isOnline && <span>ubaldooc@gmail.com</span>}
             </div>
+            <ul className="google-login-section">
+              <li>
+                <button className="google-login-button">
+                  <span className="google-icon"></span>
+                  Iniciar sesión con Google
+                </button>
+              </li>
+            </ul>
           </div>
           <hr className="dropdown-divider" />
           <ul>
-            <li><i className="fab fa-google"></i> Iniciar sesión con Google</li>
             <li><i className="fas fa-moon"></i> Modo oscuro</li>
           </ul>
           <hr className="dropdown-divider" />
