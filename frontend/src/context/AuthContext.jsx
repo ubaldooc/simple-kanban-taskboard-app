@@ -8,36 +8,33 @@ const AuthContext = createContext();
 
 // 2. Crear el componente Proveedor del contexto
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token')); // Carga inicial del token
+  // Al iniciar, intentamos cargar el usuario desde localStorage
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  // Ya no necesitamos manejar el token en el estado, el navegador lo gestiona.
+  // Mantenemos un estado simple para saber si estamos autenticados.
   const [authMode, setAuthMode] = useState('guest');
 
-  // Efecto que se ejecuta cuando el token cambia. Es el cerebro de la autenticación.
+  // Efecto que se ejecuta cuando el estado del usuario cambia.
   useEffect(() => {
-    if (token) {
-      try {
-        // Decodificamos el token para obtener la información del usuario
-        const decoded = jwtDecode(token);
-        // El ID es lo más importante que extraemos del token al recargar.
-        // El resto de la info (name, picture) se establecerá durante el login inicial.
-        // Opcional: podrías tener un endpoint /api/me para refrescar los datos del usuario.
-        setUser(prevUser => ({ ...prevUser, id: decoded.userId }));
-      } catch (error) {
-        console.error("Error decodificando el token:", error);
-        setToken(null); // Si el token es inválido, lo eliminamos
-      }
-      localStorage.setItem('token', token); // Guarda/actualiza el token en localStorage
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
       setAuthMode('online');
     } else {
-      localStorage.removeItem('token');
-      setUser(null);
+      localStorage.removeItem('user');
       setAuthMode('guest');
     }
-  }, [token]); // Este efecto se dispara cada vez que el 'token' cambia
+  }, [user]); // Este efecto se dispara cada vez que el 'user' cambia
 
   // Función para iniciar sesión
   const login = async (email, password) => {
-    try {
+    try { // NOTA: Esta ruta no existe actualmente en tu backend.
       const response = await fetch('http://localhost:5001/api/auth/login', {  // BUSCA LA RUTA CORRECTA Y CAMBIALA
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,10 +47,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      
-      // Al recibir el token, el useEffect de arriba se encargará de cambiar el modo
-      setToken(data.token); 
-      
+      // El backend establece la cookie, aquí solo actualizamos el usuario
+      setUser(data.user);
       return { success: true };
     } catch (error) {
       console.error("Error en el login:", error);
@@ -67,14 +62,15 @@ export const AuthProvider = ({ children }) => {
     onSuccess: async (codeResponse) => {
       try {
         const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
-        const { data } = await axios.post(apiUrl, {
-          code: codeResponse.code,
-        });
+        // Es importante incluir 'withCredentials: true' para que axios envíe y reciba cookies
+        const { data } = await axios.post(apiUrl, 
+          { code: codeResponse.code },
+          { withCredentials: true }
+        );
         
-        // El backend nos devuelve el usuario completo y el token.
-        // Actualizamos nuestro estado global.
+        // El backend ya estableció la cookie del token.
+        // Aquí solo necesitamos guardar el objeto de usuario en el estado.
         setUser(data.user);
-        setToken(data.token);
         
       } catch (error) {
         console.error('Error en el inicio de sesión con Google:', error);
@@ -85,14 +81,13 @@ export const AuthProvider = ({ children }) => {
 
   // Función para cerrar sesión
   const logout = () => {
-    // Al poner el token a null, el useEffect se encargará de cambiar el modo a 'guest'
-    setToken(null);
+    // TODO: Crear un endpoint en el backend para limpiar la cookie, ej: /api/auth/logout
+    setUser(null); // Esto limpiará el estado y localStorage en el frontend
   };
 
   // 3. Valores que se expondrán a los componentes hijos
   const value = {
     user,
-    token,
     authMode,
     login,
     logout,

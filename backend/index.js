@@ -3,6 +3,7 @@ import 'dotenv/config'; // Carga las variables de entorno desde .env
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
 
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken'; 
@@ -19,8 +20,12 @@ const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboard2';
 
 
 // Middleware para habilitar CORS
-app.use(cors());
-
+// Es crucial configurar CORS para que acepte credenciales (cookies) desde tu frontend
+app.use(cors({
+  origin: 'http://localhost:5173', // La URL de tu frontend
+  credentials: true,
+}));
+app.use(cookieParser()); // Usa el middleware para parsear cookies
 // Middleware para analizar el cuerpo de las peticiones en formato JSON
 app.use(express.json());
 
@@ -647,6 +652,9 @@ app.delete('/api/cards/:id', async (req, res) => {
 
 
 
+
+
+
 // --- Google OAuth2 Authentication Route PARA INICIAR SESION CON GOOGLE ---
 // Configura el cliente de Google OAuth2 para el flujo de código de autorización
 const oAuth2Client = new OAuth2Client(
@@ -703,7 +711,19 @@ app.post('/api/auth/google', async (req, res) => {
       { expiresIn: '1h' } // El token expira en 1 hora
     );
 
-    res.status(200).json({ message: 'Inicio de sesión exitoso con Google.', token, user: { id: user._id, name: user.name, email: user.email, picture: user.picture } });
+    // 5. Enviar el token en una cookie HttpOnly y los datos del usuario en el cuerpo
+    res.cookie('token', token, {
+      httpOnly: true, // La cookie no es accesible por JavaScript
+      secure: process.env.NODE_ENV === 'production', // Solo enviar por HTTPS en producción
+      sameSite: 'strict', // Mitiga ataques CSRF
+      maxAge: 24 * 60 * 60 * 1000, // 1 día de expiración
+    });
+
+    // Ya no enviamos el token en el cuerpo de la respuesta
+    res.status(200).json({ 
+      message: 'Inicio de sesión exitoso con Google.', 
+      user: { id: user._id, name: user.name, email: user.email, picture: user.picture } 
+    });
 
   } catch (error) {
     console.error('Error durante la autenticación con Google:', error);
