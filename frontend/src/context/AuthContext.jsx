@@ -1,5 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode'; // Necesitarás instalar 'jwt-decode'
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 // 1. Crear el contexto
 const AuthContext = createContext();
@@ -15,13 +17,11 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         // Decodificamos el token para obtener la información del usuario
-        const decodedUser = jwtDecode(token);
-        setUser({
-          id: decodedUser.userId,
-          name: decodedUser.name,
-          email: decodedUser.email,
-          picture: decodedUser.picture, // Asumiendo que lo incluyes en el JWT
-        });
+        const decoded = jwtDecode(token);
+        // El ID es lo más importante que extraemos del token al recargar.
+        // El resto de la info (name, picture) se establecerá durante el login inicial.
+        // Opcional: podrías tener un endpoint /api/me para refrescar los datos del usuario.
+        setUser(prevUser => ({ ...prevUser, id: decoded.userId }));
       } catch (error) {
         console.error("Error decodificando el token:", error);
         setToken(null); // Si el token es inválido, lo eliminamos
@@ -62,27 +62,26 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Función para iniciar sesión con Google
-  const loginWithGoogle = async (idToken) => {
-    try {
-      const response = await fetch('http://localhost:5001/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al iniciar sesión con Google');
+  const loginWithGoogle = useGoogleLogin({
+    flow: 'auth-code',
+    onSuccess: async (codeResponse) => {
+      try {
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+        const { data } = await axios.post(apiUrl, {
+          code: codeResponse.code,
+        });
+        
+        // El backend nos devuelve el usuario completo y el token.
+        // Actualizamos nuestro estado global.
+        setUser(data.user);
+        setToken(data.token);
+        
+      } catch (error) {
+        console.error('Error en el inicio de sesión con Google:', error);
       }
-
-      const data = await response.json();
-      setToken(data.token); // Al actualizar el token, el useEffect se encargará del resto
-      return { success: true };
-    } catch (error) {
-      console.error("Error en el login con Google:", error);
-      return { success: false, message: error.message };
-    }
-  };
+    },
+    onError: (error) => console.error('Fallo en el login de Google:', error),
+  });
 
   // Función para cerrar sesión
   const logout = () => {

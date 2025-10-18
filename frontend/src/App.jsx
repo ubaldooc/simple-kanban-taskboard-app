@@ -1,12 +1,15 @@
 import React from 'react';
 import { TaskboardProvider } from './context/TaskboardContext.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
 import { TaskboardView } from './components/TaskboardView';
 
 function App() {
   return (
-    <TaskboardProvider>
-      <TaskboardView />
-    </TaskboardProvider>
+    <AuthProvider>
+      <TaskboardProvider>
+        <TaskboardView />
+      </TaskboardProvider>
+    </AuthProvider>
   );
 }
 
