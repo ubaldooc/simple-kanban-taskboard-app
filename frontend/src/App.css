@@ -61,8 +61,7 @@ body {
 }
 
 .task-board-header {
-    background-color: rgba(0, 0, 0, 0.4);
-    background-color: rgb(0, 0, 0);
+    background-color: rgb(0, 0, 0); /* background-color: rgba(0, 0, 0, 0.4); */
     padding: 15px 20px;
     height: 48px;
     display: flex;
@@ -327,8 +326,7 @@ div.column-title-input:focus {
 
 
 .add-card {
-    background-color: rgba(255, 255, 255, 0.05);
-    background-color: rgba(116, 116, 116, 0.726);
+    background-color: rgba(116, 116, 116, 0.726); /* background-color: rgba(255, 255, 255, 0.05); */
     border-radius: 6px;
     padding: 12px;
     text-align: center;
@@ -345,8 +343,7 @@ div.column-title-input:focus {
 }
 
 .add-card:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    background-color: rgba(173, 173, 173, 0.801);
+    background-color: rgba(173, 173, 173, 0.801); /* background-color: rgba(255, 255, 255, 0.1); */
 }
 
 .add-column-container {
@@ -627,22 +624,6 @@ div.column-title-input:focus {
     animation: item-exit 0.4s ease-in forwards;
 }
 
-/* --- Animación de entrada para nuevos elementos --- */
-@keyframes item-enter {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-.item-enter-animation {
-    animation: item-enter 0.3s ease-out;
-}
-
 .add-board-option {
     cursor: pointer;
     /* font-style: italic; */
@@ -913,13 +894,13 @@ div.column-title-input:focus {
     margin: 0;
 }
 
-.profile-dropdown-menu li {
+.profile-dropdown-menu li, .google-login-section {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 8px 16px;
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.9em;    
     transition: background-color 0.2s;
 }
 
@@ -937,14 +918,11 @@ div.column-title-input:focus {
     /* margin: 8px 0; */
 }
 
-/* Estilos para ProfileDropdown */
+/* --- Estilos para Autenticación --- */
 .google-login-section {
-  padding: 8px 0;
   list-style: none;
-  margin: 0;
-  width: 100%;
+  padding: 8px 16px;
 }
-
 .google-login-button {
   display: flex;
   align-items: center;
@@ -965,7 +943,7 @@ div.column-title-input:focus {
 }
 
 .google-login-button:hover {
-  background-color: #f8f9fa;
+  background-color: #f8f9fa; /* Un gris más claro, recomendado por Google */
   box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
 }
 

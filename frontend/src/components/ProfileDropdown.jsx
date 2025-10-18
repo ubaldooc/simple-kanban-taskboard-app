@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import profileImage from '../assets/profile.png';
 
-const ProfileDropdown = ({ isOnline = false }) => { // Por defecto, asumimos offline
+const ProfileDropdown = ({ isOnline = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
