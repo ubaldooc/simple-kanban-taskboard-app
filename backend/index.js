@@ -648,49 +648,57 @@ app.delete('/api/cards/:id', async (req, res) => {
 
 
 // --- Google OAuth2 Authentication Route PARA INICIAR SESION CON GOOGLE ---
+// Configura el cliente de Google OAuth2 para el flujo de código de autorización
+const oAuth2Client = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  'postmessage' // Requerido por Google para este flujo seguro
+);
 
-// Configura el cliente de Google OAuth2
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-// POST /api/auth/google - Inicia sesión o registra un usuario con Google
+// POST /api/auth/google - Maneja el inicio de sesión/registro con el código de Google
 app.post('/api/auth/google', async (req, res) => {
-  const { idToken } = req.body;
-
-  if (!idToken) {
-    return res.status(400).json({ message: 'ID Token de Google es requerido.' });
-  }
-
   try {
-    // 1. Verificar el ID Token de Google
-    const ticket = await client.verifyIdToken({
-      idToken: idToken,
+    const { code } = req.body;
+    if (!code) {
+      return res.status(400).json({ message: 'El código de autorización de Google es requerido.' });
+    }
+
+    // 1. Intercambiar el código de autorización por tokens de acceso e ID
+    const { tokens } = await oAuth2Client.getToken(code);
+    const { id_token } = tokens;
+
+    // 2. Verificar el ID Token para obtener la información del usuario de forma segura
+    const ticket = await oAuth2Client.verifyIdToken({
+      idToken: id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    const payload = ticket.getPayload();
-    const { sub: googleId, email, name, picture } = payload;
+    const profile = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = profile;
 
-    // 2. Buscar o crear el usuario en la base de datos
+    // 3. Buscar si el usuario ya existe en la base de datos (por email o googleId)
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
 
     if (!user) {
-      // Si no existe, crea un nuevo usuario
+      // Si no existe, crea un nuevo usuario con los datos de Google
       user = new User({
         name: name || 'Usuario de Google',
         email,
         googleId,
         picture,
       });
-      await user.save();
     } else if (!user.googleId) {
-      // Si el usuario existe por email pero no tiene googleId, lo actualiza
+      // Si el usuario ya existía (p.ej. se registró con email/pass) pero ahora usa Google,
+      // vinculamos la cuenta actualizando su googleId y foto.
       user.googleId = googleId;
       user.picture = picture;
-      await user.save();
     }
+    // Guardar el usuario (sea nuevo o actualizado)
+    await user.save();
 
-    // 3. Generar un JWT para el usuario
+    // 4. Generar un JWT (Token de Sesión) para nuestra aplicación
     const token = jwt.sign(
-      { userId: user._id, name: user.name, email: user.email, authMode: 'online' },
+      // El payload del token debe ser ligero. El ID del usuario es suficiente.
+      { userId: user._id },
       process.env.JWT_SECRET,
       { expiresIn: '1h' } // El token expira en 1 hora
     );
@@ -698,13 +706,7 @@ app.post('/api/auth/google', async (req, res) => {
     res.status(200).json({ message: 'Inicio de sesión exitoso con Google.', token, user: { id: user._id, name: user.name, email: user.email, picture: user.picture } });
 
   } catch (error) {
-    console.error('Error al verificar el ID Token de Google o al procesar el usuario:', error);
+    console.error('Error durante la autenticación con Google:', error);
     res.status(401).json({ message: 'Autenticación de Google fallida.' });
   }
 });
-
-
-
-
-
-
