@@ -54,8 +54,8 @@ const LoginPage = () => {
           <span>O</span>
         </div>
 
-        <button onClick={() => loginWithGoogle()} className="google-button">
-          <i className="fab fa-google"></i>
+        <button onClick={() => loginWithGoogle()} className="google-login-button">
+          <span className="google-icon"></span>
           <span>Iniciar Sesión con Google</span>
         </button>
       </div>
