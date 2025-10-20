@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import profileImage from '../assets/profile.png';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { user, authMode, loginWithGoogle, logout } = useAuth();
+  const { user, authMode, logout } = useAuth();
+  const navigate = useNavigate();
 
   const isOnline = authMode === 'online';
   
+  const handleLoginRedirect = () => {
+    navigate('/login');
+    setIsOpen(false);
+  };
+
   const handleLogout = () => {
     logout();
     setIsOpen(false); // Cerramos el dropdown
@@ -72,9 +79,9 @@ const ProfileDropdown = () => {
             <hr className="dropdown-divider" />
               <ul className="google-login-section">
                 <li>
-                  <button className="google-login-button" onClick={() => loginWithGoogle()}>
-                    <span className="google-icon"></span>
-                    Iniciar sesión con Google
+                  <button className="dropdown-action-button" onClick={handleLoginRedirect}>
+                    <i className="fas fa-sign-in-alt"></i>
+                    Iniciar sesión
                   </button>
                 </li>
               </ul>

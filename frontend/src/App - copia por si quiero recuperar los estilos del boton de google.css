@@ -908,8 +908,7 @@ div.column-title-input:focus {
     background-color: #21262d;
 }
 
-/* Aplica estilo solo a los iconos que son hijos directos de un <li> (no dentro de un botón) */
-.profile-dropdown-menu li > i {
+.profile-dropdown-menu li i {
     width: 16px; /* Alinea los iconos */
     text-align: center;
     color: #8b949e;
@@ -957,46 +956,6 @@ div.column-title-input:focus {
   background-repeat: no-repeat;
   background-position: center;
 }
-
-
-
-
-
-
-
-
-
-/* Estilos para el botón de acción en el dropdown */
-.dropdown-action-button {
-    width: 100%;
-    padding: 10px 12px;
-    border: none;
-    border-radius: 6px;
-    background-color: #2ea44f; /* Un verde atractivo */
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
-  }
-  
-  .dropdown-action-button:hover {
-    background-color: #2c974b; /* Un verde ligeramente más oscuro al pasar el ratón */
-  }
-  
-  .dropdown-action-button:active {
-    transform: scale(0.98); /* Efecto de clic */
-  }
-  
-  /* Asegura que el icono dentro del botón de acción sea blanco */
-  .dropdown-action-button i {
-    color: white;
-  }
-  
 
 
 

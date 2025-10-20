@@ -1,25 +1,60 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import './LoginPage.css'; // Estilos para el formulario
+import logoImage from '../assets/logo.png'; // Importamos el logo
 
 const LoginPage = () => {
-  const { user, loginWithGoogle } = useAuth();
+  const { user, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   // Si el usuario ya está logueado (p.ej. por una sesión previa guardada),
   // lo redirigimos inmediatamente al dashboard principal para que no vea el login.
   useEffect(() => {
     if (user) {
-      navigate('/', { replace: true });
+      // Redirige a la página anterior o a la principal
+      navigate(-1, { replace: true });
     }
   }, [user, navigate]);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    // NOTA: La ruta para este login aún no existe en tu backend.
+    // Deberás crearla para que esta funcionalidad sea completa.
+    const result = await login(email, password);
+    if (!result.success) {
+      setError(result.message || 'Error al iniciar sesión.');
+    }
+  };
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', background: '#f0f2f5' }}>
-      <div style={{ padding: '40px', background: 'white', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', textAlign: 'center' }}>
-        <h1>Bienvenido al Taskboard</h1>
-        <p style={{ marginBottom: '24px', color: '#666' }}>Por favor, inicia sesión para continuar.</p>
-        <button onClick={() => loginWithGoogle()} style={{ padding: '12px 24px', fontSize: '16px', cursor: 'pointer', border: 'none', background: '#4285F4', color: 'white', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="login-page-container">
+      <div className="login-box">
+        <img src={logoImage} alt="Taskboard Logo" className="login-logo" />
+        <h1>Iniciar Sesión</h1>
+        
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="email">Correo Electrónico</label>
+            <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          <button type="submit" className="submit-button">Iniciar Sesión</button>
+        </form>
+
+        <div className="divider">
+          <span>O</span>
+        </div>
+
+        <button onClick={() => loginWithGoogle()} className="google-button">
           <i className="fab fa-google"></i>
           <span>Iniciar Sesión con Google</span>
         </button>

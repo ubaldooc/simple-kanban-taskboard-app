@@ -114,6 +114,7 @@ export const TaskboardView = () => {
             },
           }}
         />
+
         <header className="task-board-header">
           <div className="header-left">
             <img src={logoImage} alt="Taskboard Logo" className="header-logo" />
