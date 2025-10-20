@@ -31,7 +31,7 @@
 
 .form-section {
   width: 50%; /* Cada formulario ocupa la mitad del contenedor */
-  padding: 40px;
+  padding: 20px 35px; /* Hacemos el padding más compacto */
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -39,21 +39,21 @@
 
 .login-logo {
   width: 60px;
-  height: 60px;
-  margin-bottom: 1rem;
+  height: auto;
+  margin-bottom: 12px; /* Reducimos el margen */
   align-self: center; /* Centra el logo dentro del flex container */
 }
 
 .login-box h1 {
-  font-size: 1.8rem;
+  font-size: 1.7rem; /* Reducimos ligeramente el título */
   color: #24292e;
-  margin-bottom: 24px;
+  margin-bottom: 16px; /* Reducimos el margen */
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px; /* Hacemos el gap más pequeño */
   text-align: left;
 }
 
@@ -135,7 +135,7 @@
 }
 
 .divider {
-  margin: 24px 0;
+  margin: 16px 0; /* Hacemos el divisor más compacto */
   display: flex;
   align-items: center;
   text-align: center;
@@ -157,7 +157,7 @@
 }
 
 .auth-switch {
-  padding: 20px;
+  padding: 12px 20px; /* Reducimos el padding del pie */
   font-size: 14px;
   color: #586069;
   background-color: #f6f8fa;
