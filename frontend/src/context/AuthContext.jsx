@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Necesitarás instalar 'jwt-decode'
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
@@ -34,25 +33,22 @@ export const AuthProvider = ({ children }) => {
 
   // Función para iniciar sesión
   const login = async (email, password) => {
-    try { // NOTA: Esta ruta no existe actualmente en tu backend.
-      const response = await fetch('http://localhost:5001/api/auth/login', {  // BUSCA LA RUTA CORRECTA Y CAMBIALA
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Credenciales incorrectas');
-      }
-
-      const data = await response.json();
+    try {
+      // NOTA: Esta ruta no existe actualmente en tu backend. BUSCA LA RUTA CORRECTA Y CAMBIALA
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`;
+      const { data } = await axios.post(apiUrl, 
+        { email, password },
+        { withCredentials: true } // Importante si usas cookies para la sesión
+      );
+      
       // El backend establece la cookie, aquí solo actualizamos el usuario
       setUser(data.user);
       return { success: true };
     } catch (error) {
+      // El manejo de errores de Axios es un poco diferente
       console.error("Error en el login:", error);
-      return { success: false, message: error.message };
+      const message = error.response?.data?.message || error.message || 'Credenciales incorrectas';
+      return { success: false, message };
     }
   };
 
@@ -61,7 +57,9 @@ export const AuthProvider = ({ children }) => {
     flow: 'auth-code',
     onSuccess: async (codeResponse) => {
       try {
-        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+        // const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
+        const apiUrl = `http://localhost:5001/api/auth/google`;
+
         // Es importante incluir 'withCredentials: true' para que axios envíe y reciba cookies
         const { data } = await axios.post(apiUrl, 
           { code: codeResponse.code },
@@ -73,16 +71,30 @@ export const AuthProvider = ({ children }) => {
         setUser(data.user);
         
       } catch (error) {
-        console.error('Error en el inicio de sesión con Google:', error);
+        // Este console.log mejorado te dará más detalles si la petición al backend falla
+        if (error.response) {
+          console.error('Error de respuesta del servidor:', error.response.status, error.response.data);
+        } else if (error.request) {
+          console.error('La petición fue hecha pero no se recibió respuesta (¿backend caído o CORS?):', error.request);
+        } else {
+          console.error('Error al configurar la petición:', error.message);
+        }
       }
     },
     onError: (error) => console.error('Fallo en el login de Google:', error),
   });
 
   // Función para cerrar sesión
-  const logout = () => {
-    // TODO: Crear un endpoint en el backend para limpiar la cookie, ej: /api/auth/logout
-    setUser(null); // Esto limpiará el estado y localStorage en el frontend
+  const logout = async () => {
+    try {
+      // Asegúrate que la ruta en tu backend sea consistente (ej. /api/auth/logout)
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
+      await axios.post(apiUrl, {}, { withCredentials: true });
+    } catch (error) {
+      console.error('Error durante el cierre de sesión:', error);
+    } finally {
+      setUser(null); // Limpia el estado del frontend independientemente del resultado del backend
+    }
   };
 
   // 3. Valores que se expondrán a los componentes hijos

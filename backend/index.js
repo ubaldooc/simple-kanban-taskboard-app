@@ -13,16 +13,16 @@ import { Board, Column, Card, User } from './src/models/models.js';
 // --- Configuración inicial ---
 // Crea una instancia de la aplicación de Express
 const app = express();
-// Usa el puerto del .env o 5001 como valor por defecto
-const port =  5001;
-// Usa la URI de MongoDB del .env o una local como valor por defecto
-const MONGO_URI = 'mongodb://localhost:27017/mi_app_taskboard2';
+// Usa el puerto del .env o 5001 como valor por defecto. Asegúrate de que PORT esté en tu .env
+const port = process.env.PORT || 5001;
+// Usa la URI de MongoDB del .env. Asegúrate de que MONGO_URI esté en tu .env
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mi_app_taskboard2';
 
 
 // Middleware para habilitar CORS
 // Es crucial configurar CORS para que acepte credenciales (cookies) desde tu frontend
 app.use(cors({
-  origin: 'http://localhost:5173', // La URL de tu frontend
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // La URL de tu frontend
   credentials: true,
 }));
 app.use(cookieParser()); // Usa el middleware para parsear cookies
@@ -667,6 +667,7 @@ const oAuth2Client = new OAuth2Client(
 app.post('/api/auth/google', async (req, res) => {
   try {
     const { code } = req.body;
+    console.log('Código recibido:', code); // <-- Agrega esto para depurar
     if (!code) {
       return res.status(400).json({ message: 'El código de autorización de Google es requerido.' });
     }
@@ -729,4 +730,13 @@ app.post('/api/auth/google', async (req, res) => {
     console.error('Error durante la autenticación con Google:', error);
     res.status(401).json({ message: 'Autenticación de Google fallida.' });
   }
+});
+
+// POST /api/auth/logout - Cierra la sesión del usuario
+app.post('/api/auth/logout', (req, res) => {
+  // Limpia la cookie del token, diciéndole al navegador que la elimine.
+  res.cookie('token', '', {
+    expires: new Date(0)
+  });
+  res.status(200).json({ message: 'Cierre de sesión exitoso.' });
 });
