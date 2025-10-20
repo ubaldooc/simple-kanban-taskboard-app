@@ -84,6 +84,26 @@ export const AuthProvider = ({ children }) => {
     onError: (error) => console.error('Fallo en el login de Google:', error),
   });
 
+  // Función para registrar un nuevo usuario
+  const register = async (name, email, password) => {
+    try {
+      // NOTA: Esta ruta aún no existe en tu backend. Deberás crearla.
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`;
+      const { data } = await axios.post(apiUrl, 
+        { name, email, password },
+        { withCredentials: true }
+      );
+      
+      // Después de un registro exitoso, el backend nos devuelve el usuario y establece la cookie.
+      setUser(data.user);
+      return { success: true };
+    } catch (error) {
+      console.error("Error en el registro:", error);
+      const message = error.response?.data?.message || error.message || 'No se pudo completar el registro.';
+      return { success: false, message };
+    }
+  };
+
   // Función para cerrar sesión
   const logout = async () => {
     try {
@@ -102,6 +122,7 @@ export const AuthProvider = ({ children }) => {
     user,
     authMode,
     login,
+    register,
     logout,
     loginWithGoogle, // Exportamos la nueva función
   };
