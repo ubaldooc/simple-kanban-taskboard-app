@@ -45,42 +45,36 @@ const ProfileDropdown = () => {
       />
       {isOpen && (
         <div className="profile-dropdown-menu">
-           {isOnline ? (
-            // Vista para usuario que ha iniciado sesión
-            <>
-              <div className="profile-dropdown-header">
-                <img src={avatarSrc} alt="User Avatar" className="avatar-large" />
-                <div className="user-info">
-                  <strong>{user.name}</strong>
-                  <span>{user.email}</span>
-                </div>
+          {isOnline ? (
+            <div className="profile-dropdown-header">
+              <img src={avatarSrc} alt="User Avatar" className="avatar-large" />
+              <div className="user-info">
+                <strong>{user.name}</strong>
+                <span>{user.email}</span>
               </div>
-              <hr className="dropdown-divider" />
-              <ul>
-                <li><i className="fas fa-moon"></i> Modo oscuro</li>
-                <li><i className="fas fa-comment-alt"></i> Enviar comentarios</li>
-              </ul>
-              <hr className="dropdown-divider" />
-              <ul>
-                <li onClick={handleLogout} style={{ cursor: 'pointer' }}>
-                  <i className="fas fa-sign-out-alt"></i> Cerrar sesión
-                </li>
-              </ul>
-            </>
+            </div>
           ) : (
-            // Vista para usuario invitado
-            <>
             <div className="profile-dropdown-header">
               <img src={profileImage} alt="User Avatar" className="avatar-large" />
               <div className="user-info">
-                  <strong>Invitado</strong>
-                  <button className="dropdown-action-button" onClick={handleLoginRedirect}>
-                      <i className="fas fa-sign-in-alt"></i>
-                      Iniciar sesión
-                  </button>
-                </div>
+                <strong>Invitado</strong>
+                <button className="dropdown-action-button" onClick={handleLoginRedirect}>
+                  <i className="fas fa-sign-in-alt"></i>
+                  Iniciar sesión
+                </button>
+              </div>
             </div>
-            </>
+          )}
+          <hr className="dropdown-divider" />
+          <ul>
+            <li><i className="fas fa-moon"></i> Modo oscuro</li>
+            <li><i className="fas fa-comment-alt"></i> Enviar comentarios</li>
+          </ul>
+          {isOnline && (
+            <><hr className="dropdown-divider" /><ul
+            ><li onClick={handleLogout} style={{ cursor: 'pointer' }}>
+              <i className="fas fa-sign-out-alt"></i> Cerrar sesión
+            </li></ul></>
           )}
         </div>
       )}
