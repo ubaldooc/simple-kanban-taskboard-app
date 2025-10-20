@@ -73,18 +73,13 @@ const ProfileDropdown = () => {
             <div className="profile-dropdown-header">
               <img src={profileImage} alt="User Avatar" className="avatar-large" />
               <div className="user-info">
-                <strong>Invitado</strong>
-              </div>
-            </div>
-            <hr className="dropdown-divider" />
-              <ul className="google-login-section">
-                <li>
+                  <strong>Invitado</strong>
                   <button className="dropdown-action-button" onClick={handleLoginRedirect}>
-                    <i className="fas fa-sign-in-alt"></i>
-                    Iniciar sesión
+                      <i className="fas fa-sign-in-alt"></i>
+                      Iniciar sesión
                   </button>
-                </li>
-              </ul>
+                </div>
+            </div>
             </>
           )}
         </div>
