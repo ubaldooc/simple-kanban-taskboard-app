@@ -35,6 +35,8 @@ const BoardSchema = new Schema({
   order: { type: Number, default: 0 },
   // Array de referencias a los documentos de las columnas para mantener el orden.
   columns: [{ type: Schema.Types.ObjectId, ref: 'Column' }],
+  // --- ¡CAMBIO CLAVE! ---
+  owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
 
 // --- User Schema ---
@@ -44,6 +46,7 @@ const UserSchema = new Schema({
   email: { type: String, unique: true, sparse: true }, // Asegura que el email sea único, pero permite nulos
   googleId: { type: String, unique: true, sparse: true }, // ID único de Google, permite nulos
   picture: { type: String }, // URL de la imagen de perfil de Google
+  password: { type: String }, // Campo para la contraseña hasheada
   // Referencia al último tablero que el usuario tuvo activo.
   lastActiveBoard: { type: Schema.Types.ObjectId, ref: 'Board', default: null },
 }, { timestamps: true });

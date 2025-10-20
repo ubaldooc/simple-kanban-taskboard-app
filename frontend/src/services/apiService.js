@@ -17,75 +17,85 @@ const API_BASE_URL = 'http://localhost:5001/api';
 // --- Implementación de la API "Online" (usando fetch) ---
 const onlineApi = {
   
-  getUserPreferences: () => fetch(`${API_BASE_URL}/user/preferences`).then(handleResponse),
+  getUserPreferences: () => fetch(`${API_BASE_URL}/user/preferences`, { credentials: 'include' }).then(handleResponse),
   
   updateUserPreferences: (prefs) => fetch(`${API_BASE_URL}/user/preferences`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(prefs),
+    credentials: 'include',
   }).then(handleResponse),
 
-  getBoardsList: () => fetch(`${API_BASE_URL}/boards/list`).then(handleResponse),
+  getBoardsList: () => fetch(`${API_BASE_URL}/boards/list`, { credentials: 'include' }).then(handleResponse),
   
-  getBoardDetails: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`).then(handleResponse),
+  getBoardDetails: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`, { credentials: 'include' }).then(handleResponse),
   
   createBoard: (boardData) => fetch(`${API_BASE_URL}/boards`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(boardData),
+    credentials: 'include',
   }).then(handleResponse),
   
   updateBoard: (boardId, updateData) => fetch(`${API_BASE_URL}/boards/${boardId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updateData),
+    credentials: 'include',
   }).then(handleResponse),
   
-  deleteBoard: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`, { method: 'DELETE' }).then(handleResponse),
+  deleteBoard: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`, { method: 'DELETE', credentials: 'include' }).then(handleResponse),
   
   reorderBoards: (boardIds) => fetch(`${API_BASE_URL}/boards/reorder`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ boardIds }),
+    credentials: 'include',
   }).then(handleResponse),
 
   createColumn: (boardId, columnData) => fetch(`${API_BASE_URL}/boards/${boardId}/columns`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(columnData),
+    credentials: 'include',
   }).then(handleResponse),
   
   updateColumn: (columnId, updateData) => fetch(`${API_BASE_URL}/columns/${columnId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updateData),
+    credentials: 'include',
   }).then(handleResponse),
   
-  deleteColumn: (columnId) => fetch(`${API_BASE_URL}/columns/${columnId}`, { method: 'DELETE' }).then(handleResponse),
+  deleteColumn: (columnId) => fetch(`${API_BASE_URL}/columns/${columnId}`, { method: 'DELETE', credentials: 'include' }).then(handleResponse),
   
   reorderColumns: (boardId, columnIds) => fetch(`${API_BASE_URL}/boards/${boardId}/reorder-columns`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ columnIds }),
+    credentials: 'include',
   }).then(handleResponse),
 
   createCard: (columnId, cardData) => fetch(`${API_BASE_URL}/columns/${columnId}/cards`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(cardData),
+    credentials: 'include',
   }).then(handleResponse),
   updateCard: (cardId, updateData) => fetch(`${API_BASE_URL}/cards/${cardId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updateData),
+    credentials: 'include',
   }).then(handleResponse),
   
-  deleteCard: (cardId) => fetch(`${API_BASE_URL}/cards/${cardId}`, { method: 'DELETE' }).then(handleResponse),
+  deleteCard: (cardId) => fetch(`${API_BASE_URL}/cards/${cardId}`, { method: 'DELETE', credentials: 'include' }).then(handleResponse),
   
   reorderCards: (boardId, cards) => fetch(`${API_BASE_URL}/boards/${boardId}/reorder-cards`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cards }),
+    credentials: 'include',
   }).then(handleResponse),
 
 };

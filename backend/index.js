@@ -7,8 +7,10 @@ import cookieParser from 'cookie-parser';
 
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken'; 
+import bcrypt from 'bcrypt';
 
 import { Board, Column, Card, User } from './src/models/models.js';
+import { protect } from './src/middleware/authMiddleware.js';
 
 // --- Configuración inicial ---
 // Crea una instancia de la aplicación de Express
@@ -60,11 +62,12 @@ app.get('/', (req, res) => {
 
 
 // GET /api/boards/list - Devuelve solo los IDs y títulos de los tableros.
-app.get('/api/boards/list', async (req, res) => {
+app.get('/api/boards/list', protect, async (req, res) => { // <-- Ruta protegida
   try {
     // .sort({ order: 1 }) ordena los tableros por el campo 'order' de forma ascendente.
     // .select('title') pide a MongoDB que devuelva solo el campo 'title' (el _id se incluye por defecto).
-    const boardList = await Board.find()
+    // ¡CAMBIO CLAVE! Filtramos por el 'owner' que viene desde el middleware 'protect'
+    const boardList = await Board.find({ owner: req.user._id })
       .sort({ order: 1 })
       .select('title');
     res.status(200).json(boardList);
@@ -80,19 +83,10 @@ app.get('/api/boards/list', async (req, res) => {
 // --- User Preference Routes ---
 
 // GET /api/user/preferences - Obtiene las preferencias del usuario (en este caso, el último tablero)
-app.get('/api/user/preferences', async (req, res) => {
+app.get('/api/user/preferences', protect, async (req, res) => { // <-- Ruta protegida
   try {
-    // En una app real, obtendríamos el ID del usuario desde el token de autenticación.
-    // Aquí, usamos nuestro usuario por defecto.
-    let user = await User.findOne({ name: 'Default User' });
-
-    // Si el usuario no existe (p.ej. base de datos nueva), lo creamos.
-    if (!user) {
-      console.log('Usuario por defecto no encontrado, creándolo...');
-      user = new User({ name: 'Default User' });
-      await user.save();
-    }
-    res.status(200).json({ lastActiveBoardId: user.lastActiveBoard || null });
+    // El usuario ya viene en req.user gracias al middleware
+    res.status(200).json({ lastActiveBoardId: req.user.lastActiveBoard || null });
   } catch (error) {
     console.error('Error al obtener las preferencias del usuario:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
@@ -100,12 +94,11 @@ app.get('/api/user/preferences', async (req, res) => {
 });
 
 // PUT /api/user/preferences - Actualiza las preferencias del usuario
-app.put('/api/user/preferences', async (req, res) => {
+app.put('/api/user/preferences', protect, async (req, res) => { // <-- Ruta protegida
   try {
     const { lastActiveBoardId } = req.body;
-    // Usamos nuestro usuario por defecto.
-    await User.findOneAndUpdate(
-      { name: 'Default User' },
+    await User.findByIdAndUpdate(
+      req.user._id,
       { lastActiveBoard: lastActiveBoardId },
       { new: true }
     );
@@ -127,30 +120,15 @@ app.put('/api/user/preferences', async (req, res) => {
           // BOARDS
 
 // GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
-app.get('/api/boards', async (req, res) => {
-  try {
-    const boards = await Board.find({})
-      .populate({
-        path: 'columns',
-        populate: {
-          path: 'cards',
-          model: 'Card'
-        }
-      });
-    
-    // Si no hay tableros, se devolverá un array vacío, lo cual es correcto.
-    res.status(200).json(boards);
-  } catch (error) {
-    console.error('Error al obtener los tableros:', error);
-    res.status(500).json({ message: 'Error interno del servidor al obtener los tableros.' });
-  }
-});
 
+// Esta ruta ya no es necesaria, ya que getBoardDetails y getBoardsList la reemplazan.
+// La comentamos o eliminamos para evitar confusiones.
+// app.get('/api/boards', ...);
 
 
 
 // POST /api/boards - Crea un nuevo tablero
-app.post('/api/boards', async (req, res) => {
+app.post('/api/boards', protect, async (req, res) => { // <-- Ruta protegida
   try {
     const { title, columns } = req.body;
     if (!title) {
@@ -158,10 +136,10 @@ app.post('/api/boards', async (req, res) => {
     }
 
     // 1. Contar cuántos tableros existen para asignar el siguiente 'order'
-    const boardCount = await Board.countDocuments();
+    const boardCount = await Board.countDocuments({ owner: req.user._id });
 
     // 2. Crear el nuevo tablero con el título y el orden correctos
-    const newBoard = new Board({ title, order: boardCount });
+    const newBoard = new Board({ title, order: boardCount, owner: req.user._id }); // ¡Asignamos el dueño!
 
 
     // 2. Si se proporcionan columnas, crearlas y asociarlas.
@@ -217,7 +195,7 @@ app.post('/api/boards', async (req, res) => {
 
 
 // PUT /api/boards/reorder - Actualiza el orden de los tableros
-app.put('/api/boards/reorder', async (req, res) => {
+app.put('/api/boards/reorder', protect, async (req, res) => { // <-- Ruta protegida
   try {
     const { boardIds } = req.body;
     if (!boardIds || !Array.isArray(boardIds)) {
@@ -226,7 +204,7 @@ app.put('/api/boards/reorder', async (req, res) => {
 
     // Actualiza el campo 'order' de cada tablero según su posición en el array
     const updatePromises = boardIds.map((id, index) =>
-      Board.findByIdAndUpdate(id, { order: index })
+      Board.findOneAndUpdate({ _id: id, owner: req.user._id }, { order: index }) // Verificamos propiedad
     );
     await Promise.all(updatePromises);
 
@@ -239,14 +217,15 @@ app.put('/api/boards/reorder', async (req, res) => {
 
 
 // GET /api/boards/:id - Devuelve un tablero específico con sus columnas y tarjetas
-app.get('/api/boards/:id', async (req, res) => {
+app.get('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegida
   try {
     const boardId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(boardId)) {
       return res.status(400).json({ message: 'El ID del tablero no es válido.' });
     }
 
-    const board = await Board.findById(boardId)
+    // ¡CAMBIO CLAVE! Buscamos por ID y por el dueño.
+    const board = await Board.findOne({ _id: boardId, owner: req.user._id })
       .populate({
         path: 'columns',
         options: { sort: { 'order': 1 } }, // <-- ¡Este es el cambio clave!
@@ -279,14 +258,22 @@ app.get('/api/boards/:id', async (req, res) => {
 
 
 // PUT /api/boards/:id - Actualiza el título de un tablero
-app.put('/api/boards/:id', async (req, res) => {
+app.put('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegida
   try {
     const { title } = req.body;
-    const updatedBoard = await Board.findByIdAndUpdate(
-      req.params.id,
+    if (!title) {
+      return res.status(400).json({ message: 'El título es requerido.' });
+    }
+    // ¡CAMBIO CLAVE! Actualizamos solo si el tablero pertenece al usuario.
+    const updatedBoard = await Board.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user._id }, // El filtro debe ser un objeto
       { title },
       { new: true, runValidators: true } // Devuelve el documento actualizado y corre validaciones
     ).populate('columns'); // Poblar para mantener la consistencia con GET
+
+    if (!updatedBoard) {
+      return res.status(404).json({ message: 'Tablero no encontrado o no tienes permiso para editarlo.' });
+    }
     res.status(200).json(updatedBoard);
   } catch (error) {
     console.error('Error al actualizar el tablero:', error);
@@ -298,7 +285,7 @@ app.put('/api/boards/:id', async (req, res) => {
 
 
 // DELETE /api/boards/:id - Elimina un tablero y su contenido asociado
-app.delete('/api/boards/:id', async (req, res) => {
+app.delete('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegida
   try {
     const boardId = req.params.id;
     
@@ -308,7 +295,8 @@ app.delete('/api/boards/:id', async (req, res) => {
     }
 
     // 1. Intenta eliminar el tablero y comprueba si existía en un solo paso.
-    const deletedBoard = await Board.findByIdAndDelete(boardId);
+    // ¡CAMBIO CLAVE! Solo permite borrar si el tablero pertenece al usuario.
+    const deletedBoard = await Board.findOneAndDelete({ _id: boardId, owner: req.user._id });
     
     // Si no se encontró ningún tablero para eliminar, devuelve 404.
     if (!deletedBoard) {
@@ -321,7 +309,7 @@ app.delete('/api/boards/:id', async (req, res) => {
     
     // 3. Reordenar los tableros restantes para eliminar huecos en la secuencia 'order'.
     //    a. Obtener todos los tableros que quedan, ordenados por su 'order' actual.
-    const remainingBoards = await Board.find().sort({ order: 'asc' });
+    const remainingBoards = await Board.find({ owner: req.user._id }).sort({ order: 'asc' });
 
     //    b. Actualizar el 'order' de cada tablero a su nuevo índice.
     const reorderPromises = remainingBoards.map((board, index) =>
@@ -346,7 +334,7 @@ app.delete('/api/boards/:id', async (req, res) => {
           // COLUMNS
 
 // PUT /api/boards/:boardId/reorder-columns - Actualiza el orden de las columnas en un tablero
-app.put('/api/boards/:boardId/reorder-columns', async (req, res) => {
+app.put('/api/boards/:boardId/reorder-columns', protect, async (req, res) => {
   try {
     const { boardId } = req.params;
     const { columnIds } = req.body;
@@ -358,9 +346,15 @@ app.put('/api/boards/:boardId/reorder-columns', async (req, res) => {
       return res.status(400).json({ message: 'Se requiere un array de IDs de columnas.' });
     }
 
+    // Verificamos que el tablero pertenezca al usuario
+    const board = await Board.findOne({ _id: boardId, owner: req.user._id });
+    if (!board) {
+      return res.status(404).json({ message: 'Tablero no encontrado o no tienes permiso.' });
+    }
+
     // Actualiza el campo 'order' de cada columna según su posición en el array
     const updatePromises = columnIds.map((id, index) =>
-      Column.findByIdAndUpdate(id, { order: index })
+      Column.findOneAndUpdate({ _id: id, board: boardId }, { order: index })
     );
     await Promise.all(updatePromises);
 
@@ -374,7 +368,7 @@ app.put('/api/boards/:boardId/reorder-columns', async (req, res) => {
 
 
 // POST /api/boards/:boardId/columns - Crea una nueva columna en un tablero específico
-app.post('/api/boards/:boardId/columns', async (req, res) => {
+app.post('/api/boards/:boardId/columns', protect, async (req, res) => {
   try {
     const { boardId } = req.params;
     const { title, color } = req.body;
@@ -382,6 +376,12 @@ app.post('/api/boards/:boardId/columns', async (req, res) => {
     // 1. Validar que el ID del tablero sea válido
     if (!mongoose.Types.ObjectId.isValid(boardId)) {
       return res.status(400).json({ message: 'El ID del tablero no es válido.' });
+    }
+
+    // Verificamos que el tablero pertenezca al usuario
+    const board = await Board.findOne({ _id: boardId, owner: req.user._id });
+    if (!board) {
+      return res.status(404).json({ message: 'Tablero no encontrado o no tienes permiso.' });
     }
 
     // 2. Validar que se haya proporcionado un título (ahora se permiten títulos vacíos)
@@ -414,13 +414,20 @@ app.post('/api/boards/:boardId/columns', async (req, res) => {
 
 
 // PUT /api/columns/:id - Actualiza el título de una columna
-app.put('/api/columns/:id', async (req, res) => {
+app.put('/api/columns/:id', protect, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, color } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+    }
+
+    // Verificamos que la columna pertenezca a un tablero del usuario
+    const column = await Column.findById(id);
+    const board = await Board.findOne({ _id: column.board, owner: req.user._id });
+    if (!board) {
+      return res.status(403).json({ message: 'No tienes permiso para editar esta columna.' });
     }
 
     const updateData = {};
@@ -451,7 +458,7 @@ app.put('/api/columns/:id', async (req, res) => {
 
 
 // DELETE /api/columns/:id - Elimina una columna y su contenido asociado
-app.delete('/api/columns/:id', async (req, res) => {
+app.delete('/api/columns/:id', protect, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -459,8 +466,16 @@ app.delete('/api/columns/:id', async (req, res) => {
       return res.status(400).json({ message: 'El ID de la columna no es válido.' });
     }
 
+    // Verificamos que la columna pertenezca a un tablero del usuario
+    const column = await Column.findById(id);
+    if (!column) return res.status(404).json({ message: 'Columna no encontrada.' });
+    const board = await Board.findOne({ _id: column.board, owner: req.user._id });
+    if (!board) {
+      return res.status(403).json({ message: 'No tienes permiso para eliminar esta columna.' });
+    }
+
     // 1. Encuentra y elimina la columna. 'deletedColumn' contendrá el documento eliminado.
-    const deletedColumn = await Column.findByIdAndDelete(id);
+    const deletedColumn = await Column.findByIdAndDelete(id); // Ya verificamos permisos, podemos borrar
 
     if (!deletedColumn) {
       return res.status(404).json({ message: 'Columna no encontrada.' });
@@ -487,7 +502,7 @@ app.delete('/api/columns/:id', async (req, res) => {
           // CARD
  
 // PUT /api/boards/:boardId/reorder-cards - Actualiza el orden y/o la columna de las tarjetas
-app.put('/api/boards/:boardId/reorder-cards', async (req, res) => {
+app.put('/api/boards/:boardId/reorder-cards', protect, async (req, res) => {
   try {
     const { boardId } = req.params;
     const { cards } = req.body; // Esperamos un array de objetos { _id, order, column }
@@ -499,11 +514,17 @@ app.put('/api/boards/:boardId/reorder-cards', async (req, res) => {
       return res.status(400).json({ message: 'Se requiere un array de tarjetas.' });
     }
 
+    // Verificamos que el tablero pertenezca al usuario
+    const board = await Board.findOne({ _id: boardId, owner: req.user._id });
+    if (!board) {
+      return res.status(404).json({ message: 'Tablero no encontrado o no tienes permiso.' });
+    }
+
     // Preparamos las operaciones para bulkWrite.
     // Esto es mucho más eficiente que hacer múltiples llamadas a la base de datos.
     const bulkOps = cards.map(card => ({
       updateOne: {
-        filter: { _id: card._id },
+        filter: { _id: card._id, board: boardId }, // Añadimos filtro de tablero por seguridad
         update: {
           $set: {
             order: card.order,
@@ -535,7 +556,7 @@ app.put('/api/boards/:boardId/reorder-cards', async (req, res) => {
 
 
 // POST /api/columns/:columnId/cards - Crea una nueva tarjeta en una columna
-app.post('/api/columns/:columnId/cards', async (req, res) => {
+app.post('/api/columns/:columnId/cards', protect, async (req, res) => {
   try {
     const { columnId } = req.params;
     const { title } = req.body;
@@ -554,6 +575,12 @@ app.post('/api/columns/:columnId/cards', async (req, res) => {
     const parentColumn = await Column.findById(columnId);
     if (!parentColumn) {
       return res.status(404).json({ message: 'La columna especificada no existe.' });
+    }
+
+    // Verificamos que la columna padre pertenezca a un tablero del usuario
+    const board = await Board.findOne({ _id: parentColumn.board, owner: req.user._id });
+    if (!board) {
+      return res.status(403).json({ message: 'No tienes permiso para añadir tarjetas a esta columna.' });
     }
 
     // 4. Contar cuántas tarjetas existen en la columna para asignar el siguiente 'order'
@@ -581,13 +608,20 @@ app.post('/api/columns/:columnId/cards', async (req, res) => {
 
 
 // PUT /api/cards/:id - Actualiza una tarjeta (título, columna, orden)
-app.put('/api/cards/:id', async (req, res) => {
+app.put('/api/cards/:id', protect, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, column, order } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: 'El ID de la tarjeta no es válido.' });
+    }
+
+    // Verificamos que la tarjeta pertenezca a un tablero del usuario
+    const card = await Card.findById(id);
+    const board = await Board.findOne({ _id: card.board, owner: req.user._id });
+    if (!board) {
+      return res.status(403).json({ message: 'No tienes permiso para editar esta tarjeta.' });
     }
 
     const updateData = {};
@@ -621,7 +655,7 @@ app.put('/api/cards/:id', async (req, res) => {
 
 
 // DELETE /api/cards/:id - Elimina una tarjeta
-app.delete('/api/cards/:id', async (req, res) => {
+app.delete('/api/cards/:id', protect, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -629,8 +663,16 @@ app.delete('/api/cards/:id', async (req, res) => {
       return res.status(400).json({ message: 'El ID de la tarjeta no es válido.' });
     }
 
+    // Verificamos que la tarjeta pertenezca a un tablero del usuario
+    const card = await Card.findById(id);
+    if (!card) return res.status(404).json({ message: 'Tarjeta no encontrada.' });
+    const board = await Board.findOne({ _id: card.board, owner: req.user._id });
+    if (!board) {
+      return res.status(403).json({ message: 'No tienes permiso para eliminar esta tarjeta.' });
+    }
+
     // 1. Encuentra y elimina la tarjeta. 'deletedCard' contendrá el documento eliminado.
-    const deletedCard = await Card.findByIdAndDelete(id);
+    const deletedCard = await Card.findByIdAndDelete(id); // Ya verificamos permisos
 
     if (!deletedCard) {
       return res.status(404).json({ message: 'Tarjeta no encontrada.' });
@@ -729,6 +771,119 @@ app.post('/api/auth/google', async (req, res) => {
   } catch (error) {
     console.error('Error durante la autenticación con Google:', error);
     res.status(401).json({ message: 'Autenticación de Google fallida.' });
+  }
+});
+
+// POST /api/auth/register - Registra un nuevo usuario con email y contraseña
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // 1. Validación de datos de entrada
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Todos los campos son requeridos.' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres.' });
+    }
+
+    // 2. Verificar si el usuario ya existe
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: 'El correo electrónico ya está en uso.' }); // 409 Conflict
+    }
+
+    // 3. Hashear la contraseña (¡NUNCA guardes contraseñas en texto plano!)
+    const salt = await bcrypt.genSalt(10); // Genera un "salt" para el hash
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 4. Crear el nuevo usuario
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword, // Guardamos la contraseña hasheada
+    });
+    await newUser.save();
+
+    // 5. Generar un JWT para iniciar sesión automáticamente después del registro
+    const token = jwt.sign(
+      { userId: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // 6. Enviar el token en una cookie HttpOnly
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 1 día
+    });
+
+    // 7. Enviar la respuesta con los datos del usuario (sin la contraseña)
+    res.status(201).json({ // 201 Created
+      message: 'Usuario registrado exitosamente.',
+      user: { id: newUser._id, name: newUser.name, email: newUser.email, picture: newUser.picture }
+    });
+
+  } catch (error) {
+    console.error('Error durante el registro:', error);
+    res.status(500).json({ message: 'Error interno del servidor durante el registro.' });
+  }
+});
+
+// POST /api/auth/login - Inicia sesión con email y contraseña
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Validación de datos de entrada
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Correo y contraseña son requeridos.' });
+    }
+
+    // 2. Buscar al usuario por su correo electrónico
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Usamos un mensaje genérico para no revelar si el email existe o no
+      return res.status(401).json({ message: 'Credenciales incorrectas.' });
+    }
+
+    // 3. Verificar que el usuario tenga una contraseña (pudo haberse registrado con Google)
+    if (!user.password) {
+      return res.status(401).json({ message: 'Esta cuenta fue creada con Google. Por favor, inicia sesión con Google.' });
+    }
+
+    // 4. Comparar la contraseña proporcionada con la contraseña hasheada en la BD
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Credenciales incorrectas.' });
+    }
+
+    // 5. Si las credenciales son correctas, generar un JWT
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // 6. Enviar el token en una cookie HttpOnly
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 1 día
+    });
+
+    // 7. Enviar la respuesta con los datos del usuario (sin la contraseña)
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso.',
+      user: { id: user._id, name: user.name, email: user.email, picture: user.picture }
+    });
+
+  } catch (error) {
+    console.error('Error durante el inicio de sesión:', error);
+    res.status(500).json({ message: 'Error interno del servidor durante el inicio de sesión.' });
   }
 });
 
