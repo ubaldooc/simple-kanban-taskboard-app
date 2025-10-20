@@ -49,8 +49,8 @@ const ProfileDropdown = () => {
             <div className="profile-dropdown-header">
               <img src={avatarSrc} alt="User Avatar" className="avatar-large" />
               <div className="user-info">
-                <strong>{user.name}</strong>
                 <span>{user.email}</span>
+                <strong>{user.name}</strong>
               </div>
             </div>
           ) : (
