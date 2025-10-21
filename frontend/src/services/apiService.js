@@ -1,102 +1,45 @@
 import guestApi from '../hooks/localStorageService.js';
+import apiClient from '../api/axios.js'; // Importamos nuestra instancia de Axios
 
 const handleResponse = async (response) => {
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(errorData.message || `Error: ${response.status}`);
-  }
-  // Si la respuesta es 204 No Content, no hay cuerpo para parsear.
-  if (response.status === 204) {
-    return null;
-  }
-  return response.json();
+  // Con Axios, la data ya viene en response.data. El manejo de errores se hace con interceptores o catch.
+  return response.data;
 };
-
-const API_BASE_URL = 'http://localhost:5001/api';
 
 // --- Implementación de la API "Online" (usando fetch) ---
 const onlineApi = {
   
-  getUserPreferences: () => fetch(`${API_BASE_URL}/user/preferences`, { credentials: 'include' }).then(handleResponse),
+  getUserPreferences: () => apiClient.get('/user/preferences').then(handleResponse),
   
-  updateUserPreferences: (prefs) => fetch(`${API_BASE_URL}/user/preferences`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(prefs),
-    credentials: 'include',
-  }).then(handleResponse),
+  updateUserPreferences: (prefs) => apiClient.put('/user/preferences', prefs).then(handleResponse),
 
-  getBoardsList: () => fetch(`${API_BASE_URL}/boards/list`, { credentials: 'include' }).then(handleResponse),
+  getBoardsList: () => apiClient.get('/boards/list').then(handleResponse),
   
-  getBoardDetails: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`, { credentials: 'include' }).then(handleResponse),
+  getBoardDetails: (boardId) => apiClient.get(`/boards/${boardId}`).then(handleResponse),
   
-  createBoard: (boardData) => fetch(`${API_BASE_URL}/boards`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(boardData),
-    credentials: 'include',
-  }).then(handleResponse),
+  createBoard: (boardData) => apiClient.post('/boards', boardData).then(handleResponse),
   
-  updateBoard: (boardId, updateData) => fetch(`${API_BASE_URL}/boards/${boardId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updateData),
-    credentials: 'include',
-  }).then(handleResponse),
+  updateBoard: (boardId, updateData) => apiClient.put(`/boards/${boardId}`, updateData).then(handleResponse),
   
-  deleteBoard: (boardId) => fetch(`${API_BASE_URL}/boards/${boardId}`, { method: 'DELETE', credentials: 'include' }).then(handleResponse),
+  deleteBoard: (boardId) => apiClient.delete(`/boards/${boardId}`).then(handleResponse),
   
-  reorderBoards: (boardIds) => fetch(`${API_BASE_URL}/boards/reorder`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ boardIds }),
-    credentials: 'include',
-  }).then(handleResponse),
+  reorderBoards: (boardIds) => apiClient.put('/boards/reorder', { boardIds }).then(handleResponse),
 
-  createColumn: (boardId, columnData) => fetch(`${API_BASE_URL}/boards/${boardId}/columns`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(columnData),
-    credentials: 'include',
-  }).then(handleResponse),
+  createColumn: (boardId, columnData) => apiClient.post(`/boards/${boardId}/columns`, columnData).then(handleResponse),
   
-  updateColumn: (columnId, updateData) => fetch(`${API_BASE_URL}/columns/${columnId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updateData),
-    credentials: 'include',
-  }).then(handleResponse),
+  updateColumn: (columnId, updateData) => apiClient.put(`/columns/${columnId}`, updateData).then(handleResponse),
   
-  deleteColumn: (columnId) => fetch(`${API_BASE_URL}/columns/${columnId}`, { method: 'DELETE', credentials: 'include' }).then(handleResponse),
+  deleteColumn: (columnId) => apiClient.delete(`/columns/${columnId}`).then(handleResponse),
   
-  reorderColumns: (boardId, columnIds) => fetch(`${API_BASE_URL}/boards/${boardId}/reorder-columns`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ columnIds }),
-    credentials: 'include',
-  }).then(handleResponse),
+  reorderColumns: (boardId, columnIds) => apiClient.put(`/boards/${boardId}/reorder-columns`, { columnIds }).then(handleResponse),
 
-  createCard: (columnId, cardData) => fetch(`${API_BASE_URL}/columns/${columnId}/cards`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(cardData),
-    credentials: 'include',
-  }).then(handleResponse),
-  updateCard: (cardId, updateData) => fetch(`${API_BASE_URL}/cards/${cardId}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updateData),
-    credentials: 'include',
-  }).then(handleResponse),
+  createCard: (columnId, cardData) => apiClient.post(`/columns/${columnId}/cards`, cardData).then(handleResponse),
   
-  deleteCard: (cardId) => fetch(`${API_BASE_URL}/cards/${cardId}`, { method: 'DELETE', credentials: 'include' }).then(handleResponse),
+  updateCard: (cardId, updateData) => apiClient.put(`/cards/${cardId}`, updateData).then(handleResponse),
   
-  reorderCards: (boardId, cards) => fetch(`${API_BASE_URL}/boards/${boardId}/reorder-cards`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ cards }),
-    credentials: 'include',
-  }).then(handleResponse),
+  deleteCard: (cardId) => apiClient.delete(`/cards/${cardId}`).then(handleResponse),
+  
+  reorderCards: (boardId, cards) => apiClient.put(`/boards/${boardId}/reorder-cards`, { cards }).then(handleResponse),
 
 };
 

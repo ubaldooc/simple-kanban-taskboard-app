@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import apiClient from '../api/axios.js'; // Importamos nuestra instancia de Axios
 
 // 1. Crear el contexto
 const AuthContext = createContext();
@@ -30,6 +31,26 @@ export const AuthProvider = ({ children }) => {
       setAuthMode('guest');
     }
   }, [user]); // Este efecto se dispara cada vez que el 'user' cambia
+
+  // Efecto para configurar el interceptor de Axios
+  useEffect(() => {
+    const responseInterceptor = apiClient.interceptors.response.use(
+      response => response, // Si la respuesta es exitosa (2xx), no hacemos nada.
+      error => {
+        // Si la respuesta es un error 401 (No autorizado)
+        if (error.response && error.response.status === 401) {
+          console.log('Interceptor: Token inválido o sesión expirada. Cerrando sesión.');
+          // Llamamos a la función logout SIN esperar a la respuesta del backend
+          // para una actualización inmediata de la UI.
+          logout(false); 
+        }
+        return Promise.reject(error); // Propagamos el error para que otros 'catch' puedan manejarlo.
+      }
+    );
+
+    // Función de limpieza para remover el interceptor cuando el componente se desmonte.
+    return () => apiClient.interceptors.response.eject(responseInterceptor);
+  }, []); // El array vacío asegura que este efecto se ejecute solo una vez.
 
   // Función para iniciar sesión
   const login = async (email, password) => {
@@ -105,13 +126,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Función para cerrar sesión
-  const logout = async () => {
+  const logout = async (callApi = true) => {
     try {
-      // Asegúrate que la ruta en tu backend sea consistente (ej. /api/auth/logout)
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
-      await axios.post(apiUrl, {}, { withCredentials: true });
+      // El parámetro 'callApi' nos permite evitar una llamada recursiva desde el interceptor.
+      if (callApi) {
+        // Corregimos la URL para que coincida con la ruta del backend
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/auth/logout`;
+        await axios.post(apiUrl, {}, { withCredentials: true });
+      }
     } catch (error) {
-      console.error('Error durante el cierre de sesión:', error);
+      console.error('Error durante el cierre de sesión en la API:', error);
     } finally {
       setUser(null); // Limpia el estado del frontend independientemente del resultado del backend
     }
