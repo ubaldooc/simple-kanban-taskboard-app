@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import apiClient, { setAuthToken } from "../api/axios.js"; // Importamos la nueva función
+import toast from "react-hot-toast";
 
 // 1. Crear el contexto
 const AuthContext = createContext();
@@ -69,6 +70,9 @@ export const AuthProvider = ({ children }) => {
           } catch (refreshError) {
             // Si el refresh token también falla, cerramos la sesión
             console.log("Interceptor: Refresh token falló. Cerrando sesión.");
+            toast.error(
+              "Tu sesión ha expirado. Por favor, inicia sesión de nuevo."
+            );
             logout(false);
             return Promise.reject(refreshError);
           }
