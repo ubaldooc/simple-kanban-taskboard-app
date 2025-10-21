@@ -133,13 +133,15 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
         </div>
         <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions} ></i>
       </div>
-      <SortableContext items={cards.map((card) => card.id)}>
-        {cards.map((card) => (
-          <Card key={card.id} card={card} />
-        ))}
-      </SortableContext>
+      <div className="cards-container">
+        <SortableContext items={cards.map((card) => card.id)}>
+          {cards.map((card) => (
+            <Card key={card.id} card={card} />
+          ))}
+        </SortableContext>
+      </div>
       <div className="add-card" onClick={() => onAddCard(column.id)}>
-        <i className="fas fa-plus"></i> Add a card
+        <i className="fas fa-plus"></i> Añadir tarjeta
       </div>
     </div>
   );
