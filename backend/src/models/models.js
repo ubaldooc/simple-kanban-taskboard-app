@@ -51,12 +51,21 @@ const UserSchema = new Schema({
   lastActiveBoard: { type: Schema.Types.ObjectId, ref: 'Board', default: null },
 }, { timestamps: true });
 
+// --- Refresh Token Schema ---
+// Almacena los refresh tokens de forma segura en la base de datos.
+const RefreshTokenSchema = new Schema({
+  token: { type: String, required: true },
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  expires: { type: Date, required: true },
+});
+
 // --- Models ---
 // Exportamos los modelos para poder usarlos en otras partes de la aplicación.
 export const Card = mongoose.model('Card', CardSchema);
 export const Column = mongoose.model('Column', ColumnSchema);
 export const Board = mongoose.model('Board', BoardSchema);
 export const User = mongoose.model('User', UserSchema);
+export const RefreshToken = mongoose.model('RefreshToken', RefreshTokenSchema);
 
 
 

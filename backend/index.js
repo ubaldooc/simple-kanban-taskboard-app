@@ -8,8 +8,9 @@ import cookieParser from 'cookie-parser';
 import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken'; 
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
-import { Board, Column, Card, User } from './src/models/models.js';
+import { Board, Column, Card, User, RefreshToken } from './src/models/models.js';
 import { protect } from './src/middleware/authMiddleware.js';
 
 // --- Configuración inicial ---
@@ -705,6 +706,22 @@ const oAuth2Client = new OAuth2Client(
   'postmessage' // Requerido por Google para este flujo seguro
 );
 
+// --- Helper para generar tokens ---
+const generateTokensAndSetCookie = async (res, userId) => {
+  // 1. Crear Access Token (corta duración)
+  const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+  // 2. Crear Refresh Token (larga duración) y guardarlo en la BD
+  const refreshToken = crypto.randomBytes(64).toString('hex');
+  const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días
+  await RefreshToken.create({ token: refreshToken, user: userId, expires });
+
+  // 3. Enviar el Refresh Token en una cookie HttpOnly
+  res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', expires });
+
+  return accessToken;
+};
+
 // POST /api/auth/google - Maneja el inicio de sesión/registro con el código de Google
 app.post('/api/auth/google', async (req, res) => {
   try {
@@ -746,25 +763,13 @@ app.post('/api/auth/google', async (req, res) => {
     // Guardar el usuario (sea nuevo o actualizado)
     await user.save();
 
-    // 4. Generar un JWT (Token de Sesión) para nuestra aplicación
-    const token = jwt.sign(
-      // El payload del token debe ser ligero. El ID del usuario es suficiente.
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' } // El token expira en 1 hora
-    );
+    // 4. Generar tokens y configurar la cookie de refresh token
+    const accessToken = await generateTokensAndSetCookie(res, user._id);
 
-    // 5. Enviar el token en una cookie HttpOnly y los datos del usuario en el cuerpo
-    res.cookie('token', token, {
-      httpOnly: true, // La cookie no es accesible por JavaScript
-      secure: process.env.NODE_ENV === 'production', // Solo enviar por HTTPS en producción
-      sameSite: 'strict', // Mitiga ataques CSRF
-      maxAge: 24 * 60 * 60 * 1000, // 1 día de expiración
-    });
-
-    // Ya no enviamos el token en el cuerpo de la respuesta
+    // 5. Enviar el accessToken y los datos del usuario en la respuesta
     res.status(200).json({ 
       message: 'Inicio de sesión exitoso con Google.', 
+      accessToken,
       user: { id: user._id, name: user.name, email: user.email, picture: user.picture } 
     });
 
@@ -805,24 +810,13 @@ app.post('/api/auth/register', async (req, res) => {
     });
     await newUser.save();
 
-    // 5. Generar un JWT para iniciar sesión automáticamente después del registro
-    const token = jwt.sign(
-      { userId: newUser._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    // 5. Generar tokens y configurar la cookie de refresh token
+    const accessToken = await generateTokensAndSetCookie(res, newUser._id);
 
-    // 6. Enviar el token en una cookie HttpOnly
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 día
-    });
-
-    // 7. Enviar la respuesta con los datos del usuario (sin la contraseña)
+    // 6. Enviar la respuesta con el accessToken y los datos del usuario
     res.status(201).json({ // 201 Created
       message: 'Usuario registrado exitosamente.',
+      accessToken,
       user: { id: newUser._id, name: newUser.name, email: newUser.email, picture: newUser.picture }
     });
 
@@ -860,24 +854,13 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: 'Credenciales incorrectas.' });
     }
 
-    // 5. Si las credenciales son correctas, generar un JWT
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    // 5. Generar tokens y configurar la cookie de refresh token
+    const accessToken = await generateTokensAndSetCookie(res, user._id);
 
-    // 6. Enviar el token en una cookie HttpOnly
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 día
-    });
-
-    // 7. Enviar la respuesta con los datos del usuario (sin la contraseña)
+    // 6. Enviar la respuesta con el accessToken y los datos del usuario
     res.status(200).json({
       message: 'Inicio de sesión exitoso.',
+      accessToken,
       user: { id: user._id, name: user.name, email: user.email, picture: user.picture }
     });
 
@@ -887,11 +870,46 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// POST /api/auth/refresh - Emite un nuevo accessToken usando un refreshToken
+app.post('/api/auth/refresh', async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'No se proporcionó refresh token.' });
+  }
+
+  try {
+    // Buscar el refresh token en la base de datos
+    const storedToken = await RefreshToken.findOne({ token: refreshToken });
+
+    // Verificar si el token existe y no ha expirado
+    if (!storedToken || storedToken.expires < new Date()) {
+      await RefreshToken.deleteOne({ token: refreshToken }); // Limpiar token inválido
+      res.clearCookie('refreshToken');
+      return res.status(403).json({ message: 'Refresh token inválido o expirado.' });
+    }
+
+    // Generar un nuevo access token
+    const accessToken = jwt.sign({ userId: storedToken.user }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    res.status(200).json({ accessToken });
+  } catch (error) {
+    console.error('Error al refrescar el token:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
 // POST /api/auth/logout - Cierra la sesión del usuario
-app.post('/api/auth/logout', (req, res) => {
-  // Limpia la cookie del token, diciéndole al navegador que la elimine.
-  res.cookie('token', '', {
-    expires: new Date(0)
-  });
+app.post('/api/auth/logout', async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (refreshToken) {
+      // Elimina el refresh token de la base de datos para invalidarlo
+      await RefreshToken.deleteOne({ token: refreshToken });
+    }
+  } catch (error) {
+    console.error("Error al invalidar el refresh token:", error);
+  }
+  // Limpia la cookie del navegador
+  res.clearCookie('refreshToken');
   res.status(200).json({ message: 'Cierre de sesión exitoso.' });
 });

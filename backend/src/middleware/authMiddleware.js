@@ -4,10 +4,11 @@ import { User } from '../models/models.js';
 export const protect = async (req, res, next) => {
   let token;
 
-  if (req.cookies && req.cookies.token) {
+  // El token ahora viene en el encabezado 'Authorization' con el formato 'Bearer <token>'
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // 1. Obtener el token de la cookie
-      token = req.cookies.token;
+      // 1. Obtener el token del encabezado
+      token = req.headers.authorization.split(' ')[1];
 
       // 2. Verificar el token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -17,11 +18,12 @@ export const protect = async (req, res, next) => {
 
       next(); // Continuar a la siguiente función (la ruta de la API)
     } catch (error) {
-      return res.status(401).json({ message: 'No autorizado, token inválido.' });
+      // Si jwt.verify falla, es porque el token expiró o es inválido.
+      return res.status(401).json({ code: 'ACCESS_TOKEN_EXPIRED', message: 'El token de acceso ha expirado.' });
     }
   }
 
   if (!token) {
-    return res.status(401).json({ message: 'No autorizado, no hay token.' });
+    return res.status(401).json({ code: 'TOKEN_MISSING', message: 'No autorizado, no se proporcionó token.' });
   }
 };
