@@ -78,8 +78,7 @@ export const AuthProvider = ({ children }) => {
     flow: 'auth-code',
     onSuccess: async (codeResponse) => {
       try {
-        // const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
-        const apiUrl = `http://localhost:5001/api/auth/google`;
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/google`;
 
         // Es importante incluir 'withCredentials: true' para que axios envíe y reciba cookies
         const { data } = await axios.post(apiUrl, 
@@ -109,7 +108,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       // NOTA: Esta ruta aún no existe en tu backend. Deberás crearla.
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`;
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/register`;
       const { data } = await axios.post(apiUrl, 
         { name, email, password },
         { withCredentials: true }
@@ -131,7 +130,7 @@ export const AuthProvider = ({ children }) => {
       // El parámetro 'callApi' nos permite evitar una llamada recursiva desde el interceptor.
       if (callApi) {
         // Corregimos la URL para que coincida con la ruta del backend
-        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/auth/logout`;
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/auth/logout`;
         await axios.post(apiUrl, {}, { withCredentials: true });
       }
     } catch (error) {
