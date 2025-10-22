@@ -194,24 +194,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Función para cerrar sesión
+  // Función para cerrar sesión con un delay para el modal
   const logout = async (callApi = true) => {
     setIsLoggingOut(true); // <-- Mostramos el modal
-    try {
-      // El parámetro 'callApi' nos permite evitar una llamada recursiva desde el interceptor.
-      if (callApi) {
-        await apiClient.post("/auth/logout"); // El backend invalidará el refresh token
-      }
-    } catch (error) {
-      console.error("Error durante el cierre de sesión en la API:", error);
-    } finally {
-      // Limpiamos todo en el frontend
-      setAccessToken(null);
-      setUser(null); // Limpia el estado del frontend independientemente del resultado del backend
-      setAuthToken(null); // Limpia el encabezado de autorización de Axios
-      // Ocultamos el modal de cierre de sesión
-      setIsLoggingOut(false);
-    }
+
+    // Creamos una promesa que se resuelve después de 3 segundos
+    const delay = new Promise((resolve) => setTimeout(resolve, 3000));
+
+    // Ejecutamos la llamada a la API y el delay en paralelo
+    await Promise.all([
+      (async () => {
+        try {
+          if (callApi) {
+            await apiClient.post("/auth/logout");
+          }
+        } catch (error) {
+          console.error("Error durante el cierre de sesión en la API:", error);
+        }
+      })(),
+      delay,
+    ]);
+
+    // Limpiamos todo en el frontend después de que ambas promesas se completen
+    setAccessToken(null);
+    setUser(null);
+    setAuthToken(null);
+    setIsLoggingOut(false); // Ocultamos el modal
   };
 
   // 3. Valores que se expondrán a los componentes hijos
