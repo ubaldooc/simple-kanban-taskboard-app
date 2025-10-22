@@ -10,7 +10,7 @@ import { getApiService } from '../services/apiService';
 // --- Helper Functions ---
 
 export const useTaskboard = () => {
-  const { authMode } = useAuth();  // Obtengo la propiedad authMode de ente todas las cosas que devuelve useAuth.    useAuth devuelve un objeto value con varias propiedades, las propiedades son: user, token, authMode, login y logout.Es lo mismo que poner const modo = useAuth().authMode  .
+  const { authMode, isAuthLoading } = useAuth();  // Obtenemos también el estado de carga de la autenticación
   const api = useMemo(() => getApiService(authMode), [authMode]); //Esta línea declara una constante api y le asigna un valor de online u offline dependiendo del valor de authMode. Este valor se usara para hacer las llamadas a la API. Si authMode cambia, se recalcula el valor de api.
 
   // console.log(authMode);
@@ -69,6 +69,12 @@ export const useTaskboard = () => {
   // Cargar datos desde el backend al iniciar
   useEffect(() => {
     const fetchBoards = async () => {
+      // ¡CAMBIO CLAVE! Si la autenticación aún se está verificando, no hacemos nada.
+      // El efecto se volverá a ejecutar cuando isAuthLoading cambie a `false`.
+      if (isAuthLoading) {
+        return;
+      }
+
       setIsLoading(true);
       try {
         // Hacemos las dos peticiones en paralelo para más eficiencia
@@ -107,7 +113,7 @@ export const useTaskboard = () => {
     };
 
     fetchBoards();
-  }, [api]); // Se re-ejecuta si la API cambia (online vs guest)
+  }, [api, isAuthLoading]); // Se re-ejecuta si la API cambia o cuando la autenticación termina
 
   useEffect(() => {
     // Cargar detalles cuando el tablero activo cambia y no tiene columnas cargadas
