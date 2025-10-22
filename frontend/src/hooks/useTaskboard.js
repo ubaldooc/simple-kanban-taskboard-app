@@ -75,15 +75,6 @@ export const useTaskboard = () => {
         return;
       }
 
-      // Si el usuario no está autenticado (modo guest), reseteamos el estado.
-      // Esto es clave para limpiar los datos al cerrar sesión.
-      if (authMode === 'guest') {
-        setBoards([]);
-        setActiveBoardIdState(null);
-        setIsLoading(false);
-        return;
-      }
-
       setIsLoading(true);
       try {
         // Hacemos las dos peticiones en paralelo para más eficiencia
