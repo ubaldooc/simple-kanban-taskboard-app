@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [authMode, setAuthMode] = useState("guest");
   const [isAuthLoading, setIsAuthLoading] = useState(true); // Nuevo estado de carga
+  const [isLoggingOut, setIsLoggingOut] = useState(false); // Estado para el modal de cierre de sesión
 
   // Efecto que se ejecuta cuando el estado del usuario cambia.
   useEffect(() => {
@@ -195,6 +196,7 @@ export const AuthProvider = ({ children }) => {
 
   // Función para cerrar sesión
   const logout = async (callApi = true) => {
+    setIsLoggingOut(true); // <-- Mostramos el modal
     try {
       // El parámetro 'callApi' nos permite evitar una llamada recursiva desde el interceptor.
       if (callApi) {
@@ -207,10 +209,8 @@ export const AuthProvider = ({ children }) => {
       setAccessToken(null);
       setUser(null); // Limpia el estado del frontend independientemente del resultado del backend
       setAuthToken(null); // Limpia el encabezado de autorización de Axios
-      // ¡CAMBIO CLAVE!
-      // Forzamos una recarga completa de la aplicación al redirigir.
-      // Esto asegura que todos los estados (como los tableros en useTaskboard) se limpien por completo.
-      window.location.href = "/login";
+      // Ocultamos el modal de cierre de sesión
+      setIsLoggingOut(false);
     }
   };
 
@@ -220,6 +220,7 @@ export const AuthProvider = ({ children }) => {
     accessToken,
     authMode,
     isAuthLoading, // Exponemos el estado de carga
+    isLoggingOut, // Exponemos el estado de cierre de sesión
     login,
     register,
     logout,
