@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
       // Si hay usuario, asumimos que tenemos un token y lo configuramos en axios
       setAuthToken(accessToken);
       localStorage.setItem("user", JSON.stringify(user));
+      // console.log("AuthContext: User set, authMode online, token set in axios.");
       setAuthMode("online");
     } else {
       setAuthToken(null); // Asegurarse de limpiar el token de axios
@@ -49,6 +50,7 @@ export const AuthProvider = ({ children }) => {
         console.log("Verificando sesión existente...");
         const { data } = await apiClient.post("/auth/refresh");
         setAccessToken(data.accessToken);
+        setAuthToken(data.accessToken); // <-- ¡Añadir esta línea!
       } catch (err) {
         console.log("No se pudo refrescar la sesión, cerrando sesión local.");
         setUser(null); // Limpia el estado si el refresh token es inválido
@@ -119,6 +121,7 @@ export const AuthProvider = ({ children }) => {
 
       // Guardamos el usuario y el accessToken
       setUser(data.user);
+      setAuthToken(data.accessToken); // <-- ¡Añadir esta línea!
       setAccessToken(data.accessToken);
       return { success: true };
     } catch (error) {
@@ -143,6 +146,7 @@ export const AuthProvider = ({ children }) => {
 
         // Guardamos el usuario y el accessToken
         setUser(data.user);
+        setAuthToken(data.accessToken); // <-- ¡Añadir esta línea!
         setAccessToken(data.accessToken);
       } catch (error) {
         // Este console.log mejorado te dará más detalles si la petición al backend falla
@@ -176,6 +180,7 @@ export const AuthProvider = ({ children }) => {
 
       // Guardamos el usuario y el accessToken
       setUser(data.user);
+      setAuthToken(data.accessToken); // <-- ¡Añadir esta línea!
       setAccessToken(data.accessToken);
       return { success: true };
     } catch (error) {
