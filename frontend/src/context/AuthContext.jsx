@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
   // Estado para el Access Token (se guarda en memoria)
   const [accessToken, setAccessToken] = useState(null);
   const [authMode, setAuthMode] = useState("guest");
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // Nuevo estado de carga
 
   // Efecto que se ejecuta cuando el estado del usuario cambia.
   useEffect(() => {
@@ -30,24 +31,47 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user", JSON.stringify(user));
       setAuthMode("online");
     } else {
+      setAuthToken(null); // Asegurarse de limpiar el token de axios
       localStorage.removeItem("user");
       setAuthMode("guest");
     }
   }, [user, accessToken]); // Este efecto se dispara si cambia el usuario o el token
 
-  // Efecto para configurar el interceptor de Axios
+  // Efecto para verificar la sesión al cargar la app ("Silent Refresh")
+  useEffect(() => {
+    const verifyUser = async () => {
+      // Si no hay usuario en localStorage, no hay nada que verificar.
+      if (!user) {
+        setIsAuthLoading(false);
+        return;
+      }
+      try {
+        console.log("Verificando sesión existente...");
+        const { data } = await apiClient.post("/auth/refresh");
+        setAccessToken(data.accessToken);
+      } catch (err) {
+        console.log("No se pudo refrescar la sesión, cerrando sesión local.");
+        setUser(null); // Limpia el estado si el refresh token es inválido
+      } finally {
+        setIsAuthLoading(false);
+      }
+    };
+    verifyUser();
+  }, []); // El array vacío asegura que se ejecute solo una vez al montar.
+
+  // Efecto para configurar el interceptor de Axios para manejar tokens expirados
   useEffect(() => {
     const responseInterceptor = apiClient.interceptors.response.use(
       (response) => response, // Si la respuesta es exitosa (2xx), no hacemos nada.
       async (error) => {
         const originalRequest = error.config;
-        const isAuthError = error.response?.status === 401;
-        const errorCode = error.response?.data?.code;
+        const isUnauthorizedError = error.response?.status === 401;
+        const backendErrorMessage = error.response?.data?.message;
 
         // Si el error es 401 y es por token expirado, y no hemos reintentado ya
         if (
-          isAuthError &&
-          errorCode === "ACCESS_TOKEN_EXPIRED" &&
+          isUnauthorizedError &&
+          backendErrorMessage === "Token de autenticación expirado." &&
           !originalRequest._retry
         ) {
           originalRequest._retry = true; // Marcar para evitar bucles infinitos
@@ -177,6 +201,11 @@ export const AuthProvider = ({ children }) => {
       // Limpiamos todo en el frontend
       setAccessToken(null);
       setUser(null); // Limpia el estado del frontend independientemente del resultado del backend
+      setAuthToken(null); // Limpia el encabezado de autorización de Axios
+      // ¡CAMBIO CLAVE!
+      // Forzamos una recarga completa de la aplicación al redirigir.
+      // Esto asegura que todos los estados (como los tableros en useTaskboard) se limpien por completo.
+      window.location.href = "/login";
     }
   };
 
@@ -185,6 +214,7 @@ export const AuthProvider = ({ children }) => {
     user,
     accessToken,
     authMode,
+    isAuthLoading, // Exponemos el estado de carga
     login,
     register,
     logout,
