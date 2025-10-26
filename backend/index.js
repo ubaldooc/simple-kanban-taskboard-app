@@ -888,10 +888,20 @@ app.post('/api/auth/refresh', async (req, res) => {
       return res.status(403).json({ message: 'Refresh token inválido o expirado.' });
     }
 
-    // Generar un nuevo access token
+    // 1. Encontrar al usuario asociado al token
+    const user = await User.findById(storedToken.user);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+
+    // 2. Generar un nuevo access token
     const accessToken = jwt.sign({ userId: storedToken.user }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-    res.status(200).json({ accessToken });
+    // 3. Devolver el nuevo token Y los datos del usuario
+    res.status(200).json({ 
+      accessToken,
+      user: { id: user._id, name: user.name, email: user.email, picture: user.picture }
+    });
   } catch (error) {
     console.error('Error al refrescar el token:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });

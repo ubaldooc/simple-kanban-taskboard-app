@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import profileImage from '../assets/profile.png';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import profileImage from "../assets/profile.png";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,10 +9,10 @@ const ProfileDropdown = () => {
   const { user, authMode, logout } = useAuth();
   const navigate = useNavigate();
 
-  const isOnline = authMode === 'online';
-  
+  const isOnline = authMode === "online";
+
   const handleLoginRedirect = () => {
-    navigate('/login');
+    navigate("/login");
     setIsOpen(false);
   };
 
@@ -28,8 +28,8 @@ const ProfileDropdown = () => {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Determina qué imagen de perfil mostrar
@@ -41,6 +41,7 @@ const ProfileDropdown = () => {
         src={avatarSrc}
         alt="User Avatar"
         className="avatar"
+        referrerPolicy="no-referrer"
         onClick={() => setIsOpen(!isOpen)}
       />
       {isOpen && (
@@ -55,10 +56,17 @@ const ProfileDropdown = () => {
             </div>
           ) : (
             <div className="profile-dropdown-header">
-              <img src={profileImage} alt="User Avatar" className="avatar-large" />
+              <img
+                src={profileImage}
+                alt="User Avatar"
+                className="avatar-large"
+              />
               <div className="user-info">
                 <strong>Invitado</strong>
-                <button className="dropdown-action-button" onClick={handleLoginRedirect}>
+                <button
+                  className="dropdown-action-button"
+                  onClick={handleLoginRedirect}
+                >
                   <i className="fas fa-sign-in-alt"></i>
                   Iniciar sesión
                 </button>
@@ -67,14 +75,22 @@ const ProfileDropdown = () => {
           )}
           <hr className="dropdown-divider" />
           <ul>
-            <li><i className="fas fa-moon"></i> Modo oscuro</li>
-            <li><i className="fas fa-comment-alt"></i> Enviar comentarios</li>
+            <li>
+              <i className="fas fa-moon"></i> Modo oscuro
+            </li>
+            <li>
+              <i className="fas fa-comment-alt"></i> Enviar comentarios
+            </li>
           </ul>
           {isOnline && (
-            <><hr className="dropdown-divider" /><ul
-            ><li onClick={handleLogout} style={{ cursor: 'pointer' }}>
-              <i className="fas fa-sign-out-alt"></i> Cerrar sesión
-            </li></ul></>
+            <>
+              <hr className="dropdown-divider" />
+              <ul>
+                <li onClick={handleLogout} style={{ cursor: "pointer" }}>
+                  <i className="fas fa-sign-out-alt"></i> Cerrar sesión
+                </li>
+              </ul>
+            </>
           )}
         </div>
       )}

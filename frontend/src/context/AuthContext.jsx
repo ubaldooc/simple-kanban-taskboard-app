@@ -50,7 +50,8 @@ export const AuthProvider = ({ children }) => {
       try {
         console.log("Verificando sesión existente...");
         const { data } = await apiClient.post("/auth/refresh");
-        setAccessToken(data.accessToken);
+        setUser(data.user); // <-- ¡Añadir esta línea!
+        setAccessToken(data.accessToken); // <-- ¡Añadir esta línea!
         setAuthToken(data.accessToken); // <-- ¡Añadir esta línea!
       } catch (err) {
         console.log("No se pudo refrescar la sesión, cerrando sesión local.");
@@ -86,6 +87,7 @@ export const AuthProvider = ({ children }) => {
             const newAccessToken = data.accessToken;
 
             // Actualizar el estado y los encabezados de axios
+            setUser(data.user); // <-- ¡Añadir esta línea!
             setAccessToken(newAccessToken);
             setAuthToken(newAccessToken);
 
