@@ -636,43 +636,46 @@ div.column-title-input:focus {
 
 /* --- Estilos para el Modal de Ayuda --- */
 .modal-content.help-modal {
-    text-align: left;
-    max-width: 600px;
+  text-align: left;
+  max-width: 520px; /* Reducimos el ancho máximo */
 }
 
 .help-modal h2 {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Reducimos el espaciado */
+  font-size: 1.3em; /* Hacemos el título un poco más pequeño */
 }
 
 .help-section {
-    margin-bottom: 25px;
+  margin-bottom: 20px; /* Reducimos el margen inferior */
 }
 
 .help-section h3 {
-    color: #58a6ff;
-    border-bottom: 1px solid #30363d;
-    padding-bottom: 8px;
-    margin-bottom: 15px;
+  color: #58a6ff;
+  border-bottom: 1px solid #30363d;
+  padding-bottom: 6px; /* Reducimos el padding */
+  margin-bottom: 12px; /* Reducimos el margen */
+  font-size: 1em; /* Hacemos los subtítulos más pequeños */
 }
 
 .help-section ul {
-    list-style: none;
-    padding-left: 0;
-    color: #c9d1d9;
+  list-style: none;
+  padding-left: 0;
+  color: #c9d1d9;
 }
 
 .help-section li {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-    line-height: 1.5;
+  display: flex;
+  gap: 10px; /* Reducimos el espaciado */
+  margin-bottom: 10px; /* Reducimos el margen */
+  line-height: 1.4; /* Hacemos el interlineado más compacto */
+  font-size: 0.9em; /* Reducimos el tamaño de la fuente principal */
 }
 
 .help-section li i {
-    color: #8b949e;
-    margin-top: 4px;
+  color: #8b949e;
+  margin-top: 3px; /* Ajustamos la posición del icono */
 }
 
 .shortcuts-list .key-combo {
@@ -681,7 +684,7 @@ div.column-title-input:focus {
     padding: 2px 8px;
     border-radius: 4px;
     font-family: monospace;
-    font-size: 0.9em;
+    font-size: 0.95em; /* Ajustamos el tamaño para que sea consistente con el texto reducido */
 }
 
 
