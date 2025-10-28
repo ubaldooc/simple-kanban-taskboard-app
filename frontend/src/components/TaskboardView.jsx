@@ -49,6 +49,7 @@ export const TaskboardView = () => {
     setEditingColumnId,
     exitingItemIds,
   } = useTaskboardContext();
+  const { user, authMode } = useAuth();
 
   const { isLoggingOut } = useAuth(); // <-- 2. Obtener isLoggingOut desde AuthContext
 
@@ -147,6 +148,11 @@ export const TaskboardView = () => {
           <BoardSelector />
         </div>
         <div className="header-right">
+          {authMode === "online" && user && (
+            <span className="user-greeting">
+              Hola, {user.name.split(" ")[0]}
+            </span>
+          )}
           <ProfileDropdown onOpenHelpModal={() => setIsHelpModalOpen(true)} />
         </div>
       </header>

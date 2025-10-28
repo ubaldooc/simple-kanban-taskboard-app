@@ -135,6 +135,12 @@ body {
     object-fit: contain;
 }
 
+.user-greeting {
+    font-size: 1.2em;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
 .header-left h1 {
     font-size: 1.2em;
     margin: 0;
