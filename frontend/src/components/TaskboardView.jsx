@@ -19,6 +19,7 @@ import { Toaster } from "react-hot-toast";
 import BoardSelector from "./BoardSelector.jsx";
 import LoggingOutModal from "./LoggingOutModal.jsx";
 import ProfileDropdown from "./ProfileDropdown.jsx";
+import HelpModal from "./HelpModal.jsx"; // <-- 1. Importamos el nuevo modal
 import logoImage from "../assets/logo.png";
 import { useTaskboardContext } from "../context/TaskboardContext";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -56,6 +57,7 @@ export const TaskboardView = () => {
     position: null,
   });
   const mainContainerRef = useRef(null);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false); // <-- 2. Estado para el modal de ayuda
 
   const {
     active,
@@ -146,7 +148,11 @@ export const TaskboardView = () => {
         </div>
         <div className="header-right">
           <i className="fas fa-bell"></i>
-          <i className="fas fa-question-circle"></i>
+          {/* 3. Añadimos la clase 'help-icon' y el evento onClick */}
+          <i
+            className="fas fa-question-circle help-icon"
+            onClick={() => setIsHelpModalOpen(true)}
+          ></i>
           <ProfileDropdown />
         </div>
       </header>
@@ -239,6 +245,12 @@ export const TaskboardView = () => {
       />
 
       <LoggingOutModal isOpen={isLoggingOut} />
+
+      {/* 4. Renderizamos el modal de ayuda */}
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+      />
     </div>
   );
 };

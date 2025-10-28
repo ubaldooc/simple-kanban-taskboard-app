@@ -99,6 +99,13 @@ body {
     color: #b0c2d3;
 }
 
+/* Estilo para el nuevo icono de ayuda */
+.help-icon {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.help-icon:hover { color: #58a6ff; }
+
 .avatar {
     width: 30px;
     height: 30px;
@@ -627,6 +634,55 @@ div.column-title-input:focus {
     font-weight: 600;
 }
 
+/* --- Estilos para el Modal de Ayuda --- */
+.modal-content.help-modal {
+    text-align: left;
+    max-width: 600px;
+}
+
+.help-modal h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.help-section {
+    margin-bottom: 25px;
+}
+
+.help-section h3 {
+    color: #58a6ff;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+.help-section ul {
+    list-style: none;
+    padding-left: 0;
+    color: #c9d1d9;
+}
+
+.help-section li {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.help-section li i {
+    color: #8b949e;
+    margin-top: 4px;
+}
+
+.shortcuts-list .key-combo {
+    background-color: #21262d;
+    border: 1px solid #444c56;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
 
 
 
