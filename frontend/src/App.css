@@ -188,8 +188,8 @@ body {
 
 
 .column {
-    /* MODO LIGHT: Fondo sólido con el color de la columna */
-    background-color: var(--column-header-color, '#888');
+    /* MODO LIGHT: Fondo sólido, oscureciendo un poco el color de la columna */
+    background-color: color-mix(in srgb, var(--column-header-color, '#888') 60%, #24272bdb);
     border: 1px solid var(--column-header-color, var(--border-primary));
     border-radius: 8px;
     padding: 15px;
@@ -830,7 +830,7 @@ div.column-title-input:focus {
     top: calc(100% + 5px);
     left: 0;
     width: 100%;
-    background-color: var(--background-primary);
+    background-color: var(--background-secondary);
     border: 1px solid var(--border-primary);
     border-radius: 6px;
     box-shadow: 0 8px 24px var(--shadow-primary);
@@ -851,7 +851,7 @@ div.column-title-input:focus {
     justify-content: space-between;
     align-items: center;
     color: var(--text-primary);
-    background-color: var(--background-primary);
+    background-color: var(--background-secondary);
     border-bottom: 1px solid var(--border-secondary);
     user-select: none;
 }
