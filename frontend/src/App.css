@@ -152,7 +152,7 @@ body {
     display: flex;
     flex-direction: column;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
 
     /* ¡CAMBIO CLAVE! Permite que el contenido de la columna se desplace verticalmente si es necesario. */
     overflow-y: hidden; /* Ocultamos el scroll por defecto, se manejará en el contenedor de tarjetas */
