@@ -19,10 +19,10 @@ body {
   --background-tertiary: #dddddd;
   --background-overlay: rgba(27, 31, 35, 0.5);
   --background-interactive: #f6f8fa;
-  --background-interactive-hover: #f0f2f5;
+  --background-interactive-hover: #f0f2f563;
 
   --text-primary: #24292f;
-  --text-secondary: #57606a;
+  --text-secondary: #e2e2e2;
   --text-link: #0969da;
 
   --border-primary: #d0d7de;
@@ -405,7 +405,8 @@ div.column-title-input:focus {
 
 
 .add-card {
-    background-color: transparent;
+    /* background-color: transparent; */
+    background-color: rgba(255, 255, 255, 0.249);
     border-radius: 6px;
     padding: 12px;
     text-align: center;
@@ -452,7 +453,7 @@ div.column-title-input:focus {
 /* Este estilo ahora es para el dropdown que se renderiza en el body */
 .column-options-dropdown {
     position: absolute; /* La posición se calcula en JS */
-    background-color: var(--background-tertiary);
+    background-color: var(--background-secondary);
     border-radius: 6px;
     box-shadow: 0 4px 12px var(--shadow-primary);
     z-index: 110; /* Debe estar por encima de otros elementos */
@@ -496,7 +497,7 @@ div.column-title-input:focus {
     padding: 6px 12px 2px;
     font-size: 0.75em;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     cursor: default;
     text-transform: uppercase;
 }
@@ -1016,7 +1017,7 @@ div.column-title-input:focus {
     border-radius: 8px;
     box-shadow: 0 8px 24px var(--shadow-primary);
     z-index: 110;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     padding: 8px 0;
 }
 
@@ -1049,7 +1050,7 @@ div.column-title-input:focus {
 
 .profile-dropdown-header .user-info span {
     font-size: 0.85em;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     margin-bottom: 4px; /* Añadimos un pequeño espacio debajo del email */
 }
 
@@ -1077,7 +1078,7 @@ div.column-title-input:focus {
 .profile-dropdown-menu li > i {
     width: 16px; /* Alinea los iconos */
     text-align: center;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .profile-dropdown-menu .dropdown-divider {
