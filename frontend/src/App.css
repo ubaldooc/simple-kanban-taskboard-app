@@ -253,6 +253,12 @@ body.dark .column {
     cursor: grab;
 }
 
+/* MODO OSCURO: El fondo del header de la columna usa el color asignado */
+body.dark .column-header {
+    background-color: var(--column-header-color, '#888');
+    border-bottom-color: rgba(0, 0, 0, 0.25); /* Un borde inferior un poco más oscuro para contraste */
+}
+
 div.column-title-input {
     width: 100%;
     background-color: transparent;
