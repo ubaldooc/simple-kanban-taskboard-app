@@ -142,8 +142,10 @@ body {
 
 .column {
     /* ¡CAMBIO CLAVE! Usamos el color de la columna con transparencia para el fondo */
-    background-color: color-mix(in srgb, var(--column-header-color, #161b22) 20%, #161b22ee);
-    border: 2px solid var(--column-header-color, #30363d);
+    background-color: rgba(22, 27, 34, 0.6); /* Fondo oscuro semi-transparente */
+    /* ¡NUEVO! Añadimos el efecto de cristal esmerilado */
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--column-header-color, #30363d); /* Borde más sutil */
     border-radius: 8px;
     padding: 15px;
     min-width: 240px;
