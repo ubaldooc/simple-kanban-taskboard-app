@@ -241,11 +241,14 @@ body.dark .column {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
-    padding-bottom: 6px;
-
-    border-bottom: 3px solid var(--column-header-color, #888);
+    margin: -15px -15px 18px -15px; /* Ajuste para que ocupe todo el ancho */
+    padding: 10px 15px;
+    background-color: rgba(0, 0, 0, 0.235); /* Fondo oscuro semitransparente */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     position: relative;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    /* border-radius: 10px; */
     
     cursor: grab;
 }
@@ -300,12 +303,13 @@ div.column-title-input:focus {
 
 .column-header h2 {
     color: white;
-    font-size: 1.14em;
+    font-size: 1rem;
     margin: 0;
     font-weight: normal;
     /* white-space: nowrap; */
     overflow: hidden;
     /* text-overflow: ellipsis; */
+    letter-spacing: 0.4px;
 }
 
 .column-header i {
