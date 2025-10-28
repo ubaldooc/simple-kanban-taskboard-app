@@ -149,7 +149,7 @@ body {
 
 .header-left i, .header-right i {
     font-size: 1.2em;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 /* Estilo para el nuevo icono de ayuda */
@@ -925,7 +925,7 @@ div.column-title-input:focus {
 }
 
 .board-selector-dropdown .board-actions i {
-    color: var(--text-secondary);
+    color: var(--text-primary);
     font-size: 0.85em; /* Iconos más pequeños */
     transition: color 0.2s;
 }
