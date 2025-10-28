@@ -11,13 +11,60 @@ html {
 
 }
 
+/* --- Definición de Variables de Tema --- */
+body {
+  /* --- TEMA CLARO (POR DEFECTO) --- */
+  --background-primary: #ffffff;
+  --background-secondary: #f6f8fa;
+  --background-tertiary: #f0f2f5;
+  --background-overlay: rgba(27, 31, 35, 0.5);
+  --background-interactive: #f6f8fa;
+  --background-interactive-hover: #f0f2f5;
 
+  --text-primary: #24292f;
+  --text-secondary: #57606a;
+  --text-link: #0969da;
+
+  --border-primary: #d0d7de;
+  --border-secondary: #d8dee4;
+
+  --shadow-primary: rgba(140, 149, 159, 0.15);
+  --shadow-column: rgba(0, 0, 0, 0.1);
+
+  --color-danger: #cf222e;
+  --color-success: #1f883d;
+  --color-accent: #0969da;
+}
+
+body.dark {
+  /* --- TEMA OSCURO --- */
+  --background-primary: #0d1117;
+  --background-secondary: #161b22;
+  --background-tertiary: #21262d;
+  --background-overlay: rgba(0, 0, 0, 0.7);
+  --background-interactive: rgba(16, 16, 16, 0.509);
+  --background-interactive-hover: rgba(255, 255, 255, 0.1);
+
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-link: #58a6ff;
+
+  --border-primary: #30363d;
+  --border-secondary: #21262d;
+
+  --shadow-primary: rgba(0, 0, 0, 0.5);
+  --shadow-column: rgba(0, 0, 0, 0.3);
+
+  --color-danger: #da3633;
+  --color-success: #238636;
+  --color-accent: #58a6ff;
+}
 
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #0d1117; /* Color de fondo oscuro */
-    color: #e6edf3; /* Color de texto claro */
+    background-color: var(--background-primary);
+    color: var(--text-primary);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -46,7 +93,7 @@ body {
 
 .task-board-container {
     border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px var(--shadow-primary);
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -61,13 +108,13 @@ body {
 }
 
 .task-board-header {
-    background-color: rgb(0, 0, 0); /* background-color: rgba(0, 0, 0, 0.4); */
+    background-color: var(--background-primary);
     padding: 15px 20px;
     height: 48px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-primary);
 
     position: fixed;
     top: 0;
@@ -96,7 +143,7 @@ body {
 
 .header-left i, .header-right i {
     font-size: 1.2em;
-    color: #b0c2d3;
+    color: var(--text-secondary);
 }
 
 /* Estilo para el nuevo icono de ayuda */
@@ -104,14 +151,14 @@ body {
     cursor: pointer;
     transition: color 0.2s;
 }
-.help-icon:hover { color: #58a6ff; }
+.help-icon:hover { color: var(--text-link); }
 
 .avatar {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     cursor: pointer;
-    background-color: #6c757d;
+    background-color: var(--background-tertiary);
 }
 
 .task-board-main {
@@ -131,7 +178,7 @@ body {
     overflow-y: auto;
     overflow-x: auto;
     scrollbar-width: thin;
-    scrollbar-color: #3d91ffca #ffffff;
+    scrollbar-color: var(--color-accent) var(--background-secondary);
 }
 
 /* Clase para deshabilitar el scroll horizontal cuando se arrastra sobre la zona de eliminación */
@@ -142,17 +189,17 @@ body {
 
 .column {
     /* ¡CAMBIO CLAVE! Usamos el color de la columna con transparencia para el fondo */
-    background-color: rgba(22, 27, 34, 0.833); /* Fondo oscuro semi-transparente */
+    background-color: color-mix(in srgb, var(--background-secondary) 60%, transparent);
     /* ¡NUEVO! Añadimos el efecto de cristal esmerilado */
     backdrop-filter: blur(12px);
-    border: 2px solid var(--column-header-color, #30363d); /* Borde más sutil */
+    border: 1px solid var(--column-header-color, var(--border-primary));
     border-radius: 8px;
     padding: 15px;
     min-width: 240px;
     width: 220px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px var(--shadow-column);
 
     /* ¡CAMBIO CLAVE! Permite que el contenido de la columna se desplace verticalmente si es necesario. */
     overflow-y: hidden; /* Ocultamos el scroll por defecto, se manejará en el contenedor de tarjetas */
@@ -166,7 +213,7 @@ body {
     margin-right: -4px; /* Compensa el padding para mantener la alineación */
     /* Personalización del scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: #58a6ff #161b22;
+    scrollbar-color: var(--color-accent) var(--background-secondary);
 }
 
 /* Estilo para la columna original (placeholder) mientras se arrastra */
@@ -176,7 +223,7 @@ body {
 
 .column-editing {
     /* Opcional: Cambiar el borde o fondo para indicar que se está editando */
-    box-shadow: 0 0 2px 4px #58a6ff;
+    box-shadow: 0 0 2px 4px var(--color-accent);
 }
 
 .column-header {
@@ -197,7 +244,7 @@ div.column-title-input {
     background-color: transparent;
     border: none;
     outline: none;
-    color: #e6edf3;
+    color: var(--text-primary);
     font-size: 1.1em;
     font-weight: normal;
     font-family: inherit;
@@ -214,8 +261,8 @@ div.column-title-input {
 }
 
 div.column-title-input:focus {
-    background-color: #21262d;
-    box-shadow: 0 0 0 2px #58a6ff inset;
+    background-color: var(--background-tertiary);
+    box-shadow: 0 0 0 2px var(--color-accent) inset;
 }
 
 .column-title-wrapper {
@@ -230,11 +277,11 @@ div.column-title-input:focus {
 .card-count {
     font-size: 0.85em;
     font-weight: 600;
-    color: #8b949e; /* Un color de texto más sutil */
-    background-color: #161b22; /* Un fondo ligeramente más oscuro que la tarjeta */
+    color: var(--text-secondary);
+    background-color: var(--background-secondary);
     padding: 2px 7px;
     border-radius: 10px; /* Más redondeado para un aspecto de "píldora" */
-    border: 1px solid #30363d;
+    border: 1px solid var(--border-primary);
     flex-shrink: 0; /* Evita que el contador se encoja */
 
     display: none;
@@ -253,24 +300,22 @@ div.column-title-input:focus {
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 4px;
-    transition: background-color 0.2s;
-    color: #b0c2d3;
+    transition: background-color 0.2s, color 0.2s;
+    color: var(--text-secondary);
 }
 
 .column-header i:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--background-interactive-hover);
 }
 
 .card {
-    /* background-color: #21262d; */
-    background-color: #1a1d20;
+    background-color: var(--background-tertiary);
     border-radius: 6px;
     /* padding: 12px; */
     padding: 10px 12px;
     margin-bottom: 10px;
-    margin-bottom: 16px;
-    border: 1px solid rgb(78, 78, 78);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-primary);
+    box-shadow: 0 1px 4px var(--shadow-column);
     cursor: grab; /* Cambia a 'grabbing' durante el arrastre a través de JS */
     /* La transición se gestiona con dnd-kit para un mejor rendimiento */
     /* transition: box-shadow 0.2s ease-in-out; */
@@ -315,12 +360,12 @@ div.column-title-input:focus {
     /* Hacemos que el padding coincida con el de la tarjeta normal */
     padding: 10px 12px;
     /* El fondo coincide con el de la tarjeta para una apariencia integrada */
-    background-color: #21262d;
+    background-color: var(--background-tertiary);
     /* Eliminamos los estilos de borde y contorno por defecto del navegador */
     border: none;
     outline: none;
-    /* Heredamos los estilos de fuente y color para que coincidan */
-    color: #e6edf3;
+    /* Heredamos los estilos de fuente y color */
+    color: var(--text-primary);
     font-family: inherit;
     font-size: 0.9em;
     line-height: 1.4;
@@ -334,23 +379,22 @@ div.column-title-input:focus {
     white-space: pre-wrap; /* Respeta los saltos de línea */
     overflow-wrap: break-word; /* Ajusta palabras largas para que no se desborden */
 
-    border-bottom: 1px solid #58a6ff;
+    border-bottom: 1px solid var(--color-accent);
 }
 
 .card-editing > div[contenteditable="true"]:focus {
-    box-shadow: 0 0 0 2px #58a6ff; 
+    box-shadow: 0 0 0 2px var(--color-accent); 
 }
 
 
 
 .add-card {
-    background-color: rgba(116, 116, 116, 0.726); /* background-color: rgba(255, 255, 255, 0.05); */
+    background-color: transparent;
     border-radius: 6px;
     padding: 12px;
     text-align: center;
     cursor: pointer;
-    color: #b0c2d3;
-    color: #cce0f3;
+    color: var(--text-secondary);
     font-size: 0.9em;
     display: flex;
     align-items: center;
@@ -361,7 +405,7 @@ div.column-title-input:focus {
 }
 
 .add-card:hover {
-    background-color: rgba(173, 173, 173, 0.801); /* background-color: rgba(255, 255, 255, 0.1); */
+    background-color: var(--background-interactive-hover);
 }
 
 .add-column-container {
@@ -370,12 +414,12 @@ div.column-title-input:focus {
 }
 
 .add-column-btn {
-    background-color: rgba(35, 35, 35, 0.42);
+    background-color: var(--background-interactive);
     border-radius: 8px;
     padding: 12px;
     text-align: left;
     cursor: pointer;
-    color: #e6edf3;
+    color: var(--text-primary);
     font-size: 0.9em;
     display: flex;
     align-items: center;
@@ -386,26 +430,26 @@ div.column-title-input:focus {
 }
 
 .add-column-btn:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--background-interactive-hover);
 }
 
 /* Este estilo ahora es para el dropdown que se renderiza en el body */
 .column-options-dropdown {
     position: absolute; /* La posición se calcula en JS */
-    background-color: #21262d;
+    background-color: var(--background-tertiary);
     border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 12px var(--shadow-primary);
     z-index: 110; /* Debe estar por encima de otros elementos */
     width: 200px;
     padding: 5px;
-    border: 1px solid #30363d;
+    border: 1px solid var(--border-primary);
 }
 
 .color-palette-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    padding: 4px 12px 8px; /* Ajustamos padding para el nuevo label */
+    padding: 4px 12px 8px;
 }
 
 .dropdown-divider {
@@ -425,7 +469,7 @@ div.column-title-input:focus {
 
 .color-swatch:hover {
     transform: scale(1.1);
-    border-color: #c9d1d9;
+    border-color: var(--text-primary);
 }
 
 .column-option {
@@ -436,7 +480,7 @@ div.column-title-input:focus {
     padding: 6px 12px 2px;
     font-size: 0.75em;
     font-weight: 600;
-    color: #8b949e;
+    color: var(--text-secondary);
     cursor: default;
     text-transform: uppercase;
 }
@@ -446,7 +490,7 @@ div.column-title-input:focus {
     padding: 10px 20px;
     text-align: center;
     font-size: 0.8em;
-    color: #b0c2d3;
+    color: var(--text-secondary);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 
     display: none;
@@ -462,25 +506,25 @@ div.column-title-input:focus {
 }
 
 .task-board-main::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--background-interactive);
     border-radius: 10px;
 }
 
 .task-board-main::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--background-interactive-hover);
     border-radius: 10px;
-    border: 2px solid rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--background-interactive);
 }
 
 .task-board-main::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: color-mix(in srgb, var(--text-secondary) 50%, transparent);
 }
 
 .column-option {
     padding: 8px 12px;
     cursor: pointer;
     border-radius: 4px;
-    color: #c9d1d9;
+    color: var(--text-primary);
     font-size: 0.9em;
 }
 
@@ -502,7 +546,7 @@ div.column-title-input:focus {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #e6edf3; /* Color blanco para el icono y el texto */
+    color: var(--text-primary);
     z-index: 10;
     
     /* Oculto por defecto a la derecha */
@@ -535,7 +579,7 @@ div.column-title-input:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--background-overlay);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -544,26 +588,26 @@ div.column-title-input:focus {
 }
 
 .modal-content {
-    background-color: #161b22;
+    background-color: var(--background-secondary);
     padding: 25px 30px;
     border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 15px var(--shadow-primary);
     width: 90%;
     max-width: 450px;
-    border: 1px solid #30363d;
+    border: 1px solid var(--border-primary);
     text-align: center;
 }
 
 .modal-content h2 {
     margin-top: 0;
     margin-bottom: 15px;
-    color: #f0f0f0;
+    color: var(--text-primary);
 }
 
 .modal-content p {
     margin-bottom: 25px;
     line-height: 1.6;
-    color: #c9d1d9;
+    color: var(--text-secondary);
 }
 
 .modal-actions {
@@ -587,22 +631,22 @@ div.column-title-input:focus {
 }
 
 .modal-btn-cancel {
-    background-color: #21262d;
-    color: #c9d1d9;
-    border: 1px solid #30363d;
+    background-color: var(--background-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
 }
 
 .modal-btn-cancel:hover {
-    background-color: #30363d;
+    background-color: var(--background-interactive-hover);
 }
 
 .modal-btn-confirm {
-    background-color: #da3633;
+    background-color: var(--color-danger);
     color: #ffffff;
 }
 
 .modal-btn-confirm:hover {
-    background-color: #f85149;
+    background-color: color-mix(in srgb, var(--color-danger) 90%, #fff 10%);
 }
 
 /* --- Modal Informativo (sin botones) --- */
@@ -621,7 +665,7 @@ div.column-title-input:focus {
 
 .spinner {
     border: 4px solid rgba(255, 255, 255, 0.2);
-    border-left-color: #58a6ff;
+    border-left-color: var(--color-accent);
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -652,8 +696,8 @@ div.column-title-input:focus {
 }
 
 .help-section h3 {
-  color: #58a6ff;
-  border-bottom: 1px solid #30363d;
+  color: var(--text-link);
+  border-bottom: 1px solid var(--border-primary);
   padding-bottom: 6px; /* Reducimos el padding */
   margin-bottom: 12px; /* Reducimos el margen */
   font-size: 1em; /* Hacemos los subtítulos más pequeños */
@@ -662,19 +706,19 @@ div.column-title-input:focus {
 .help-section ul {
   list-style: none;
   padding-left: 0;
-  color: #c9d1d9;
+  color: var(--text-secondary);
 }
 
 .help-section li {
   display: flex;
   gap: 10px; /* Reducimos el espaciado */
   margin-bottom: 10px; /* Reducimos el margen */
-  line-height: 1.4; /* Hacemos el interlineado más compacto */
+  line-height: 1.4;
   font-size: 0.9em; /* Reducimos el tamaño de la fuente principal */
 }
 
 .help-section li i {
-  color: #8b949e;
+  color: var(--text-secondary);
   margin-top: 3px; /* Ajustamos la posición del icono */
 }
 
@@ -684,7 +728,7 @@ div.column-title-input:focus {
     padding: 2px 8px;
     border-radius: 4px;
     font-family: monospace;
-    font-size: 0.95em; /* Ajustamos el tamaño para que sea consistente con el texto reducido */
+    font-size: 0.95em;
 }
 
 
@@ -731,14 +775,14 @@ div.column-title-input:focus {
 .add-board-option {
     cursor: pointer;
     /* font-style: italic; */
-    color: #207ae1;
-    background-color: #fff;
+    color: var(--text-link);
+    background-color: var(--background-secondary);
     padding: 8px 28px;
     user-select: none;
 }
 
 .add-board-option:hover {
-    background-color: #f0f0f0;
+    background-color: var(--background-tertiary);
 }
 
 /* --- Estilos para el nuevo BoardSelector --- */
@@ -749,8 +793,7 @@ div.column-title-input:focus {
 }
 
 .board-selector-active {
-    /* background-color: rgba(255, 255, 255, 0.1); */
-    background-color: rgba(224, 15, 15, 0.667);
+    background-color: var(--background-interactive);
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -762,8 +805,7 @@ div.column-title-input:focus {
 }
 
 .board-selector-active:hover {
-    /* background-color: rgba(255, 255, 255, 0.15); */
-    background-color: rgba(187, 53, 53, 0.667);
+    background-color: var(--background-interactive-hover);
 }
 
 .board-selector-active span {
@@ -783,17 +825,17 @@ div.column-title-input:focus {
     top: calc(100% + 5px);
     left: 0;
     width: 100%;
-    background-color: #ffffff; /* Fondo blanco */
-    border: 1px solid #d0d7de; /* Borde sutil */
+    background-color: var(--background-primary);
+    border: 1px solid var(--border-primary);
     border-radius: 6px;
-    box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2); /* Sombra más suave */
+    box-shadow: 0 8px 24px var(--shadow-primary);
     z-index: 100;
     list-style: none;
     padding: 5px;
     max-height: 420px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #a11b1b #ffffff;
+    scrollbar-color: var(--color-danger) var(--background-primary);
 }
 /* Renombramos 'li' a una clase más específica para evitar conflictos */
 .board-list-item {
@@ -803,9 +845,9 @@ div.column-title-input:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #1f2328;
-    background-color: #ffffff; /* Fondo para el DragOverlay */
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+    background-color: var(--background-primary);
+    border-bottom: 1px solid var(--border-secondary);
     user-select: none;
 }
 
@@ -823,7 +865,7 @@ div.column-title-input:focus {
 .drag-handle {
     visibility: hidden; /* Oculto por defecto */
     cursor: grab;
-    color: #8b949e;
+    color: var(--text-secondary);
     padding: 0 4px;
 }
 
@@ -840,8 +882,8 @@ div.column-title-input:focus {
 
 /* Estilo para el elemento mientras se arrastra (el que está bajo el cursor) */
 .is-dragging-board-item {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    border: 1px solid #d0d7de;
+    box-shadow: 0 4px 12px var(--shadow-primary);
+    border: 1px solid var(--border-primary);
     opacity: 0.95;
 }
 
@@ -860,7 +902,7 @@ div.column-title-input:focus {
 }
 
 .board-selector-dropdown .board-actions i {
-    color: #656d76; /* Color base para los iconos */
+    color: var(--text-secondary);
     font-size: 0.85em; /* Iconos más pequeños */
     transition: color 0.2s;
 }
@@ -870,14 +912,14 @@ div.column-title-input:focus {
 }
 
 .board-selector-dropdown .board-actions i.fa-pencil-alt:hover {
-    color: #0969da; /* Color azul para editar */
+    color: var(--color-accent);
 }
 .board-selector-dropdown .board-actions i.fa-trash-alt:hover {
-    color: #cf222e; /* Color rojo para eliminar */
+    color: var(--color-danger);
 }
 
 .board-list-item.editing {
-    background-color: #f0f6fc; /* Un fondo ligeramente diferente para el modo edición */
+    background-color: var(--background-tertiary);
     cursor: default;
 }
 
@@ -888,13 +930,13 @@ div.column-title-input:focus {
 .board-name-input {
     flex-grow: 1;
     padding: 4px 8px;
-    border: 1px solid #0969da;
+    border: 1px solid var(--color-accent);
     border-radius: 4px;
     font-size: inherit;
     font-family: inherit;
-    color: #1f2328;
+    color: var(--text-primary);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.3);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 30%, transparent);
     width: 120px;
     max-width: 210px;
 }
@@ -911,7 +953,7 @@ div.column-title-input:focus {
 }
 
 .board-edit-actions i {
-    color: #2da44e; /* Verde para confirmar */
+    color: var(--color-success);
     cursor: pointer;
     font-size: 1.1em;
     padding: 4px;
@@ -923,9 +965,9 @@ div.column-title-input:focus {
 
 /* --- Estilo para el botón de crear el primer tablero --- */
 .create-first-board-btn {
-    background-color: #238636; /* Verde similar al de GitHub */
+    background-color: var(--color-success);
     color: white;
-    padding: 8px 16px;
+    padding: 8px 16px; 
     border: 1px solid rgba(240, 246, 252, 0.1);
     border-radius: 6px;
     cursor: pointer;
@@ -938,7 +980,7 @@ div.column-title-input:focus {
 }
 
 .create-first-board-btn:hover {
-    background-color: #2ea043;
+    background-color: color-mix(in srgb, var(--color-success) 90%, #fff 10%);
 }
 .create-first-board-btn:active {
     transform: scale(0.98);
@@ -953,12 +995,12 @@ div.column-title-input:focus {
     top: calc(100% + 10px);
     right: 0;
     width: 300px;
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: var(--background-secondary);
+    border: 1px solid var(--border-primary);
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 24px var(--shadow-primary);
     z-index: 110;
-    color: #c9d1d9;
+    color: var(--text-secondary);
     padding: 8px 0;
 }
 
@@ -986,12 +1028,12 @@ div.column-title-input:focus {
 
 .profile-dropdown-header .user-info strong {
     font-weight: 600;
-    color: #e6edf3;
+    color: var(--text-primary);
 }
 
 .profile-dropdown-header .user-info span {
     font-size: 0.85em;
-    color: #8b949e;
+    color: var(--text-secondary);
     margin-bottom: 4px; /* Añadimos un pequeño espacio debajo del email */
 }
 
@@ -1012,14 +1054,14 @@ div.column-title-input:focus {
 }
 
 .profile-dropdown-menu li:hover {
-    background-color: #21262d;
+    background-color: var(--background-tertiary);
 }
 
 /* Aplica estilo solo a los iconos que son hijos directos de un <li> (no dentro de un botón) */
 .profile-dropdown-menu li > i {
     width: 16px; /* Alinea los iconos */
     text-align: center;
-    color: #8b949e;
+    color: var(--text-secondary);
 }
 
 .profile-dropdown-menu .dropdown-divider {
@@ -1079,7 +1121,7 @@ div.column-title-input:focus {
     padding: 10px 12px;
     border: none;
     border-radius: 6px;
-    background-color: #2ea44f; /* Un verde atractivo */
+    background-color: var(--color-success);
     color: white;
     font-size: 14px;
     font-weight: 600;
@@ -1092,7 +1134,7 @@ div.column-title-input:focus {
   }
   
   .dropdown-action-button:hover {
-    background-color: #2c974b; /* Un verde ligeramente más oscuro al pasar el ratón */
+    background-color: color-mix(in srgb, var(--color-success) 90%, #fff 10%);
   }
   
   .dropdown-action-button:active {

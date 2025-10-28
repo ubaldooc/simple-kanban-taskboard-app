@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import profileImage from "../assets/profile.png";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext"; // <-- 1. Importar useTheme
 import { useNavigate } from "react-router-dom";
 
 const ProfileDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { theme, toggleTheme } = useTheme(); // <-- 2. Obtener el tema y la función para cambiarlo
   const { user, authMode, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -75,8 +77,13 @@ const ProfileDropdown = () => {
           )}
           <hr className="dropdown-divider" />
           <ul>
-            <li>
-              <i className="fas fa-moon"></i> Modo oscuro
+            {/* 3. Hacer que el botón cambie el tema */}
+            <li onClick={toggleTheme}>
+              {/* Cambiar el icono y el texto según el tema actual */}
+              <i
+                className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"}`}
+              ></i>
+              Modo {theme === "dark" ? "Claro" : "Oscuro"}
             </li>
             <li>
               <i className="fas fa-comment-alt"></i> Enviar comentarios

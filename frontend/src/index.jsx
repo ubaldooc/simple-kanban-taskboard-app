@@ -1,22 +1,25 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App.jsx';
-import reportWebVitals from './reportWebVitals';
-import { AuthProvider } from './context/AuthContext.jsx';
-import { TaskboardProvider } from './context/TaskboardContext.jsx';
-import { BrowserRouter } from 'react-router-dom';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App.jsx";
+import reportWebVitals from "./reportWebVitals";
+import { AuthProvider } from "./context/AuthContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext";
+import { TaskboardProvider } from "./context/TaskboardContext.jsx";
+import { BrowserRouter } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <AuthProvider>
-          <TaskboardProvider>
-            <App />
-          </TaskboardProvider>
+          <ThemeProvider>
+            <TaskboardProvider>
+              <App />
+            </TaskboardProvider>
+          </ThemeProvider>
         </AuthProvider>
       </GoogleOAuthProvider>
     </BrowserRouter>
