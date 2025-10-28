@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext"; // <-- 1. Importar useTheme
 import { useNavigate } from "react-router-dom";
 
-const ProfileDropdown = () => {
+const ProfileDropdown = ({ onOpenHelpModal }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { theme, toggleTheme } = useTheme(); // <-- 2. Obtener el tema y la función para cambiarlo
@@ -87,6 +87,10 @@ const ProfileDropdown = () => {
             </li>
             <li>
               <i className="fas fa-comment-alt"></i> Enviar comentarios
+            </li>
+            <li onClick={onOpenHelpModal}>
+              <i className="fas fa-question-circle"></i>
+              Ayuda y Atajos
             </li>
           </ul>
           {isOnline && (

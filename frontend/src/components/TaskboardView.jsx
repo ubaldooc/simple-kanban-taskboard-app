@@ -147,13 +147,7 @@ export const TaskboardView = () => {
           <BoardSelector />
         </div>
         <div className="header-right">
-          <i className="fas fa-bell"></i>
-          {/* 3. Añadimos la clase 'help-icon' y el evento onClick */}
-          <i
-            className="fas fa-question-circle help-icon"
-            onClick={() => setIsHelpModalOpen(true)}
-          ></i>
-          <ProfileDropdown />
+          <ProfileDropdown onOpenHelpModal={() => setIsHelpModalOpen(true)} />
         </div>
       </header>
 
