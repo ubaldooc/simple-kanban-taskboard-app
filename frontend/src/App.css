@@ -15,7 +15,7 @@ html {
 body {
   /* --- TEMA CLARO (POR DEFECTO) --- */
   --background-primary: #2862cb;
-  --background-secondary: #1e3e5f;
+  --background-secondary: #f2f9ff;
   --background-tertiary: #dddddd;
   --background-overlay: rgba(27, 31, 35, 0.5);
   --background-interactive: #f6f8fa;
@@ -188,10 +188,8 @@ body {
 
 
 .column {
-    /* ¡CAMBIO CLAVE! Usamos el color de la columna con transparencia para el fondo */
-    background-color: color-mix(in srgb, var(--background-secondary) 60%, transparent);
-    /* ¡NUEVO! Añadimos el efecto de cristal esmerilado */
-    backdrop-filter: blur(12px);
+    /* MODO LIGHT: Fondo sólido con el color de la columna */
+    background-color: var(--column-header-color, '#888');
     border: 1px solid var(--column-header-color, var(--border-primary));
     border-radius: 8px;
     padding: 15px;
@@ -204,6 +202,13 @@ body {
     /* ¡CAMBIO CLAVE! Permite que el contenido de la columna se desplace verticalmente si es necesario. */
     overflow-y: hidden; /* Ocultamos el scroll por defecto, se manejará en el contenedor de tarjetas */
 }
+
+/* MODO DARK: Restauramos el efecto de cristal esmerilado */
+body.dark .column {
+    background-color: color-mix(in srgb, var(--background-secondary) 60%, transparent);
+    backdrop-filter: blur(12px);
+}
+
 
 /* Este es el contenedor que crecerá y tendrá el scroll */
 .cards-container {
