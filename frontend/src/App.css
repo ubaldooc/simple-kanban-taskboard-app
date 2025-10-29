@@ -20,6 +20,7 @@ body {
   --background-overlay: rgba(27, 31, 35, 0.5);
   --background-interactive: #f6f8fa;
   --background-interactive-hover: #f0f2f563;
+  --background-interactive-hover-white: #f0f2f56b;
 
   --text-primary: #24292f;
   --text-secondary: #e2e2e2;
@@ -46,7 +47,7 @@ body.dark {
   --background-interactive-hover: rgba(255, 255, 255, 0.1);
 
   --text-primary: #e6edf3;
-  --text-secondary: #8b949e;
+  --text-secondary: #d7e3f0;
   --text-link: #58a6ff;
 
   --border-primary: #30363d;
@@ -423,12 +424,12 @@ div.column-title-input:focus {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: auto; /* Empuja el "Add a card" al final de la columna */
+    margin-top: 6px; /* Empuja el "Add a card" al final de la columna */
     user-select: none;
 }
 
 .add-card:hover {
-    background-color: var(--background-interactive-hover);
+    background-color: var(--background-interactive-hover-white);
 }
 
 .add-column-container {
@@ -875,7 +876,7 @@ div.column-title-input:focus {
 }
 
 .board-list-item:hover {
-    background-color: #dfe6ec; /* Fondo suave al pasar el ratón */
+    background-color: #404344; /* Fondo suave al pasar el ratón */
 }
 
 .board-item-content {
