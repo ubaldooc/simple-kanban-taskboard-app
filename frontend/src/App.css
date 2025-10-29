@@ -19,7 +19,7 @@ body {
   --background-tertiary: #dddddd;
   --background-overlay: rgba(27, 31, 35, 0.5);
   --background-interactive: #f6f8fa;
-  --background-interactive-hover: #f0f2f563;
+  --background-interactive-hover: #abb0b86c;
   --background-interactive-hover-white: #f0f2f56b;
 
   --text-primary: #24292f;
@@ -44,7 +44,8 @@ body.dark {
   --background-tertiary: #21262d;
   --background-overlay: rgba(0, 0, 0, 0.7);
   --background-interactive: rgba(16, 16, 16, 0.509);
-  --background-interactive-hover: rgba(255, 255, 255, 0.1);
+  --background-interactive-hover: #cfcfcf52;
+
 
   --text-primary: #e6edf3;
   --text-secondary: #d7e3f0;
@@ -806,7 +807,7 @@ div.column-title-input:focus {
 }
 
 .add-board-option:hover {
-    background-color: var(--background-tertiary);
+    background-color: var(--background-interactive-hover);
 }
 
 /* --- Estilos para el nuevo BoardSelector --- */
@@ -876,7 +877,7 @@ div.column-title-input:focus {
 }
 
 .board-list-item:hover {
-    background-color: #404344; /* Fondo suave al pasar el ratón */
+    background-color: var(--background-interactive-hover); /* Fondo suave al pasar el ratón */
 }
 
 .board-item-content {
