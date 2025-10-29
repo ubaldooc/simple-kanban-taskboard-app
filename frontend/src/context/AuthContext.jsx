@@ -26,8 +26,8 @@ export const AuthProvider = ({ children }) => {
 
   // Efecto que se ejecuta cuando el estado del usuario cambia.
   useEffect(() => {
-    if (user) {
-      // Si hay usuario, asumimos que tenemos un token y lo configuramos en axios
+    // Si hay usuario Y un token de acceso, lo configuramos en axios.
+    if (user && accessToken) {
       setAuthToken(accessToken);
       localStorage.setItem("user", JSON.stringify(user));
       // console.log("AuthContext: User set, authMode online, token set in axios.");
