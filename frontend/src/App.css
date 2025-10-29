@@ -966,6 +966,12 @@ div.column-title-input:focus {
     max-width: 210px;
 }
 
+/* En modo oscuro, el texto del input de edición del tablero será negro para mejor contraste */
+body.dark .board-name-input {
+    color: #000000;
+    background-color: #e6edf3; /* Fondo claro para que el texto negro sea legible */
+}
+
 /* Oculta las acciones mientras se edita el nombre de ese tablero */
 .board-list-item.editing .board-actions {
     visibility: hidden;
