@@ -1,4 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import apiClient, { setAuthToken } from "../api/axios.js"; // Importamos la nueva función
@@ -24,6 +30,15 @@ export const AuthProvider = ({ children }) => {
   const [isAuthLoading, setIsAuthLoading] = useState(true); // Nuevo estado de carga
   const [isLoggingOut, setIsLoggingOut] = useState(false); // Estado para el modal de cierre de sesión
 
+  // --- Refs para evitar dependencias en el interceptor ---
+  // Usamos refs para que el interceptor siempre tenga acceso a la última versión
+  // del token y de la función setUser sin necesidad de re-crearse.
+  const accessTokenRef = useRef(accessToken);
+  const setUserRef = useRef(setUser);
+  useEffect(() => {
+    accessTokenRef.current = accessToken;
+    setUserRef.current = setUser;
+  }, [accessToken, setUser]);
   // Efecto que se ejecuta cuando el estado del usuario cambia.
   useEffect(() => {
     // Si hay usuario Y un token de acceso, lo configuramos en axios.
@@ -65,6 +80,7 @@ export const AuthProvider = ({ children }) => {
 
   // Efecto para configurar el interceptor de Axios para manejar tokens expirados
   useEffect(() => {
+    // Este efecto ahora se ejecuta solo una vez al montar el componente.
     const responseInterceptor = apiClient.interceptors.response.use(
       (response) => response, // Si la respuesta es exitosa (2xx), no hacemos nada.
       async (error) => {
@@ -86,10 +102,10 @@ export const AuthProvider = ({ children }) => {
             const { data } = await apiClient.post("/auth/refresh");
             const newAccessToken = data.accessToken;
 
-            // Actualizar el estado y los encabezados de axios
-            setUser(data.user); // <-- ¡Añadir esta línea!
+            // Actualizar el estado usando las refs y los encabezados de axios
+            setUserRef.current(data.user);
             setAccessToken(newAccessToken);
-            setAuthToken(newAccessToken);
+            setAuthToken(newAccessToken); // Esto actualiza el header por defecto de axios
 
             // Reintentar la petición original con el nuevo token
             originalRequest.headers[
@@ -115,7 +131,7 @@ export const AuthProvider = ({ children }) => {
 
     // Función de limpieza para remover el interceptor cuando el componente se desmonte.
     return () => apiClient.interceptors.response.eject(responseInterceptor);
-  }, [accessToken]); // Re-ejecutar si el token cambia para tener el closure correcto
+  }, []); // El array vacío asegura que el interceptor se configure una sola vez.
 
   // Función para iniciar sesión
   const login = async (email, password) => {
