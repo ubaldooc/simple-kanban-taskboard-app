@@ -632,7 +632,7 @@ div.column-title-input:focus {
 .modal-content p {
     margin-bottom: 25px;
     line-height: 1.6;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .modal-actions {
