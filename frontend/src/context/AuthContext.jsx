@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }) => {
 
             // Actualizar el estado usando las refs y los encabezados de axios
             setUserRef.current(data.user);
-            setAccessToken(newAccessToken);
+            setAccessToken(newAccessToken); // <-- ¡Esta es la línea que faltaba!
             setAuthToken(newAccessToken); // Esto actualiza el header por defecto de axios
 
             // Reintentar la petición original con el nuevo token

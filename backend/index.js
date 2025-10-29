@@ -525,7 +525,7 @@ app.put('/api/boards/:boardId/reorder-cards', protect, async (req, res) => {
     // Esto es mucho más eficiente que hacer múltiples llamadas a la base de datos.
     const bulkOps = cards.map(card => ({
       updateOne: {
-        filter: { _id: card._id, board: boardId }, // Añadimos filtro de tablero por seguridad
+        filter: { _id: card._id, board: board._id }, // Filtramos por el ID del tablero que ya verificamos que pertenece al usuario
         update: {
           $set: {
             order: card.order,
@@ -717,7 +717,7 @@ const generateTokensAndSetCookie = async (res, userId) => {
   await RefreshToken.create({ token: refreshToken, user: userId, expires });
 
   // 3. Enviar el Refresh Token en una cookie HttpOnly
-  res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', expires });
+  res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', expires });
 
   return accessToken;
 };
