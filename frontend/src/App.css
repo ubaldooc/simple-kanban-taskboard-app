@@ -305,9 +305,9 @@ div.column-title-input {
     font-size: 1.1em;
     font-weight: normal;
     font-family: inherit;
-    padding: 2px 5px;
+    padding: 2px 4px;
     margin: -2px -4px; /* Compensar el padding */
-    border-radius: 6px;
+    border-radius: 4px;
     resize: none; /* Deshabilita el redimensionamiento manual */
     /* overflow-y: auto; */
     white-space: pre-wrap;
@@ -318,7 +318,7 @@ div.column-title-input {
 }
 
 div.column-title-input:focus {
-    background-color: var(--background-secondary);
+    background-color: var(--background-tertiary);
     box-shadow: 0 0 0 2px var(--color-accent) inset;
 }
 

@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect, memo } from "react";
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
-import Card from "./Card.jsx";
-import { useTaskboardContext } from "../context/TaskboardContext.jsx";
+import React, { useState, useRef, useEffect, memo } from 'react';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import Card from './Card.jsx';
+import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 
 const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   const {
+
     editingColumnId,
     setEditingColumnId,
     updateColumnTitle,
@@ -16,14 +17,14 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   } = useTaskboardContext();
   const titleInputRef = useRef(null);
   const optionsButtonRef = useRef(null); // Ref para el botón de opciones
-
+  
   const isEditing = editingColumnId === column.id;
 
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
       const textarea = titleInputRef.current;
       textarea.focus();
-
+      
       // Seleccionar todo el texto al entrar en modo de edición.
       const selection = window.getSelection();
       if (selection) {
@@ -35,17 +36,11 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     }
   }, [isEditing]);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column.id,
     data: {
-      type: "Column",
+      type: 'Column',
       column,
     },
     disabled: isEditing,
@@ -53,10 +48,8 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
 
   const style = {
     transition,
-    transform: transform
-      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-      : undefined,
-    "--column-header-color": column.color || "#888",
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    '--column-header-color': column.color || '#888',
   };
 
   const toggleOptions = (e) => {
@@ -68,13 +61,13 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
 
   const handleTitleBlur = () => {
     let finalTitle = titleInputRef.current.innerText.trim();
-    if (finalTitle === "") {
+    if (finalTitle === '') {
       if (cards.length === 0) {
         // Si no hay título Y no hay tarjetas, eliminar la columna directamente
         deleteColumn(column.id);
       } else {
         // Si no hay título pero sí hay tarjetas, asignar título por defecto
-        finalTitle = "Columna";
+        finalTitle = 'Columna';
         if (column.title !== finalTitle) {
           updateColumnTitle(column.id, finalTitle);
         }
@@ -89,20 +82,17 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   };
 
   const handleTitleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault(); // Evita el salto de línea
       titleInputRef.current.blur(); // Llama a handleTitleBlur indirectamente
 
       // Si es una columna nueva (título original vacío) Y el usuario ha escrito un título,
       // entonces creamos una nueva columna para una experiencia de usuario más fluida.
       // Si el título se deja vacío, no se crea una nueva columna.
-      if (
-        column.title === "" &&
-        titleInputRef.current.innerText.trim() !== ""
-      ) {
+      if (column.title === '' && titleInputRef.current.innerText.trim() !== '') {
         addColumn();
       }
-    } else if (e.key === "Escape") {
+    } else if (e.key === 'Escape') {
       if (titleInputRef.current) titleInputRef.current.innerText = column.title;
       setEditingColumnId(null);
     }
@@ -115,48 +105,33 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
 
   // La animación se aplica solo si la columna está en modo edición Y su título original está vacío.
   // Esto diferencia una columna nueva de una existente que se está editando.
-  const isNewlyCreatedAnimation = isEditing && column.title === "";
+  const isNewlyCreatedAnimation = isEditing && column.title === '';
   const isExiting = exitingItemIds.includes(column.id);
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      className={`column ${isDragging ? "is-dragging-column" : ""} ${
-        isEditing ? "column-editing" : ""
-      } ${isNewlyCreatedAnimation ? "item-enter-animation" : ""} ${
-        isExiting ? "item-exit-animation" : ""
-      }`}
-    >
-      <div className="column-header" {...attributes} {...listeners}>
-        <div
-          className="column-title-wrapper"
-          onDoubleClick={handleTitleDoubleClick}
-        >
-          {isEditing ? (
+      ref={setNodeRef} style={style}
+      className={`column ${isDragging ? 'is-dragging-column' : ''} ${isEditing ? 'column-editing' : ''} ${
+        isNewlyCreatedAnimation ? 'item-enter-animation' : ''
+      } ${isExiting ? 'item-exit-animation' : ''}`}>
+      <div className="column-header" {...attributes} {...listeners} >
+        <div className="column-title-wrapper" onDoubleClick={handleTitleDoubleClick}>
+          {isEditing ? ( 
             <div
               ref={titleInputRef}
               contentEditable={true}
               suppressContentEditableWarning={true}
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
-              className="column-title-input"
+              className="column-title-input" 
               spellCheck="false"
-            >
-              {column.title}
-            </div>
+            >{column.title}</div>
           ) : (
             <h2>{column.title}</h2>
           )}
           <span className="card-count">{cards.length}</span>
         </div>
-        {!isNewlyCreatedAnimation && (
-          <i
-            ref={optionsButtonRef}
-            className="fas fa-ellipsis-h column-options"
-            onClick={toggleOptions}
-          ></i>
-        )}
+        <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions} ></i>
       </div>
       <div className="cards-container">
         <SortableContext items={cards.map((card) => card.id)}>
