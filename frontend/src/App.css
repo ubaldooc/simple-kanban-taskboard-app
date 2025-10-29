@@ -19,8 +19,8 @@ body {
   --background-tertiary: #dddddd;
   --background-overlay: rgba(27, 31, 35, 0.5);
   --background-interactive: #f6f8fa;
-  --background-interactive-hover: #abb0b86c;
-  --background-interactive-hover-white: #f0f2f56b;
+  --background-interactive-hover: #b9c1cb;
+  --background-interactive-hover-white: #d4d5db7f;
 
   --text-primary: #24292f;
   --text-secondary: #e2e2e2;
@@ -44,7 +44,7 @@ body.dark {
   --background-tertiary: #21262d;
   --background-overlay: rgba(0, 0, 0, 0.7);
   --background-interactive: rgba(16, 16, 16, 0.509);
-  --background-interactive-hover: #cfcfcf52;
+  --background-interactive-hover: #52545b;
 
 
   --text-primary: #e6edf3;
@@ -455,7 +455,7 @@ div.column-title-input:focus {
 }
 
 .add-column-btn:hover {
-    background-color: var(--background-interactive-hover);
+    background-color: var(--background-interactive-hover-white);
 }
 
 /* Este estilo ahora es para el dropdown que se renderiza en el body */
