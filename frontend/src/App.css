@@ -21,6 +21,8 @@ body {
   --background-interactive: #f6f8fa;
   --background-interactive-hover: #b9c1cb;
   --background-interactive-hover-white: #d4d5db7f;
+  --background-interactive-accent: #f2f9ff;
+  --background-interactive-accent-hover: #d2d8dd;
 
   --text-primary: #24292f;
   --text-secondary: #e2e2e2;
@@ -45,7 +47,8 @@ body.dark {
   --background-overlay: rgba(0, 0, 0, 0.7);
   --background-interactive: rgba(16, 16, 16, 0.509);
   --background-interactive-hover: #52545b;
-
+  --background-interactive-accent: #2379c4;
+  --background-interactive-accent-hover: #3c94dc;
 
   --text-primary: #e6edf3;
   --text-secondary: #d7e3f0;
@@ -138,8 +141,8 @@ body {
 }
 
 .user-greeting {
-    font-size: 1.2em;
-    color: var(--text-primary);
+    font-size: 0.9em;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
@@ -167,6 +170,38 @@ body {
     border-radius: 50%;
     cursor: pointer;
     background-color: var(--background-tertiary);
+}
+
+.guest-login-prompt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guest-login-prompt span {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.header-login-btn {
+    background-color: var(--color-success);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 0.85em;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.header-login-btn:hover {
+    background-color: color-mix(in srgb, var(--color-success) 90%, #fff 10%);
+}
+
+.header-login-btn:active {
+    transform: scale(0.97);
 }
 
 .task-board-main {
@@ -818,7 +853,8 @@ div.column-title-input:focus {
 }
 
 .board-selector-active {
-    background-color: var(--background-interactive);
+    background-color: var(--background-interactive-accent);
+    /* border: 1px solid whitesmoke; */
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -830,7 +866,7 @@ div.column-title-input:focus {
 }
 
 .board-selector-active:hover {
-    background-color: var(--background-interactive-hover);
+    background-color: var(--background-interactive-accent-hover);
 }
 
 .board-selector-active span {

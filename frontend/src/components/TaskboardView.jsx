@@ -15,7 +15,7 @@ import DeleteZone from "./DeleteZone.jsx";
 import ConfirmationModal from "./ConfirmationModal.jsx";
 import useHotkeys from "../hooks/useHotkeys.js";
 import ColumnOptionsDropdown from "./ColumnOptionsDropdown.jsx";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import BoardSelector from "./BoardSelector.jsx";
 import LoggingOutModal from "./LoggingOutModal.jsx";
 import ProfileDropdown from "./ProfileDropdown.jsx";
@@ -23,6 +23,7 @@ import HelpModal from "./HelpModal.jsx"; // <-- 1. Importamos el nuevo modal
 import logoImage from "../assets/logo.png";
 import { useTaskboardContext } from "../context/TaskboardContext";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 import { useTaskboardDnd } from "../hooks/useTaskboardDnd";
 
 export const TaskboardView = () => {
@@ -50,6 +51,7 @@ export const TaskboardView = () => {
     exitingItemIds,
   } = useTaskboardContext();
   const { user, authMode } = useAuth();
+  const navigate = useNavigate();
 
   const { isLoggingOut } = useAuth(); // <-- 2. Obtener isLoggingOut desde AuthContext
 
@@ -148,10 +150,20 @@ export const TaskboardView = () => {
           <BoardSelector />
         </div>
         <div className="header-right">
-          {authMode === "online" && user && (
+          {authMode === "online" && user ? (
             <span className="user-greeting">
               Hola, {user.name.split(" ")[0]}
             </span>
+          ) : (
+            <div className="guest-login-prompt">
+              <button
+                className="header-login-btn"
+                onClick={() => navigate("/login")}
+              >
+                Iniciar sesión
+              </button>
+              <span>¡para trabajar desde cualquier dispositivo!</span>
+            </div>
           )}
           <ProfileDropdown onOpenHelpModal={() => setIsHelpModalOpen(true)} />
         </div>
