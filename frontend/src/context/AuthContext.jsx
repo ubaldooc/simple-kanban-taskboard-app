@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
         // Si el error es 401 y es por token expirado, y no hemos reintentado ya
         if (
           isUnauthorizedError &&
-          backendErrorMessage === "Token de autenticación expirado." &&
+          backendErrorMessage === "El token de acceso ha expirado." &&
           !originalRequest._retry
         ) {
           originalRequest._retry = true; // Marcar para evitar bucles infinitos
