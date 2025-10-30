@@ -195,7 +195,13 @@ export const TaskboardView = () => {
           {/* Aplicamos los estilos y una clase específica para la columna */}
           <DragOverlay
             style={dragItemStyles}
-            className={activeColumn ? "dnd-overlay-column" : ""}
+            className={
+              activeColumn
+                ? "dnd-overlay-column"
+                : activeCard
+                ? "dnd-overlay-card"
+                : ""
+            }
           >
             {activeCard ? (
               <Card card={activeCard} />

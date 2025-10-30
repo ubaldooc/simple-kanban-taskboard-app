@@ -406,6 +406,19 @@ div.column-title-input:focus {
     min-height: 200px; /* O un valor que se ajuste a tu diseño */
 }
 
+/* --- Estilos para la tarjeta arrastrada y su placeholder --- */
+/* Limita el texto a 2 líneas y aplica elipsis si se desborda.
+   Se aplica tanto al clon en el DragOverlay como al placeholder original. */
+.dnd-overlay-card .card p,
+.card.is-dragging-source p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Número máximo de líneas */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Asegura que el placeholder no se colapse a cero altura */
+    min-height: 1.4em; /* Aproximadamente una línea de texto */
+}
 
 .card p {
     margin: 0;
