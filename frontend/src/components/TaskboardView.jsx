@@ -69,6 +69,7 @@ export const TaskboardView = () => {
     handleDragStart,
     handleDragOver,
     handleDragEnd,
+    dragItemStyles, // <-- 1. Importamos los estilos del elemento arrastrado
   } = useTaskboardDnd();
 
   // --- DND Kit Sensors ---
@@ -191,7 +192,11 @@ export const TaskboardView = () => {
             ))}
           </SortableContext>
           <DeleteZone />
-          <DragOverlay>
+          {/* Aplicamos los estilos y una clase específica para la columna */}
+          <DragOverlay
+            style={dragItemStyles}
+            className={activeColumn ? "dnd-overlay-column" : ""}
+          >
             {activeCard ? (
               <Card card={activeCard} />
             ) : activeColumn ? (

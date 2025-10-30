@@ -17,26 +17,54 @@ export const useTaskboardDnd = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isOverDeleteZone, setIsOverDeleteZone] = useState(false);
 
+  // Estado para guardar las dimensiones del elemento arrastrado
+  const [dragItemStyles, setDragItemStyles] = useState(null);
+
   const handleDragStart = (event) => {
     const { active } = event;
     if (active.data.current?.type === "Card" || active.data.current?.type === "Column") {
       setIsDragging(true);
       setActive(active);
+
+      // Capturamos el tamaño del nodo DOM original
+      const node = active.data.current?.sortable?.node?.current;
+      if (node) {
+        setDragItemStyles({
+          width: node.offsetWidth,
+          height: node.offsetHeight,
+        });
+      }
     }
   };
 
   const handleDragOver = (event) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
+    if (!over) return;
 
     setIsOverDeleteZone(over.id === 'delete-zone');
 
-    const isActiveACard = active.data.current?.type === 'Card';
-    if (!isActiveACard) return;
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type;
 
-    const activeCard = active.data.current.card;
+    // --- Lógica para reordenar COLUMNAS mientras se arrastran ---
+    if (activeType === 'Column' && overType === 'Column' && active.id !== over.id) {
+      updateActiveBoard(board => {
+        const oldIndex = board.columns.findIndex(c => c.id === active.id);
+        const newIndex = board.columns.findIndex(c => c.id === over.id);
+        
+        // Si los índices son válidos, mueve la columna en el estado
+        if (oldIndex !== -1 && newIndex !== -1) {
+          return {
+            ...board,
+            columns: arrayMove(board.columns, oldIndex, newIndex),
+          };
+        }
+        return board;
+      });
+    }
 
     // --- Lógica para mover una tarjeta sobre otra columna o tarjeta ---
+    if (activeType !== 'Card') return;
     const isOverAColumn = over.data.current?.type === 'Column';
     const isOverACard = over.data.current?.type === 'Card';
 
@@ -84,6 +112,7 @@ export const useTaskboardDnd = () => {
     setActive(null);
     setIsDragging(false);
     setIsOverDeleteZone(false);
+    setDragItemStyles(null); // Limpiamos los estilos
 
     if (!over) return;
 
@@ -122,5 +151,6 @@ export const useTaskboardDnd = () => {
     handleDragStart,
     handleDragOver,
     handleDragEnd,
+    dragItemStyles, // Exportamos los estilos
   };
 };

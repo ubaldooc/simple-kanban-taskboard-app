@@ -400,6 +400,13 @@ div.column-title-input:focus {
     color: transparent; /* Oculta también el texto */
 }
 
+/* --- Estilo para el clon de la columna en el DragOverlay --- */
+/* Asegura que una columna vacía no se encoja al ser arrastrada. */
+.dnd-overlay-column .column {
+    min-height: 200px; /* O un valor que se ajuste a tu diseño */
+}
+
+
 .card p {
     margin: 0;
     font-size: 0.9em;
