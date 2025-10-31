@@ -1096,7 +1096,7 @@ body.dark .board-name-input {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    padding: 6px;
+    padding: 6px 6px 8px 6px;
 }
 
 .profile-dropdown-header .avatar-large {
@@ -1119,7 +1119,7 @@ body.dark .board-name-input {
 }
 
 .profile-dropdown-header .user-info span {
-    font-size: 0.85em;
+    font-size: 0.8rem;
     color: var(--text-primary);
     margin-bottom: 4px; /* Añadimos un pequeño espacio debajo del email */
 }

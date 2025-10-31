@@ -8,7 +8,7 @@ export const ThemeProvider = ({ children }) => {
   // 1. Estado para el tema, inicializado desde localStorage o por defecto 'dark'
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
-    return savedTheme || "dark";
+    return savedTheme || "light";
   });
 
   // 2. Efecto para aplicar la clase al body y guardar en localStorage
