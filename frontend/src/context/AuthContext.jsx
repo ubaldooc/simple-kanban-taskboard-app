@@ -242,6 +242,7 @@ export const AuthProvider = ({ children }) => {
 
   // 3. Valores que se expondrán a los componentes hijos
   const value = {
+    setUser, // <-- ¡Añadido! Ahora setUser está disponible para los consumidores del contexto.
     user,
     accessToken,
     authMode,

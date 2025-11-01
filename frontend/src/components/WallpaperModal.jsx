@@ -1,19 +1,21 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
-import apiClient from "../api/axios";
 import toast from "react-hot-toast";
 import "./WallpaperModal.css"; // Renombrado de WallpaperManager.css
+import { getApiService } from "../services/apiService";
 
 const WallpaperModal = ({ isOpen, onClose }) => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
     user?.wallpaper || "/wallpapers/wallpaper-0.jpg"
   );
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // ¡CAMBIO CLAVE! Seleccionamos la API correcta (online o guest)
+  const api = useMemo(() => getApiService(authMode), [authMode]);
 
   // Lista de imágenes predefinidas (puedes mover esto a un archivo de configuración si crece)
   const predefinedWallpapers = Array.from(
@@ -35,57 +37,72 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   }, [isOpen, onClose]);
 
   // Maneja la selección de un archivo local
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFile(file);
-      setSelectedWallpaper(null); // Deselecciona cualquier predefinido
-      setPreview(URL.createObjectURL(file));
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("wallpaper", file);
+
+      try {
+        // En modo offline, la subida de archivos no está soportada.
+        if (authMode === "guest") {
+          toast.error(
+            "La subida de fondos solo está disponible para usuarios registrados."
+          );
+          return;
+        }
+        // Usamos la API online para subir el archivo
+        const response = await api.updateUserWallpaper(formData);
+        setUser({ ...user, wallpaper: response.wallpaper });
+        setSelectedWallpaper(response.wallpaper);
+        toast.success("Fondo de pantalla subido.");
+      } catch (error) {
+        toast.error("Error al subir la imagen.");
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
   // Maneja la selección de un wallpaper predefinido
-  const handlePredefinedSelect = (url) => {
+  const handlePredefinedSelect = async (url) => {
+    // Si ya está seleccionado, no hacer nada
+    if (url === selectedWallpaper) return;
+
+    // Guardamos el wallpaper original para poder revertir en caso de error.
+    // Usamos el estado 'selectedWallpaper' como fuente de verdad antes del cambio.
+    const originalWallpaper = selectedWallpaper;
+
+    // Actualización optimista
     setSelectedWallpaper(url);
-    setFile(null); // Limpia cualquier archivo seleccionado
-    setPreview(null);
-  };
-
-  // Guarda la selección (ya sea predefinida o subida)
-  const handleSave = async () => {
-    setIsUploading(true);
-    const formData = new FormData();
-
-    // Si hay un archivo, lo añadimos al FormData.
-    // Si no, añadimos la URL del fondo predefinido.
-    if (file) {
-      formData.append("wallpaper", file);
-    } else {
-      formData.append("wallpaperUrl", selectedWallpaper);
+    // Si hay un usuario (modo online), actualizamos su objeto.
+    // Si no (modo guest), esta operación se omite de forma segura.
+    if (user) {
+      setUser({ ...user, wallpaper: url });
     }
 
+    // Petición al backend
     try {
-      const response = await apiClient.put("/user/wallpaper", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      // Actualiza el estado del usuario en el contexto con la respuesta del backend
-      setUser({ ...user, wallpaper: response.data.wallpaper });
-      toast.success("Fondo de pantalla guardado.");
+      await api.updateUserPreferences({ wallpaper: url });
+      // No es necesario un toast de éxito para que sea más fluido
     } catch (error) {
-      toast.error("Error al guardar el fondo de pantalla.");
-    } finally {
-      setIsUploading(false);
-      onClose();
+      toast.error("No se pudo guardar el fondo.");
+      // Revertir en caso de error
+      setSelectedWallpaper(originalWallpaper);
+      if (user) {
+        setUser({ ...user, wallpaper: originalWallpaper });
+      }
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay" onClick={onClose}>
       <div className="wallpaper-modal-box" ref={modalRef}>
         <h2 className="modal-title">Cambiar fondo de pantalla</h2>
-        <button className="close-button" onClick={onClose}>
+        <button className="close-button" onClick={onClose} aria-label="Cerrar">
           <i className="fas fa-times"></i>
         </button>
 
@@ -108,49 +125,25 @@ const WallpaperModal = ({ isOpen, onClose }) => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="upload-section">
-          <button
-            className="upload-button"
+          {/* Botón para subir imagen, integrado en la cuadrícula */}
+          <div
+            className="wallpaper-item upload-placeholder"
             onClick={() => fileInputRef.current.click()}
           >
-            <i className="fas fa-upload"></i> Subir una imagen
-          </button>
+            {isUploading ? (
+              <span className="spinner-small"></span>
+            ) : (
+              <i className="fas fa-plus"></i>
+            )}
+          </div>
           <input
             type="file"
             ref={fileInputRef}
             style={{ display: "none" }}
             accept="image/jpeg, image/png, image/webp"
             onChange={handleFileChange}
+            disabled={isUploading}
           />
-          {preview && (
-            <div className="upload-preview">
-              <span>Selección actual:</span>
-              <img src={preview} alt="Vista previa" />
-            </div>
-          )}
-        </div>
-
-        <div className="modal-actions">
-          <button className="modal-btn modal-btn-cancel" onClick={onClose}>
-            Cancelar
-          </button>
-          <button
-            className="modal-btn modal-btn-confirm"
-            onClick={handleSave}
-            disabled={
-              isUploading || (!file && selectedWallpaper === user?.wallpaper)
-            }
-          >
-            {isUploading ? (
-              <>
-                <span className="spinner-small"></span> Guardando...
-              </>
-            ) : (
-              "Guardar Cambios"
-            )}
-          </button>
         </div>
       </div>
     </div>

@@ -13,6 +13,9 @@ const onlineApi = {
   
   updateUserPreferences: (prefs) => apiClient.put('/user/preferences', prefs).then(handleResponse),
 
+  // Nueva función específica para subir wallpapers
+  updateUserWallpaper: (formData) => apiClient.put('/user/wallpaper', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(handleResponse),
+
   getBoardsList: () => apiClient.get('/boards/list').then(handleResponse),
   
   getBoardDetails: (boardId) => apiClient.get(`/boards/${boardId}`).then(handleResponse),
