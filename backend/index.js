@@ -9,6 +9,8 @@ import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken'; 
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
 
 import { Board, Column, Card, User, RefreshToken } from './src/models/models.js';
 import { protect } from './src/middleware/authMiddleware.js';
@@ -20,6 +22,17 @@ const app = express();
 const port = process.env.PORT || 5001;
 // Usa la URI de MongoDB del .env. Asegúrate de que MONGO_URI esté en tu .env
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mi_app_taskboard2';
+
+// Configuración de Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configuración de multer para manejar archivos temporales
+const storage = multer.memoryStorage(); // Almacena los archivos en memoria
+const upload = multer({ storage });
 
 
 // Middleware para habilitar CORS
@@ -629,8 +642,6 @@ app.put('/api/cards/:id', protect, async (req, res) => {
     if (title && title.trim() !== '') {
       updateData.title = title.trim();
     }
-    // Aquí podrías añadir lógica para mover la tarjeta a otra columna
-    // y para reordenar, pero por ahora nos centramos en el título.
 
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ message: 'No se proporcionaron datos para actualizar.' });
@@ -652,7 +663,6 @@ app.put('/api/cards/:id', protect, async (req, res) => {
     res.status(500).json({ message: 'Error interno del servidor al actualizar la tarjeta.' });
   }
 });
-
 
 
 // DELETE /api/cards/:id - Elimina una tarjeta
@@ -697,6 +707,10 @@ app.delete('/api/cards/:id', protect, async (req, res) => {
 
 
 
+      // INICIAR SESION CON GOOGLE
+      // INICIAR SESION CON GOOGLE
+      // INICIAR SESION CON GOOGLE
+      // INICIAR SESION CON GOOGLE
 
 // --- Google OAuth2 Authentication Route PARA INICIAR SESION CON GOOGLE ---
 // Configura el cliente de Google OAuth2 para el flujo de código de autorización
@@ -817,7 +831,7 @@ app.post('/api/auth/register', async (req, res) => {
     res.status(201).json({ // 201 Created
       message: 'Usuario registrado exitosamente.',
       accessToken,
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, picture: newUser.picture }
+      user: { id: newUser._id, name: newUser.name, email: newUser.email, picture: newUser.picture, wallpaper: newUser.wallpaper } // SI HAY ALGUN ERROR ES PROBABLE QUE SE ORIGINE PORQUE AÑADI WALLPAPER EN ESTA LINEA
     });
 
   } catch (error) {
@@ -861,7 +875,7 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(200).json({
       message: 'Inicio de sesión exitoso.',
       accessToken,
-      user: { id: user._id, name: user.name, email: user.email, picture: user.picture }
+      user: { id: user._id, name: user.name, email: user.email, picture: user.picture, wallpaper: user.wallpaper }
     });
 
   } catch (error) {
@@ -900,7 +914,7 @@ app.post('/api/auth/refresh', async (req, res) => {
     // 3. Devolver el nuevo token Y los datos del usuario
     res.status(200).json({ 
       accessToken,
-      user: { id: user._id, name: user.name, email: user.email, picture: user.picture }
+      user: { id: user._id, name: user.name, email: user.email, picture: user.picture, wallpaper: user.wallpaper }
     });
   } catch (error) {
     console.error('Error al refrescar el token:', error);
@@ -922,4 +936,62 @@ app.post('/api/auth/logout', async (req, res) => {
   // Limpia la cookie del navegador
   res.clearCookie('refreshToken');
   res.status(200).json({ message: 'Cierre de sesión exitoso.' });
+});
+
+
+
+    // WALLPAPER
+    // WALLPAPER
+    // WALLPAPER
+    // WALLPAPER
+app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, res) => { // Acepta un archivo opcional
+  try {
+    const { wallpaperUrl } = req.body; // O la URL de un fondo predefinido
+    let finalWallpaperUrl;
+
+    // Caso 1: Se subió un nuevo archivo
+    if (req.file) {
+      const user = await User.findById(req.user._id);
+      // Si el usuario ya tiene un wallpaper personalizado en Cloudinary, elimina el anterior
+      if (user.wallpaper && user.wallpaper.includes('cloudinary')) {
+        const publicId = user.wallpaper.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`wallpapers/${publicId}`);
+      }
+
+      // Sube la nueva imagen a Cloudinary y obtén la URL
+      finalWallpaperUrl = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'wallpapers' },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result.secure_url);
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+
+    // Caso 2: Se envió la URL de un fondo predefinido
+    } else if (wallpaperUrl) {
+      finalWallpaperUrl = wallpaperUrl;
+
+    // Caso 3: No se proporcionó ni archivo ni URL
+    } else {
+      return res.status(400).json({ message: 'No se proporcionó un fondo de pantalla.' });
+    }
+
+    // Actualiza el campo 'wallpaper' del usuario en la base de datos
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { wallpaper: finalWallpaperUrl },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: 'Fondo de pantalla actualizado.',
+      wallpaper: updatedUser.wallpaper,
+    });
+  } catch (error) {
+    console.error('Error al subir el wallpaper:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
 });

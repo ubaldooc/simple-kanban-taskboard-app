@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import profileImage from "../assets/profile.png";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext"; // <-- 1. Importar useTheme
+import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 
-const ProfileDropdown = ({ onOpenHelpModal }) => {
+const ProfileDropdown = ({ onOpenHelpModal, onOpenWallpaperModal }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { theme, toggleTheme } = useTheme(); // <-- 2. Obtener el tema y la función para cambiarlo
+  const { theme, toggleTheme } = useTheme();
   const { user, authMode, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -20,7 +20,7 @@ const ProfileDropdown = ({ onOpenHelpModal }) => {
 
   const handleLogout = () => {
     logout();
-    setIsOpen(false); // Cerramos el dropdown
+    setIsOpen(false);
   };
 
   // Efecto para cerrar el dropdown si se hace clic fuera de él
@@ -77,9 +77,12 @@ const ProfileDropdown = ({ onOpenHelpModal }) => {
           )}
           <hr className="dropdown-divider" />
           <ul>
-            {/* 3. Hacer que el botón cambie el tema */}
+            {/* Botón para cambiar el wallpaper */}
+            <li onClick={onOpenWallpaperModal}>
+              <i className="fas fa-image"></i> Cambiar fondo
+            </li>
+            {/* Botón para cambiar el tema */}
             <li onClick={toggleTheme}>
-              {/* Cambiar el icono y el texto según el tema actual */}
               <i
                 className={`fas ${theme === "dark" ? "fa-sun" : "fa-moon"}`}
               ></i>

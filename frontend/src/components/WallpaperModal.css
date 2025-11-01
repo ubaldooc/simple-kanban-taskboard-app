@@ -1,0 +1,150 @@
+.wallpaper-modal-box {
+  /* Hereda estilos de .modal-content pero con ajustes */
+  background-color: var(--background-secondary);
+  padding: 25px 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px var(--shadow-primary);
+  width: 90%;
+  max-width: 600px; /* Un poco más ancho para la cuadrícula */
+  border: 1px solid var(--border-primary);
+  text-align: left;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative; /* Para el botón de cerrar */
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: var(--background-tertiary);
+}
+
+.modal-title {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 1.4rem;
+}
+
+.modal-subtitle {
+  color: var(--text-secondary);
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 0.9rem;
+}
+
+.wallpaper-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.wallpaper-item {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  height: 65px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  border: 2px solid transparent;
+  overflow: hidden; /* Para el checkmark */
+}
+
+.wallpaper-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px var(--shadow-column);
+}
+
+.wallpaper-item.selected {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.selection-checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(9, 105, 218, 0.6); /* Color de acento con opacidad */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 1.5rem;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.wallpaper-item.selected .selection-checkmark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.upload-section {
+  border-top: 1px solid var(--border-primary);
+  padding-top: 20px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.upload-button {
+  background-color: var(--background-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-button:hover {
+  background-color: var(--background-interactive-hover);
+}
+
+.upload-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.upload-preview img {
+  width: 80px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border-primary);
+}
+
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}

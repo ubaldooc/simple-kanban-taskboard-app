@@ -8,6 +8,9 @@ import {
   closestCenter,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
+import { Toaster, toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 import "../App.css";
 import Column from "./Column.jsx";
 import Card from "./Card.jsx";
@@ -15,15 +18,15 @@ import DeleteZone from "./DeleteZone.jsx";
 import ConfirmationModal from "./ConfirmationModal.jsx";
 import useHotkeys from "../hooks/useHotkeys.js";
 import ColumnOptionsDropdown from "./ColumnOptionsDropdown.jsx";
-import { Toaster, toast } from "react-hot-toast";
 import BoardSelector from "./BoardSelector.jsx";
+
 import LoggingOutModal from "./LoggingOutModal.jsx";
 import ProfileDropdown from "./ProfileDropdown.jsx";
-import HelpModal from "./HelpModal.jsx"; // <-- 1. Importamos el nuevo modal
+import HelpModal from "./HelpModal.jsx";
 import logoImage from "../assets/logo.png";
+import WallpaperModal from "./WallpaperModal.jsx";
 import { useTaskboardContext } from "../context/TaskboardContext";
 import { useAuth } from "../context/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
 import { useTaskboardDnd } from "../hooks/useTaskboardDnd";
 
 export const TaskboardView = () => {
@@ -61,6 +64,7 @@ export const TaskboardView = () => {
   });
   const mainContainerRef = useRef(null);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false); // <-- 2. Estado para el modal de ayuda
+  const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
 
   const {
     active,
@@ -166,7 +170,10 @@ export const TaskboardView = () => {
               <span>¡para trabajar desde cualquier dispositivo!</span>
             </div>
           )}
-          <ProfileDropdown onOpenHelpModal={() => setIsHelpModalOpen(true)} />
+          <ProfileDropdown
+            onOpenHelpModal={() => setIsHelpModalOpen(true)}
+            onOpenWallpaperModal={() => setIsWallpaperModalOpen(true)}
+          />
         </div>
       </header>
 
@@ -273,6 +280,11 @@ export const TaskboardView = () => {
       <HelpModal
         isOpen={isHelpModalOpen}
         onClose={() => setIsHelpModalOpen(false)}
+      />
+
+      <WallpaperModal
+        isOpen={isWallpaperModalOpen}
+        onClose={() => setIsWallpaperModalOpen(false)}
       />
     </div>
   );
