@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import "./WallpaperModal.css"; // Renombrado de WallpaperManager.css
 import { getApiService } from "../services/apiService";
 
-const WallpaperModal = ({ isOpen, onClose }) => {
+const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
   const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
     user?.wallpaper || "/wallpapers/wallpaper-0.jpg"
@@ -80,6 +80,9 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     // Si no (modo guest), esta operación se omite de forma segura.
     if (user) {
       setUser({ ...user, wallpaper: url });
+    } else {
+      // ¡CAMBIO CLAVE! Notificamos al componente App que el wallpaper del invitado ha cambiado.
+      onGuestWallpaperChange(url);
     }
 
     // Petición al backend
@@ -92,6 +95,8 @@ const WallpaperModal = ({ isOpen, onClose }) => {
       setSelectedWallpaper(originalWallpaper);
       if (user) {
         setUser({ ...user, wallpaper: originalWallpaper });
+      } else {
+        onGuestWallpaperChange(originalWallpaper);
       }
     }
   };

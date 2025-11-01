@@ -29,7 +29,7 @@ import { useTaskboardContext } from "../context/TaskboardContext";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTaskboardDnd } from "../hooks/useTaskboardDnd";
 
-export const TaskboardView = () => {
+export const TaskboardView = ({ setGuestWallpaper }) => {
   const {
     boards,
     activeBoard,
@@ -285,6 +285,7 @@ export const TaskboardView = () => {
       <WallpaperModal
         isOpen={isWallpaperModalOpen}
         onClose={() => setIsWallpaperModalOpen(false)}
+        onGuestWallpaperChange={setGuestWallpaper}
       />
     </div>
   );
