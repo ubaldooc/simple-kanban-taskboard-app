@@ -49,7 +49,7 @@ const UserSchema = new Schema({
   password: { type: String }, // Campo para la contraseña hasheada
   // Referencia al último tablero que el usuario tuvo activo.
   lastActiveBoard: { type: Schema.Types.ObjectId, ref: 'Board', default: null },
-  wallpaper: { type: String, default: '/wallpapers/wallpaper-0.jpg' }, // Wallpaper del usuario
+  wallpaper: { type: String, default: '/wallpapers/wallpaper-0.webp' }, // Wallpaper del usuario
 }, { timestamps: true });
 
 // --- Refresh Token Schema ---

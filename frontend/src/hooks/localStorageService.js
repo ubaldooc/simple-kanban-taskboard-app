@@ -32,7 +32,7 @@ const _getData = () => {
     console.error("Error al leer desde localStorage:", error);
   }
   // Devuelve una estructura por defecto si no hay nada o hay un error
-  return { boards: [], columns: [], cards: [], preferences: { lastActiveBoardId: null, wallpaper: '/wallpapers/wallpaper-0.jpg' } };
+  return { boards: [], columns: [], cards: [], preferences: { lastActiveBoardId: null, wallpaper: '/wallpapers/wallpaper-0.webp' } };
 };
 
 /**
@@ -53,7 +53,7 @@ const api = {
   // --- Preferencias de Usuario ---
   getUserPreferences: async () => {
     const db = _getData();
-    return db.preferences || { lastActiveBoardId: null, wallpaper: '/wallpapers/wallpaper-0.jpg' };
+    return db.preferences || { lastActiveBoardId: null, wallpaper: '/wallpapers/wallpaper-0.webp' };
   },
 
   updateUserPreferences: async (prefs) => {

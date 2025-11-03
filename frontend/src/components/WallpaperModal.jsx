@@ -7,7 +7,7 @@ import { getApiService } from "../services/apiService";
 const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
   const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
-    user?.wallpaper || "/wallpapers/wallpaper-0.jpg"
+    user?.wallpaper || "/wallpapers/wallpaper-0.webp"
   );
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -20,7 +20,7 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
   // Lista de imágenes predefinidas (puedes mover esto a un archivo de configuración si crece)
   const predefinedWallpapers = Array.from(
     { length: 27 }, // 27 para incluir 0-26
-    (_, i) => `/wallpapers/wallpaper-${i}.jpg`
+    (_, i) => `/wallpapers/wallpaper-${i}.webp`
   );
 
   // Efecto para cerrar el modal al hacer clic fuera
