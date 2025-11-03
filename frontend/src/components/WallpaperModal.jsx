@@ -19,7 +19,7 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
 
   // Lista de imágenes predefinidas (puedes mover esto a un archivo de configuración si crece)
   const predefinedWallpapers = Array.from(
-    { length: 27 }, // 27 para incluir 0-26
+    { length: 26 }, // 27 para incluir 0-26
     (_, i) => `/wallpapers/wallpaper-${i}.webp`
   );
 

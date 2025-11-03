@@ -20,7 +20,7 @@
   background-color: transparent;
   border: none;
   font-size: 1.2rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   padding: 5px 10px;
   border-radius: 50%;
@@ -39,7 +39,7 @@
 }
 
 .modal-subtitle {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   margin-top: 0;
   margin-bottom: 25px;
   font-size: 0.9rem;
@@ -97,13 +97,13 @@
 }
 
 .upload-placeholder {
-  background-color: var(--background-tertiary);
+  background-color: var(--background-secondary);
   border: 2px dashed var(--border-primary);
   display: flex;
   justify-content: center;
   align-items: center;
   font-size: 1.5rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .upload-placeholder:hover {
