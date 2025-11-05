@@ -955,9 +955,17 @@ app.get('/api/wallpapers/predefined', async (req, res) => {
       max_results: 30 // Límite de fondos a devolver, ajústalo si tienes más.
     });
 
-    // Extraemos solo las URLs seguras de los recursos encontrados.
-    const wallpaperUrls = resources.map(resource => resource.secure_url);
-
+    // Extraemos solo las URLs seguras de los recursos encontrados transformadas con relación de aspecto 16:9.
+    const wallpaperUrls = resources.map((resource) =>
+      cloudinary.url(resource.public_id, {
+        width: 1920, // Ancho deseado
+        height: 1080, // Alto deseado (16:9)
+        crop: 'fill', // Recorta la imagen para ajustarse a las dimensiones
+        gravity: 'auto', // Centra automáticamente el recorte
+        secure: true, // Usa HTTPS
+      })
+    );
+    
     res.status(200).json(wallpaperUrls);
   } catch (error) {
     console.error('Error al obtener los wallpapers predefinidos de Cloudinary:', error);
