@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import apiClient from "../api/axios"; // Importamos apiClient directamente
 import "./WallpaperModal.css"; // Renombrado de WallpaperManager.css
 import { getApiService } from "../services/apiService";
 
@@ -10,18 +11,34 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
     user?.wallpaper || "/wallpapers/wallpaper-0.webp"
   );
   const [file, setFile] = useState(null);
+  // Nuevos estados para los wallpapers predefinidos y la carga
+  const [predefinedWallpapers, setPredefinedWallpapers] = useState([]);
+  const [isLoadingWallpapers, setIsLoadingWallpapers] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // ¡CAMBIO CLAVE! Seleccionamos la API correcta (online o guest)
   const api = useMemo(() => getApiService(authMode), [authMode]);
 
-  // Lista de imágenes predefinidas (puedes mover esto a un archivo de configuración si crece)
-  const predefinedWallpapers = Array.from(
-    { length: 26 }, // 27 para incluir 0-26
-    (_, i) => `/wallpapers/wallpaper-${i}.webp`
-  );
+  // Efecto para obtener los wallpapers predefinidos desde el backend
+  useEffect(() => {
+    // Solo hacemos la petición si el modal está abierto y los wallpapers no se han cargado aún.
+    if (isOpen && predefinedWallpapers.length === 0) {
+      const fetchWallpapers = async () => {
+        setIsLoadingWallpapers(true);
+        try {
+          const { data } = await apiClient.get("/wallpapers/predefined");
+          setPredefinedWallpapers(data);
+        } catch (error) {
+          console.error("Error al cargar los wallpapers predefinidos:", error);
+          toast.error("No se pudieron cargar los fondos.");
+        } finally {
+          setIsLoadingWallpapers(false);
+        }
+      };
+      fetchWallpapers();
+    }
+  }, [isOpen, predefinedWallpapers.length]); // Se ejecuta cuando el modal se abre
 
   // Efecto para cerrar el modal al hacer clic fuera
   useEffect(() => {
@@ -116,21 +133,27 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
         </p>
 
         <div className="wallpaper-grid">
-          {predefinedWallpapers.map((url, index) => (
-            <div
-              key={index}
-              className={`wallpaper-item ${
-                selectedWallpaper === url ? "selected" : ""
-              }`}
-              style={{ backgroundImage: `url(${url})` }}
-              onClick={() => handlePredefinedSelect(url)}
-            >
-              <div className="selection-checkmark">
-                <i className="fas fa-check"></i>
-              </div>
+          {isLoadingWallpapers ? (
+            // Mostramos un spinner mientras se cargan los fondos
+            <div className="wallpaper-loading-container">
+              <span className="spinner-small"></span>
             </div>
-          ))}
-          {/* Botón para subir imagen, integrado en la cuadrícula */}
+          ) : (
+            predefinedWallpapers.map((url, index) => (
+              <div
+                key={index}
+                className={`wallpaper-item ${
+                  selectedWallpaper === url ? "selected" : ""
+                }`}
+                style={{ backgroundImage: `url(${url})` }}
+                onClick={() => handlePredefinedSelect(url)}
+              >
+                <div className="selection-checkmark">
+                  <i className="fas fa-check"></i>
+                </div>
+              </div>
+            ))
+          )}
           <div
             className="wallpaper-item upload-placeholder"
             onClick={() => fileInputRef.current.click()}

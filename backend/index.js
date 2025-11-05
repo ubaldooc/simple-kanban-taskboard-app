@@ -943,6 +943,29 @@ app.post('/api/auth/logout', async (req, res) => {
     // WALLPAPER
     // WALLPAPER
     // WALLPAPER
+
+// GET /api/wallpapers/predefined - Obtiene los fondos de pantalla por defecto desde Cloudinary
+app.get('/api/wallpapers/predefined', async (req, res) => {
+  try {
+    // Usamos la API de Cloudinary para buscar recursos en una carpeta específica.
+    // ¡CAMBIO CLAVE! Usamos resources_by_tag en lugar de resources con prefix.
+    // Esto es más seguro y está permitido por defecto.
+    const { resources } = await cloudinary.api.resources_by_tag('default_wallpaper', {
+      context: true, // Opcional, pero útil si añades metadatos
+      max_results: 30 // Límite de fondos a devolver, ajústalo si tienes más.
+    });
+
+    // Extraemos solo las URLs seguras de los recursos encontrados.
+    const wallpaperUrls = resources.map(resource => resource.secure_url);
+
+    res.status(200).json(wallpaperUrls);
+  } catch (error) {
+    console.error('Error al obtener los wallpapers predefinidos de Cloudinary:', error);
+    res.status(500).json({ message: 'Error interno del servidor al obtener los fondos.' });
+  }
+});
+
+
     // WALLPAPER
 app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, res) => { // Acepta un archivo opcional
   try {
