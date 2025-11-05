@@ -132,6 +132,13 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
           Elige uno de nuestros fondos o sube el tuyo.
         </p>
 
+        {/* Mensaje de error fuera del contenedor wallpaper-grid */}
+        {!isLoadingWallpapers && predefinedWallpapers.length === 0 && (
+          <div className="wallpaper-error">
+            <p>No se pudieron cargar los fondos de pantalla.</p>
+          </div>
+        )}
+
         <div className="wallpaper-grid">
           {isLoadingWallpapers ? (
             // Mostramos un spinner mientras se cargan los fondos
@@ -154,25 +161,30 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
               </div>
             ))
           )}
-          <div
-            className="wallpaper-item upload-placeholder"
-            onClick={() => fileInputRef.current.click()}
-          >
-            {isUploading ? (
-              <span className="spinner-small"></span>
-            ) : (
-              <i className="fas fa-plus"></i>
-            )}
-          </div>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            accept="image/jpeg, image/png, image/webp"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
+
+          {/* Botón de agregar wallpaper solo se muestra si los fondos se cargaron correctamente */}
+          {!isLoadingWallpapers && predefinedWallpapers.length > 0 && (
+            <div
+              className="wallpaper-item upload-placeholder"
+              onClick={() => fileInputRef.current.click()}
+            >
+              {isUploading ? (
+                <span className="spinner-small"></span>
+              ) : (
+                <i className="fas fa-plus"></i>
+              )}
+            </div>
+          )}
         </div>
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          accept="image/jpeg, image/png, image/webp"
+          onChange={handleFileChange}
+          disabled={isUploading}
+        />
       </div>
     </div>
   );
