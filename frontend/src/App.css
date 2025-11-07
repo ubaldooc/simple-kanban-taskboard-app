@@ -7,68 +7,69 @@
     box-sizing: border-box;
 }
 
-html {
-
-}
+html {}
 
 /* --- Definición de Variables de Tema --- */
 body {
-  /* --- TEMA CLARO (POR DEFECTO) --- */
-  --background-primary: #2862cb;
-  --background-secondary: #f2f9ff;
-  --background-tertiary: #dddddd;
-  --background-overlay: rgba(27, 31, 35, 0.5);
-  --background-interactive: #f6f8fa;
-  --background-interactive-hover: #b9c1cb;
-  --background-interactive-hover-white: #d4d5db7f;
-  --background-interactive-accent: #f2f9ff;
-  --background-interactive-accent-hover: #d2d8dd;
+    /* --- TEMA CLARO (POR DEFECTO) --- */
+    --background-primary: #2862cb;
+    --background-secondary: #f2f9ff;
+    --background-tertiary: #dddddd;
+    --background-overlay: rgba(27, 31, 35, 0.5);
+    --background-interactive: #f6f8fa;
+    --background-interactive-hover: #b9c1cb;
+    --background-interactive-hover-white: #d4d5db7f;
+    --background-interactive-accent: #f2f9ff;
+    --background-interactive-accent-hover: #d2d8dd;
 
-  --text-primary: #24292f;
-  --text-secondary: #e2e2e2;
-  --text-link: #0969da;
+    --text-primary: #24292f;
+    --text-secondary: #e2e2e2;
+    --text-link: #0969da;
 
-  --border-primary: #d0d7de;
-  --border-secondary: #d8dee4;
+    --border-primary: #d0d7de;
+    --border-secondary: #d8dee4;
 
-  --shadow-primary: rgba(140, 149, 159, 0.15);
-  --shadow-column: rgba(0, 0, 0, 0.1);
+    --shadow-primary: rgba(140, 149, 159, 0.15);
+    --shadow-column: rgba(0, 0, 0, 0.1);
 
-  --color-danger: #cf222e;
-  --color-success: #1f883d;
-  --color-accent: #0969da;
+    --color-danger: #cf222e;
+    --color-success: #1f883d;
+    --color-accent: #0969da;
 }
 
 body.dark {
-  /* --- TEMA OSCURO --- */
-  --background-primary: #0d1117;
-  --background-secondary: #161b22;
-  --background-tertiary: #21262d;
-  --background-overlay: rgba(0, 0, 0, 0.7);
-  --background-interactive: rgba(16, 16, 16, 0.509);
-  --background-interactive-hover: #52545b;
-  --background-interactive-accent: #2379c4;
-  --background-interactive-accent-hover: #3c94dc;
+    /* --- TEMA OSCURO --- */
+    --background-primary: #0d1117;
+    --background-secondary: #161b22;
+    --background-tertiary: #21262d;
+    --background-overlay: rgba(0, 0, 0, 0.7);
+    --background-interactive: rgba(16, 16, 16, 0.509);
+    --background-interactive-hover: #52545b;
+    --background-interactive-accent: #2379c4;
+    --background-interactive-accent-hover: #3c94dc;
 
-  --text-primary: #e6edf3;
-  --text-secondary: #d7e3f0;
-  --text-link: #58a6ff;
+    --text-primary: #e6edf3;
+    --text-secondary: #d7e3f0;
+    --text-link: #58a6ff;
 
-  --border-primary: #30363d;
-  --border-secondary: #21262d;
+    --border-primary: #30363d;
+    --border-secondary: #21262d;
 
-  --shadow-primary: rgba(0, 0, 0, 0.5);
-  --shadow-column: rgba(0, 0, 0, 0.3);
+    --shadow-primary: rgba(0, 0, 0, 0.5);
+    --shadow-column: rgba(0, 0, 0, 0.3);
 
-  --color-danger: #da3633;
-  --color-success: #238636;
-  --color-accent: #58a6ff;
+    --color-danger: #da3633;
+    --color-success: #238636;
+    --color-accent: #58a6ff;
 }
 
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: var(--background-primary);
+    /* Se establece un color de fondo oscuro como respaldo mientras carga la imagen. */
+    /* background-color: #0d1117; */
+    /* Se establece la imagen de fondo por defecto directamente aquí para evitar el parpadeo. */
+    /* background-image: url("https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"); */
     color: var(--text-primary);
     display: flex;
     justify-content: center;
@@ -78,7 +79,6 @@ body {
     /* min-height: calc(100vh - 20px); */
     min-width: calc(100vh - 20px);
     box-sizing: border-box;
-    background-image: url('/wallpapers/wallpaper-0.webp'); /* Imagen de fondo desde la carpeta public */
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
@@ -127,17 +127,20 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 100; /* Asegura que el header y sus dropdowns estén siempre al frente */
+    z-index: 100;
+    /* Asegura que el header y sus dropdowns estén siempre al frente */
 }
 
-.header-left, .header-right {
+.header-left,
+.header-right {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
 .header-logo {
-    height: 28px; /* Ajusta la altura según necesites */
+    height: 28px;
+    /* Ajusta la altura según necesites */
     width: auto;
     object-fit: contain;
 }
@@ -154,7 +157,8 @@ body {
     font-weight: normal;
 }
 
-.header-left i, .header-right i {
+.header-left i,
+.header-right i {
     font-size: 1.2em;
     color: var(--text-primary);
 }
@@ -164,7 +168,10 @@ body {
     cursor: pointer;
     transition: color 0.2s;
 }
-.help-icon:hover { color: var(--text-link); }
+
+.help-icon:hover {
+    color: var(--text-link);
+}
 
 .avatar {
     width: 30px;
@@ -214,12 +221,13 @@ body {
     /* overflow-x: auto; */
     height: 100%;
     width: 100%;
-    position: relative; /* Necesario para posicionar la zona de eliminación */
+    position: relative;
+    /* Necesario para posicionar la zona de eliminación */
     /* width: 100%; */
 
     /* ¡CAMBIO CLAVE! 'stretch' hace que todas las columnas tengan la misma altura. */
     align-items: stretch;
-    
+
     overflow-y: auto;
     overflow-x: auto;
     scrollbar-width: thin;
@@ -245,7 +253,8 @@ body {
     box-shadow: 0 2px 8px var(--shadow-column);
 
     /* ¡CAMBIO CLAVE! Permite que el contenido de la columna se desplace verticalmente si es necesario. */
-    overflow-y: hidden; /* Ocultamos el scroll por defecto, se manejará en el contenedor de tarjetas */
+    overflow-y: hidden;
+    /* Ocultamos el scroll por defecto, se manejará en el contenedor de tarjetas */
 }
 
 /* MODO DARK: Restauramos el efecto de cristal esmerilado */
@@ -257,10 +266,14 @@ body.dark .column {
 
 /* Este es el contenedor que crecerá y tendrá el scroll */
 .cards-container {
-    flex-grow: 1; /* Permite que este contenedor ocupe el espacio vertical disponible */
-    overflow-y: auto; /* Muestra el scrollbar solo cuando es necesario */
-    padding-right: 4px; /* Espacio para el scrollbar para que no se pegue a las tarjetas */
-    margin-right: -4px; /* Compensa el padding para mantener la alineación */
+    flex-grow: 1;
+    /* Permite que este contenedor ocupe el espacio vertical disponible */
+    overflow-y: auto;
+    /* Muestra el scrollbar solo cuando es necesario */
+    padding-right: 4px;
+    /* Espacio para el scrollbar para que no se pegue a las tarjetas */
+    margin-right: -4px;
+    /* Compensa el padding para mantener la alineación */
     /* Personalización del scrollbar */
     scrollbar-width: thin;
     scrollbar-color: var(--color-accent) var(--background-secondary);
@@ -280,22 +293,25 @@ body.dark .column {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: -15px -15px 18px -15px; /* Ajuste para que ocupe todo el ancho */
+    margin: -15px -15px 18px -15px;
+    /* Ajuste para que ocupe todo el ancho */
     padding: 10px 15px;
-    background-color: rgba(0, 0, 0, 0.235); /* Fondo oscuro semitransparente */
+    background-color: rgba(0, 0, 0, 0.235);
+    /* Fondo oscuro semitransparente */
     border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     position: relative;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     /* border-radius: 10px; */
-    
+
     cursor: grab;
 }
 
 /* MODO OSCURO: El fondo del header de la columna usa el color asignado */
 body.dark .column-header {
     background-color: var(--column-header-color, '#888');
-    border-bottom-color: rgba(0, 0, 0, 0.25); /* Un borde inferior un poco más oscuro para contraste */
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+    /* Un borde inferior un poco más oscuro para contraste */
 }
 
 div.column-title-input {
@@ -308,15 +324,19 @@ div.column-title-input {
     font-weight: normal;
     font-family: inherit;
     padding: 2px 4px;
-    margin: -2px -4px; /* Compensar el padding */
+    margin: -2px -4px;
+    /* Compensar el padding */
     border-radius: 4px;
-    resize: none; /* Deshabilita el redimensionamiento manual */
+    resize: none;
+    /* Deshabilita el redimensionamiento manual */
     /* overflow-y: auto; */
     white-space: pre-wrap;
     word-break: break-word;
     line-height: 1.2;
-    cursor: text; /* Cambia el cursor a texto cuando el input es visible */
-    max-height: 70px; /* Altura máxima para evitar que crezca demasiado */
+    cursor: text;
+    /* Cambia el cursor a texto cuando el input es visible */
+    max-height: 70px;
+    /* Altura máxima para evitar que crezca demasiado */
 }
 
 div.column-title-input:focus {
@@ -329,7 +349,8 @@ div.column-title-input:focus {
     align-items: center;
     gap: 8px;
     flex-grow: 1;
-    overflow: hidden; /* Evita que el título empuje los elementos */
+    overflow: hidden;
+    /* Evita que el título empuje los elementos */
     user-select: none;
 }
 
@@ -339,9 +360,11 @@ div.column-title-input:focus {
     color: var(--text-secondary);
     background-color: var(--background-secondary);
     padding: 2px 7px;
-    border-radius: 10px; /* Más redondeado para un aspecto de "píldora" */
+    border-radius: 10px;
+    /* Más redondeado para un aspecto de "píldora" */
     border: 1px solid var(--border-primary);
-    flex-shrink: 0; /* Evita que el contador se encoja */
+    flex-shrink: 0;
+    /* Evita que el contador se encoja */
 
     display: none;
 }
@@ -377,7 +400,8 @@ div.column-title-input:focus {
     margin-bottom: 10px;
     border: 1px solid var(--border-primary);
     box-shadow: 0 1px 4px var(--shadow-column);
-    cursor: grab; /* Cambia a 'grabbing' durante el arrastre a través de JS */
+    cursor: grab;
+    /* Cambia a 'grabbing' durante el arrastre a través de JS */
     /* La transición se gestiona con dnd-kit para un mejor rendimiento */
     /* transition: box-shadow 0.2s ease-in-out; */
 
@@ -398,14 +422,17 @@ div.column-title-input:focus {
 .card.is-dragging-source {
     opacity: 0.3;
     background-color: transparent;
-    box-shadow: none !important; /* Aseguramos que no haya sombra */
-    color: transparent; /* Oculta también el texto */
+    box-shadow: none !important;
+    /* Aseguramos que no haya sombra */
+    color: transparent;
+    /* Oculta también el texto */
 }
 
 /* --- Estilo para el clon de la columna en el DragOverlay --- */
 /* Asegura que una columna vacía no se encoja al ser arrastrada. */
 .dnd-overlay-column .column {
-    min-height: 200px; /* O un valor que se ajuste a tu diseño */
+    min-height: 200px;
+    /* O un valor que se ajuste a tu diseño */
 }
 
 /* --- Estilos para la tarjeta arrastrada y su placeholder --- */
@@ -414,29 +441,32 @@ div.column-title-input:focus {
 .dnd-overlay-card .card p,
 .card.is-dragging-source p {
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* Número máximo de líneas */
+    -webkit-line-clamp: 2;
+    /* Número máximo de líneas */
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     /* Asegura que el placeholder no se colapse a cero altura */
-    min-height: 1.4em; /* Aproximadamente una línea de texto */
+    min-height: 1.4em;
+    /* Aproximadamente una línea de texto */
 }
 
 .card p {
     margin: 0;
     font-size: 0.9em;
     line-height: 1.4;
-    overflow-wrap: break-word; /* Asegura que el texto largo se ajuste */
+    overflow-wrap: break-word;
+    /* Asegura que el texto largo se ajuste */
 }
 
 /* Cuando la tarjeta está en modo de edición, eliminamos su padding
    para que el input pueda ocupar todo el espacio. */
 .card-editing {
-   cursor: text;
-   padding: 0;
+    cursor: text;
+    padding: 0;
 }
 
-.card-editing > div[contenteditable="true"] {
+.card-editing>div[contenteditable="true"] {
     width: 100%;
     /* Hacemos que el padding coincida con el de la tarjeta normal */
     padding: 10px 12px;
@@ -457,14 +487,16 @@ div.column-title-input:focus {
     resize: none;
     overflow: hidden;
 
-    white-space: pre-wrap; /* Respeta los saltos de línea */
-    overflow-wrap: break-word; /* Ajusta palabras largas para que no se desborden */
+    white-space: pre-wrap;
+    /* Respeta los saltos de línea */
+    overflow-wrap: break-word;
+    /* Ajusta palabras largas para que no se desborden */
 
     border-bottom: 1px solid var(--color-accent);
 }
 
-.card-editing > div[contenteditable="true"]:focus {
-    box-shadow: 0 0 0 2px var(--color-accent); 
+.card-editing>div[contenteditable="true"]:focus {
+    box-shadow: 0 0 0 2px var(--color-accent);
 }
 
 
@@ -482,7 +514,8 @@ div.column-title-input:focus {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 6px; /* Empuja el "Add a card" al final de la columna */
+    margin-top: 6px;
+    /* Empuja el "Add a card" al final de la columna */
     user-select: none;
 }
 
@@ -491,7 +524,8 @@ div.column-title-input:focus {
 }
 
 .add-column-container {
-    min-width: 180px; /* Igual al min-width de la columna */
+    min-width: 180px;
+    /* Igual al min-width de la columna */
     max-width: 360px;
 }
 
@@ -517,11 +551,13 @@ div.column-title-input:focus {
 
 /* Este estilo ahora es para el dropdown que se renderiza en el body */
 .column-options-dropdown {
-    position: absolute; /* La posición se calcula en JS */
+    position: absolute;
+    /* La posición se calcula en JS */
     background-color: var(--background-secondary);
     border-radius: 6px;
     box-shadow: 0 4px 12px var(--shadow-primary);
-    z-index: 110; /* Debe estar por encima de otros elementos */
+    z-index: 110;
+    /* Debe estar por encima de otros elementos */
     width: 200px;
     padding: 5px;
     border: 1px solid var(--border-primary);
@@ -568,7 +604,8 @@ div.column-title-input:focus {
 }
 
 .task-board-footer {
-    background-color: rgba(0, 0, 0, 0.4); /* Fondo semi-transparente para el footer */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Fondo semi-transparente para el footer */
     padding: 10px 20px;
     text-align: center;
     font-size: 0.8em;
@@ -618,11 +655,13 @@ div.column-title-input:focus {
 /* --- Zona de Eliminación --- */
 .delete-zone {
     position: fixed;
-    top: 48px; /* Altura del header */
+    top: 48px;
+    /* Altura del header */
     right: 0;
     bottom: 0;
     width: 50px;
-    background-color: rgba(211, 72, 72, 0.2); /* Fondo rojo semitransparente */
+    background-color: rgba(211, 72, 72, 0.2);
+    /* Fondo rojo semitransparente */
     border-left: 2px dashed rgba(255, 82, 82, 0.5);
     display: flex;
     flex-direction: column;
@@ -630,21 +669,24 @@ div.column-title-input:focus {
     justify-content: center;
     color: var(--text-primary);
     z-index: 10;
-    
+
     /* Oculto por defecto a la derecha */
     transform: translateX(100%);
     transition: transform 0.3s ease-in-out, background-color 0.2s ease;
-    pointer-events: none; /* No interfiere con el scroll cuando está oculto */
+    pointer-events: none;
+    /* No interfiere con el scroll cuando está oculto */
 }
 
 /* Se hace visible solo cuando se arrastra una TARJETA */
 .task-board-container.is-dragging-card .delete-zone {
     transform: translateX(0);
-    pointer-events: auto; /* Se puede interactuar con él al arrastrar */
+    pointer-events: auto;
+    /* Se puede interactuar con él al arrastrar */
 }
 
 .delete-zone.is-over {
-    background-color: rgba(211, 72, 72, 0.5); /* Más intenso al pasar por encima */
+    background-color: rgba(211, 72, 72, 0.5);
+    /* Más intenso al pasar por encima */
 }
 
 .delete-zone span {
@@ -741,8 +783,13 @@ div.column-title-input:focus {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .spinner {
@@ -762,46 +809,57 @@ div.column-title-input:focus {
 
 /* --- Estilos para el Modal de Ayuda --- */
 .modal-content.help-modal {
-  text-align: left;
-  max-width: 520px; /* Reducimos el ancho máximo */
+    text-align: left;
+    max-width: 520px;
+    /* Reducimos el ancho máximo */
 }
 
 .help-modal h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px; /* Reducimos el espaciado */
-  font-size: 1.3em; /* Hacemos el título un poco más pequeño */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    /* Reducimos el espaciado */
+    font-size: 1.3em;
+    /* Hacemos el título un poco más pequeño */
 }
 
 .help-section {
-  margin-bottom: 20px; /* Reducimos el margen inferior */
+    margin-bottom: 20px;
+    /* Reducimos el margen inferior */
 }
 
 .help-section h3 {
-  color: var(--text-link);
-  border-bottom: 1px solid var(--border-primary);
-  padding-bottom: 6px; /* Reducimos el padding */
-  margin-bottom: 12px; /* Reducimos el margen */
-  font-size: 1em; /* Hacemos los subtítulos más pequeños */
+    color: var(--text-link);
+    border-bottom: 1px solid var(--border-primary);
+    padding-bottom: 6px;
+    /* Reducimos el padding */
+    margin-bottom: 12px;
+    /* Reducimos el margen */
+    font-size: 1em;
+    /* Hacemos los subtítulos más pequeños */
 }
 
 .help-section ul {
-  list-style: none;
-  padding-left: 0;
-  color: var(--text-secondary);
+    list-style: none;
+    padding-left: 0;
+    color: var(--text-secondary);
 }
 
 .help-section li {
-  display: flex;
-  gap: 10px; /* Reducimos el espaciado */
-  margin-bottom: 10px; /* Reducimos el margen */
-  line-height: 1.4;
-  font-size: 0.9em; /* Reducimos el tamaño de la fuente principal */
+    display: flex;
+    gap: 10px;
+    /* Reducimos el espaciado */
+    margin-bottom: 10px;
+    /* Reducimos el margen */
+    line-height: 1.4;
+    font-size: 0.9em;
+    /* Reducimos el tamaño de la fuente principal */
 }
 
 .help-section li i {
-  color: var(--text-secondary);
-  margin-top: 3px; /* Ajustamos la posición del icono */
+    color: var(--text-secondary);
+    margin-top: 3px;
+    /* Ajustamos la posición del icono */
 }
 
 .shortcuts-list .key-combo {
@@ -823,6 +881,7 @@ div.column-title-input:focus {
         opacity: 0;
         transform: scale(0.9);
     }
+
     to {
         opacity: 1;
         transform: scale(1);
@@ -838,8 +897,10 @@ div.column-title-input:focus {
     from {
         opacity: 1;
         transform: scale(1) translateY(0);
-        max-height: 500px; /* Un valor inicial suficientemente grande */
+        max-height: 500px;
+        /* Un valor inicial suficientemente grande */
     }
+
     to {
         opacity: 0;
         transform: scale(0.9) translateY(-20px);
@@ -920,6 +981,7 @@ div.column-title-input:focus {
     scrollbar-width: thin;
     scrollbar-color: var(--color-danger) var(--background-primary);
 }
+
 /* Renombramos 'li' a una clase más específica para evitar conflictos */
 .board-list-item {
     padding: 8px 12px;
@@ -935,7 +997,8 @@ div.column-title-input:focus {
 }
 
 .board-list-item:hover {
-    background-color: var(--background-interactive-hover); /* Fondo suave al pasar el ratón */
+    background-color: var(--background-interactive-hover);
+    /* Fondo suave al pasar el ratón */
 }
 
 .board-item-content {
@@ -946,14 +1009,16 @@ div.column-title-input:focus {
 }
 
 .drag-handle {
-    visibility: hidden; /* Oculto por defecto */
+    visibility: hidden;
+    /* Oculto por defecto */
     cursor: grab;
     color: var(--text-secondary);
     padding: 0 4px;
 }
 
 .board-list-item:hover .drag-handle {
-    visibility: visible; /* Visible en hover */
+    visibility: visible;
+    /* Visible en hover */
 }
 
 .board-list-item.editing .drag-handle {
@@ -979,24 +1044,28 @@ div.column-title-input:focus {
 
 .board-selector-dropdown .board-actions {
     display: flex;
-    visibility: hidden; /* Oculto por defecto */
+    visibility: hidden;
+    /* Oculto por defecto */
     gap: 12px;
     padding-left: 10px;
 }
 
 .board-selector-dropdown .board-actions i {
     color: var(--text-primary);
-    font-size: 0.85em; /* Iconos más pequeños */
+    font-size: 0.85em;
+    /* Iconos más pequeños */
     transition: color 0.2s;
 }
 
 .board-list-item:hover .board-actions {
-    visibility: visible; /* Visible en hover */
+    visibility: visible;
+    /* Visible en hover */
 }
 
 .board-selector-dropdown .board-actions i.fa-pencil-alt:hover {
     color: var(--color-accent);
 }
+
 .board-selector-dropdown .board-actions i.fa-trash-alt:hover {
     color: var(--color-danger);
 }
@@ -1027,7 +1096,8 @@ div.column-title-input:focus {
 /* En modo oscuro, el texto del input de edición del tablero será negro para mejor contraste */
 body.dark .board-name-input {
     color: #000000;
-    background-color: #e6edf3; /* Fondo claro para que el texto negro sea legible */
+    background-color: #e6edf3;
+    /* Fondo claro para que el texto negro sea legible */
 }
 
 /* Oculta las acciones mientras se edita el nombre de ese tablero */
@@ -1056,7 +1126,7 @@ body.dark .board-name-input {
 .create-first-board-btn {
     background-color: var(--color-success);
     color: white;
-    padding: 8px 16px; 
+    padding: 8px 16px;
     border: 1px solid rgba(240, 246, 252, 0.1);
     border-radius: 6px;
     cursor: pointer;
@@ -1071,9 +1141,11 @@ body.dark .board-name-input {
 .create-first-board-btn:hover {
     background-color: color-mix(in srgb, var(--color-success) 90%, #fff 10%);
 }
+
 .create-first-board-btn:active {
     transform: scale(0.98);
 }
+
 /* --- Estilos para el Dropdown de Perfil --- */
 .profile-dropdown-container {
     position: relative;
@@ -1111,8 +1183,10 @@ body.dark .board-name-input {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%; /* Ocupa todo el ancho para que el botón se expanda */
-    padding: 0 16px; /* Añade padding a los lados */
+    width: 100%;
+    /* Ocupa todo el ancho para que el botón se expanda */
+    padding: 0 16px;
+    /* Añade padding a los lados */
 }
 
 .profile-dropdown-header .user-info strong {
@@ -1123,7 +1197,8 @@ body.dark .board-name-input {
 .profile-dropdown-header .user-info span {
     font-size: 0.8rem;
     color: var(--text-primary);
-    margin-bottom: 4px; /* Añadimos un pequeño espacio debajo del email */
+    margin-bottom: 4px;
+    /* Añadimos un pequeño espacio debajo del email */
 }
 
 .profile-dropdown-menu ul {
@@ -1132,13 +1207,14 @@ body.dark .board-name-input {
     margin: 0;
 }
 
-.profile-dropdown-menu li, .google-login-section {
+.profile-dropdown-menu li,
+.google-login-section {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 8px 16px;
     cursor: pointer;
-    font-size: 0.9em;    
+    font-size: 0.9em;
     transition: background-color 0.2s;
 }
 
@@ -1147,8 +1223,9 @@ body.dark .board-name-input {
 }
 
 /* Aplica estilo solo a los iconos que son hijos directos de un <li> (no dentro de un botón) */
-.profile-dropdown-menu li > i {
-    width: 16px; /* Alinea los iconos */
+.profile-dropdown-menu li>i {
+    width: 16px;
+    /* Alinea los iconos */
     text-align: center;
     color: var(--text-primary);
 }
@@ -1159,41 +1236,43 @@ body.dark .board-name-input {
 
 /* --- Estilos para Autenticación --- */
 .google-login-section {
-  list-style: none;
-  padding: 8px 16px;
+    list-style: none;
+    padding: 8px 16px;
 }
+
 .google-login-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  color: #3c4043;
-  border: 1px solid #dadce0;
-  border-radius: 24px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s, box-shadow 0.2s;
-  width: 100%;
-  text-align: center;
-  gap: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: 24px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    text-align: center;
+    gap: 12px;
 }
 
 .google-login-button:hover {
-  background-color: #f8f9fa; /* Un gris más claro, recomendado por Google */
-  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
+    background-color: #f8f9fa;
+    /* Un gris más claro, recomendado por Google */
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
 }
 
 .google-icon {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' width='48px' height='48px'%3e%3cpath fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/%3e%3cpath fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/%3e%3cpath fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/%3e%3cpath fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/%3e%3cpath fill='none' d='M0 0h48v48H0z'/%3e%3c/svg%3e");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' width='48px' height='48px'%3e%3cpath fill='%23EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/%3e%3cpath fill='%234285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/%3e%3cpath fill='%23FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/%3e%3cpath fill='%2334A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/%3e%3cpath fill='none' d='M0 0h48v48H0z'/%3e%3c/svg%3e");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 
@@ -1220,21 +1299,22 @@ body.dark .board-name-input {
     justify-content: center;
     gap: 8px;
     transition: background-color 0.2s ease-in-out, transform 0.1s ease;
-  }
-  
-  .dropdown-action-button:hover {
+}
+
+.dropdown-action-button:hover {
     background-color: color-mix(in srgb, var(--color-success) 90%, #fff 10%);
-  }
-  
-  .dropdown-action-button:active {
-    transform: scale(0.98); /* Efecto de clic */
-  }
-  
-  /* Asegura que el icono dentro del botón de acción sea blanco */
-  .dropdown-action-button i {
+}
+
+.dropdown-action-button:active {
+    transform: scale(0.98);
+    /* Efecto de clic */
+}
+
+/* Asegura que el icono dentro del botón de acción sea blanco */
+.dropdown-action-button i {
     color: white;
-  }
-  
+}
+
 
 
 

@@ -5,8 +5,7 @@ const WallpaperSetter = ({ guestWallpaper }) => {
   const { user, authMode } = useAuth();
 
   useEffect(() => {
-    let wallpaperUrl =
-      "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"; // URL por defecto
+    let wallpaperUrl = "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"; // URL por defecto
 
     // Si estamos online, usamos el wallpaper del objeto user.
     if (authMode === "online" && user?.wallpaper) {

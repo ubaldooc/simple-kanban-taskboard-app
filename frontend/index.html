@@ -1,19 +1,56 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Organiza tus tareas y proyectos con este increíble Taskboard."/>
-    <link rel="apple-touch-icon" href="/logo192.png" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <title>Mi app taskboard</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <script type="module" src="/src/index.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Organiza tus tareas y proyectos con este increíble Taskboard." />
+  <link rel="apple-touch-icon" href="/logo192.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>Mi app taskboard</title>
+  <!-- SCRIPT PARA CARGAR EL WALLPAPER INMEDIATAMENTE -->
+  <script>
+    // Espera a que el DOM esté completamente cargado antes de ejecutar el script.
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        const defaultWallpaper = 'https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp';
+        let finalWallpaperUrl = defaultWallpaper;
+
+        // 1. Modo Online: Busca el wallpaper en el objeto 'user'.
+        const userDataString = localStorage.getItem('user');
+        if (userDataString) {
+          const user = JSON.parse(userDataString);
+          if (user && user.wallpaper) {
+            finalWallpaperUrl = user.wallpaper;
+          }
+        } else {
+          // 2. Modo Offline (Invitado): Busca el wallpaper en el objeto 'taskboardData'.
+          const guestDataString = localStorage.getItem('taskboardData');
+          if (guestDataString) {
+            const guestData = JSON.parse(guestDataString);
+            if (guestData && guestData.preferences && guestData.preferences.wallpaper) {
+              finalWallpaperUrl = guestData.preferences.wallpaper;
+            }
+          }
+        }
+
+        // 3. Aplica el wallpaper encontrado o el de por defecto si nada se encontró.
+        document.body.style.backgroundImage = `url(${finalWallpaperUrl})`;
+      } catch (e) {
+        // Si algo falla (ej: localStorage deshabilitado), no se rompe la app.
+        console.error('Error al establecer el wallpaper desde el script inicial:', e);
+      }
+    });
+  </script>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <script type="module" src="/src/index.jsx"></script>
+</body>
+
 </html>

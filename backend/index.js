@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 
 import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken'; 
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { v2 as cloudinary } from 'cloudinary';
@@ -127,11 +127,11 @@ app.put('/api/user/preferences', protect, async (req, res) => { // <-- Ruta prot
 
 
 
-          // BOARDS
-          // BOARDS
-          // BOARDS
-          // BOARDS
-          // BOARDS
+// BOARDS
+// BOARDS
+// BOARDS
+// BOARDS
+// BOARDS
 
 // GET /api/boards - Devuelve todos los tableros con sus columnas y tarjetas.
 
@@ -302,7 +302,7 @@ app.put('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegida
 app.delete('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegida
   try {
     const boardId = req.params.id;
-    
+
     // Validación: Comprobar si el ID es un ObjectId válido de MongoDB
     if (!mongoose.Types.ObjectId.isValid(boardId)) {
       return res.status(400).json({ message: 'El ID del tablero proporcionado no es válido.' });
@@ -311,7 +311,7 @@ app.delete('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegi
     // 1. Intenta eliminar el tablero y comprueba si existía en un solo paso.
     // ¡CAMBIO CLAVE! Solo permite borrar si el tablero pertenece al usuario.
     const deletedBoard = await Board.findOneAndDelete({ _id: boardId, owner: req.user._id });
-    
+
     // Si no se encontró ningún tablero para eliminar, devuelve 404.
     if (!deletedBoard) {
       return res.status(404).json({ message: 'Tablero no encontrado.' });
@@ -320,7 +320,7 @@ app.delete('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegi
     // 2. Si el tablero existía y fue eliminado, procede a limpiar su contenido asociado.
     await Card.deleteMany({ board: boardId });
     await Column.deleteMany({ board: boardId });
-    
+
     // 3. Reordenar los tableros restantes para eliminar huecos en la secuencia 'order'.
     //    a. Obtener todos los tableros que quedan, ordenados por su 'order' actual.
     const remainingBoards = await Board.find({ owner: req.user._id }).sort({ order: 'asc' });
@@ -331,7 +331,7 @@ app.delete('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegi
     );
     await Promise.all(reorderPromises);
 
-    
+
     res.status(200).json({ message: 'Tablero y todo su contenido eliminados exitosamente.' });
   } catch (error) {
     console.error('Error al eliminar el tablero:', error);
@@ -341,11 +341,11 @@ app.delete('/api/boards/:id', protect, async (req, res) => { // <-- Ruta protegi
 
 
 
-          // COLUMNS
-          // COLUMNS
-          // COLUMNS
-          // COLUMNS
-          // COLUMNS
+// COLUMNS
+// COLUMNS
+// COLUMNS
+// COLUMNS
+// COLUMNS
 
 // PUT /api/boards/:boardId/reorder-columns - Actualiza el orden de las columnas en un tablero
 app.put('/api/boards/:boardId/reorder-columns', protect, async (req, res) => {
@@ -510,11 +510,11 @@ app.delete('/api/columns/:id', protect, async (req, res) => {
 });
 
 
-          // CARD
-          // CARD
-          // CARD
-          // CARD
- 
+// CARD
+// CARD
+// CARD
+// CARD
+
 // PUT /api/boards/:boardId/reorder-cards - Actualiza el orden y/o la columna de las tarjetas
 app.put('/api/boards/:boardId/reorder-cards', protect, async (req, res) => {
   try {
@@ -707,10 +707,10 @@ app.delete('/api/cards/:id', protect, async (req, res) => {
 
 
 
-      // INICIAR SESION CON GOOGLE
-      // INICIAR SESION CON GOOGLE
-      // INICIAR SESION CON GOOGLE
-      // INICIAR SESION CON GOOGLE
+// INICIAR SESION CON GOOGLE
+// INICIAR SESION CON GOOGLE
+// INICIAR SESION CON GOOGLE
+// INICIAR SESION CON GOOGLE
 
 // --- Google OAuth2 Authentication Route PARA INICIAR SESION CON GOOGLE ---
 // Configura el cliente de Google OAuth2 para el flujo de código de autorización
@@ -781,10 +781,10 @@ app.post('/api/auth/google', async (req, res) => {
     const accessToken = await generateTokensAndSetCookie(res, user._id);
 
     // 5. Enviar el accessToken y los datos del usuario en la respuesta
-    res.status(200).json({ 
-      message: 'Inicio de sesión exitoso con Google.', 
+    res.status(200).json({
+      message: 'Inicio de sesión exitoso con Google.',
       accessToken,
-      user: { id: user._id, name: user.name, email: user.email, picture: user.picture } 
+      user: { id: user._id, name: user.name, email: user.email, picture: user.picture, wallpaper: user.wallpaper }
     });
 
   } catch (error) {
@@ -912,7 +912,7 @@ app.post('/api/auth/refresh', async (req, res) => {
     const accessToken = jwt.sign({ userId: storedToken.user }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
     // 3. Devolver el nuevo token Y los datos del usuario
-    res.status(200).json({ 
+    res.status(200).json({
       accessToken,
       user: { id: user._id, name: user.name, email: user.email, picture: user.picture, wallpaper: user.wallpaper }
     });
@@ -940,9 +940,9 @@ app.post('/api/auth/logout', async (req, res) => {
 
 
 
-    // WALLPAPER
-    // WALLPAPER
-    // WALLPAPER
+// WALLPAPER
+// WALLPAPER
+// WALLPAPER
 
 // GET /api/wallpapers/predefined - Obtiene los fondos de pantalla por defecto desde Cloudinary
 app.get('/api/wallpapers/predefined', async (req, res) => {
@@ -965,7 +965,7 @@ app.get('/api/wallpapers/predefined', async (req, res) => {
         secure: true, // Usa HTTPS
       })
     );
-    
+
     res.status(200).json(wallpaperUrls);
   } catch (error) {
     console.error('Error al obtener los wallpapers predefinidos de Cloudinary:', error);
@@ -974,7 +974,7 @@ app.get('/api/wallpapers/predefined', async (req, res) => {
 });
 
 
-    // WALLPAPER
+// WALLPAPER
 app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, res) => { // Acepta un archivo opcional
   try {
     const { wallpaperUrl } = req.body; // O la URL de un fondo predefinido
@@ -1001,11 +1001,11 @@ app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, 
         uploadStream.end(req.file.buffer);
       });
 
-    // Caso 2: Se envió la URL de un fondo predefinido
+      // Caso 2: Se envió la URL de un fondo predefinido
     } else if (wallpaperUrl) {
       finalWallpaperUrl = wallpaperUrl;
 
-    // Caso 3: No se proporcionó ni archivo ni URL
+      // Caso 3: No se proporcionó ni archivo ni URL
     } else {
       return res.status(400).json({ message: 'No se proporcionó un fondo de pantalla.' });
     }

@@ -96,24 +96,21 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
     // Si hay un usuario (modo online), actualizamos su objeto.
     // Si no (modo guest), esta operación se omite de forma segura.
     if (user) {
-      setUser({ ...user, wallpaper: url });
+      setUser({ ...user, wallpaper: url }); // Esto actualiza el AuthContext y el localStorage
     } else {
-      // ¡CAMBIO CLAVE! Notificamos al componente App que el wallpaper del invitado ha cambiado.
-      onGuestWallpaperChange(url);
+      onGuestWallpaperChange(url); // Esto actualiza el estado en App.jsx y el localStorage
     }
 
     // Petición al backend
     try {
-      await api.updateUserPreferences({ wallpaper: url });
+      await api.updateUserWallpaper({ wallpaperUrl: url }); // Usar la ruta y el formato correctos
       // No es necesario un toast de éxito para que sea más fluido
     } catch (error) {
       toast.error("No se pudo guardar el fondo.");
       // Revertir en caso de error
       setSelectedWallpaper(originalWallpaper);
       if (user) {
-        setUser({ ...user, wallpaper: originalWallpaper });
-      } else {
-        onGuestWallpaperChange(originalWallpaper);
+        setUser({ ...user, wallpaper: originalWallpaper }); // Revertimos el estado global
       }
     }
   };
