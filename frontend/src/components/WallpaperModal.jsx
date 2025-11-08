@@ -91,26 +91,38 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
     // Usamos el estado 'selectedWallpaper' como fuente de verdad antes del cambio.
     const originalWallpaper = selectedWallpaper;
 
-    // Actualización optimista
+    // Actualización visual optimista
     setSelectedWallpaper(url);
-    // Si hay un usuario (modo online), actualizamos su objeto.
-    // Si no (modo guest), esta operación se omite de forma segura.
-    if (user) {
-      setUser({ ...user, wallpaper: url }); // Esto actualiza el AuthContext y el localStorage
-    } else {
-      onGuestWallpaperChange(url); // Esto actualiza el estado en App.jsx y el localStorage
-    }
 
-    // Petición al backend
-    try {
-      await api.updateUserWallpaper({ wallpaperUrl: url }); // Usar la ruta y el formato correctos
-      // No es necesario un toast de éxito para que sea más fluido
-    } catch (error) {
-      toast.error("No se pudo guardar el fondo.");
-      // Revertir en caso de error
-      setSelectedWallpaper(originalWallpaper);
-      if (user) {
-        setUser({ ...user, wallpaper: originalWallpaper }); // Revertimos el estado global
+    if (authMode === "online") {
+      try {
+        // 1. Llama a la API para guardar el cambio en la base de datos.
+        await api.updateUserWallpaper({ wallpaperUrl: url });
+
+        // 2. Si tiene éxito, actualiza el estado global del usuario.
+        // AuthContext se encargará de persistir el objeto 'user' en localStorage.
+        setUser({ ...user, wallpaper: url });
+
+      } catch (error) {
+        toast.error("No se pudo guardar el fondo.");
+        // Revertir en caso de error
+        setSelectedWallpaper(originalWallpaper);
+      }
+    } else {
+      // Modo Offline (Invitado)
+      try {
+        // 1. Modifica la subclave wallpaper dentro de taskboardData en localStorage.
+        const guestDataString = localStorage.getItem('taskboardData');
+        const guestData = guestDataString ? JSON.parse(guestDataString) : {};
+        guestData.preferences = { ...guestData.preferences, wallpaper: url };
+        localStorage.setItem('taskboardData', JSON.stringify(guestData));
+
+        // 2. Llama a la función que actualiza el estado en App.jsx para que WallpaperSetter reaccione.
+        onGuestWallpaperChange(url);
+
+      } catch (e) {
+        toast.error("No se pudo guardar el fondo en el navegador.");
+        setSelectedWallpaper(originalWallpaper);
       }
     }
   };
