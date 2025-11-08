@@ -8,7 +8,7 @@ import { getApiService } from "../services/apiService";
 const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
   const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
-    user?.wallpaper || "/wallpapers/wallpaper-0.webp"
+    user?.wallpaper || "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"
   );
   const [file, setFile] = useState(null);
   // Nuevos estados para los wallpapers predefinidos y la carga

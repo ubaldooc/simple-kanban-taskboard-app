@@ -6,27 +6,27 @@ import WallpaperSetter from "./components/WallpaperSetter.jsx";
 import { getApiService } from "./services/apiService.js";
 
 function App() {
-  // Estado para el wallpaper del modo invitado, gestionado a nivel de App.
-  const [guestWallpaper, setGuestWallpaper] = useState(null);
 
-  // Carga el wallpaper del invitado desde localStorage al iniciar la app.
-  useEffect(() => {
-    const api = getApiService("guest");
-    api.getUserPreferences().then((prefs) => {
-      if (prefs && prefs.wallpaper) {
-        setGuestWallpaper(prefs.wallpaper);
-      }
-    });
-  }, []); // Se ejecuta solo una vez.
+  // TOFO ESTO DE ABAJO NO SIRVE PORUQE AHORA LEO EL WALLPAPER DESDE EL INDEX.HTML MAS RAPIDO
+  // Estado para el wallpaper del modo invitado, gestionado a nivel de App.
+  // const [guestWallpaper, setGuestWallpaper] = useState(null);
+
+  // // Carga el wallpaper del invitado desde localStorage al iniciar la app.
+  // useEffect(() => {
+  //   const api = getApiService("guest");
+  //   api.getUserPreferences().then((prefs) => {
+  //     if (prefs && prefs.wallpaper) {
+  //       setGuestWallpaper(prefs.wallpaper);
+  //     }
+  //   });
+  // }, []); // Se ejecuta solo una vez.
 
   return (
     <>
-      <WallpaperSetter guestWallpaper={guestWallpaper} />
+      <WallpaperSetter />
       <Routes>
         {/* La ruta principal ahora es pública y muestra el Taskboard */}
-        <Route
-          path="/"
-          element={<TaskboardView setGuestWallpaper={setGuestWallpaper} />}
+        <Route path="/" element={<TaskboardView />}
         />
         {/* La ruta de login sigue siendo pública */}
         <Route path="/login" element={<LoginPage />} />
