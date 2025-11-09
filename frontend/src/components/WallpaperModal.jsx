@@ -117,7 +117,7 @@ const WallpaperModal = ({ isOpen, onClose }) => {
         guestData.preferences = { ...guestData.preferences, wallpaper: url };
         localStorage.setItem('taskboardData', JSON.stringify(guestData));
 
-        // 2. Dispara un evento personalizado para notificar a otros componentes.
+        // 2. Dispara un evento personalizado para que WallpaperSetter se entere del cambio.
         window.dispatchEvent(new CustomEvent('wallpaperChanged'));
 
       } catch (e) {

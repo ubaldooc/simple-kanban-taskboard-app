@@ -6,6 +6,21 @@ const WallpaperSetter = () => {
   const { user, authMode, isAuthLoading } = useAuth();
   const [backgrounds, setBackgrounds] = useState([null, null]);
   const [activeLayer, setActiveLayer] = useState(0);
+  // Estado "gatillo" para forzar una actualización cuando el evento de localStorage ocurra.
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+
+  useEffect(() => {
+    // Este efecto se encarga de escuchar el evento personalizado.
+    const handleWallpaperChange = () => {
+      // Cuando el evento ocurre, cambiamos el valor del "gatillo" para forzar un re-render.
+      setUpdateTrigger(prev => prev + 1);
+    };
+
+    window.addEventListener('wallpaperChanged', handleWallpaperChange);
+
+    // Limpiamos el listener cuando el componente se desmonte.
+    return () => window.removeEventListener('wallpaperChanged', handleWallpaperChange);
+  }, []); // El array vacío asegura que este efecto se configure solo una vez.
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -29,7 +44,7 @@ const WallpaperSetter = () => {
       setBackgrounds(newBackgrounds);
       setActiveLayer(nextLayer);
     }
-  }, [user, authMode, isAuthLoading]);
+  }, [user, authMode, isAuthLoading, updateTrigger]); // <-- Añadimos updateTrigger a las dependencias
 
   return (
     <>
