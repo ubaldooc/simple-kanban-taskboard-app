@@ -5,7 +5,7 @@ import apiClient from "../api/axios"; // Importamos apiClient directamente
 import "./WallpaperModal.css"; // Renombrado de WallpaperManager.css
 import { getApiService } from "../services/apiService";
 
-const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
+const WallpaperModal = ({ isOpen, onClose }) => {
   const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
     user?.wallpaper || "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"
@@ -117,8 +117,8 @@ const WallpaperModal = ({ isOpen, onClose, onGuestWallpaperChange }) => {
         guestData.preferences = { ...guestData.preferences, wallpaper: url };
         localStorage.setItem('taskboardData', JSON.stringify(guestData));
 
-        // 2. Llama a la función que actualiza el estado en App.jsx para que WallpaperSetter reaccione.
-        onGuestWallpaperChange(url);
+        // 2. Dispara un evento personalizado para notificar a otros componentes.
+        window.dispatchEvent(new CustomEvent('wallpaperChanged'));
 
       } catch (e) {
         toast.error("No se pudo guardar el fondo en el navegador.");

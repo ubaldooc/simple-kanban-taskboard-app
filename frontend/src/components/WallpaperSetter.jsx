@@ -2,36 +2,45 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 const WallpaperSetter = () => {
-  const { user, authMode } = useAuth();
-  const [finalAuthMode, setFinalAuthMode] = useState(null);
+  const { user, authMode, isAuthLoading } = useAuth();
+  // Estado local para forzar un re-renderizado cuando el evento ocurra.
+  const [updateTrigger, setUpdateTrigger] = useState(0);
 
-  useEffect(() => {
-    // Espera a que el valor de authMode se estabilice y evita el parpadeo de 2 wallpapers
-    const timeout = setTimeout(() => {
-      setFinalAuthMode(authMode);
-    }, 400); // Ajusta el tiempo según sea necesario
-
-    return () => clearTimeout(timeout); // Limpia el timeout si el componente se desmonta
-  }, [authMode]);
-
-  useEffect(() => {
-    if (!finalAuthMode) return;
-
+  const applyWallpaper = () => {
     const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp";
     let finalWallpaperUrl = defaultWallpaper;
 
-    if (finalAuthMode === "online" && user?.wallpaper) {
+    if (authMode === "online" && user?.wallpaper) {
       finalWallpaperUrl = user.wallpaper;
-    } else if (finalAuthMode === "guest") {
+    } else if (authMode === "guest") {
       const guestData = JSON.parse(localStorage.getItem("taskboardData")) || {};
       finalWallpaperUrl = guestData.preferences?.wallpaper || defaultWallpaper;
     }
-
     document.body.style.backgroundImage = `url(${finalWallpaperUrl})`;
-  }, [user, finalAuthMode]);
+  };
+
+  useEffect(() => {
+    if (isAuthLoading) {
+      return;
+    }
+    applyWallpaper();
+
+    // Función que se ejecutará cuando el evento 'wallpaperChanged' sea disparado.
+    const handleWallpaperChange = () => {
+      console.log("Evento 'wallpaperChanged' detectado. Aplicando nuevo fondo.");
+      applyWallpaper();
+    };
+
+    // Añadimos el listener para escuchar el evento.
+    window.addEventListener('wallpaperChanged', handleWallpaperChange);
+
+    // Limpiamos el listener cuando el componente se desmonte para evitar fugas de memoria.
+    return () => {
+      window.removeEventListener('wallpaperChanged', handleWallpaperChange);
+    };
+  }, [user, authMode, isAuthLoading]);
 
   return null; // Este componente no renderiza nada
 };
 
 export default WallpaperSetter;
-

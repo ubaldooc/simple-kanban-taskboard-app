@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
   });
   // Estado para el Access Token (se guarda en memoria)
   const [accessToken, setAccessToken] = useState(null);
-  const [authMode, setAuthMode] = useState("guest");
+  const [authMode, setAuthMode] = useState(null); // quiza deberia dejarlo en "guest" en vez de null
   const [isAuthLoading, setIsAuthLoading] = useState(true); // Nuevo estado de carga
   const [isLoggingOut, setIsLoggingOut] = useState(false); // Estado para el modal de cierre de sesión
 
@@ -65,9 +65,9 @@ export const AuthProvider = ({ children }) => {
       try {
         console.log("Verificando sesión existente...");
         const { data } = await apiClient.post("/auth/refresh");
-        setUser(data.user); // <-- ¡Añadir esta línea!
-        setAccessToken(data.accessToken); // <-- ¡Añadir esta línea!
-        setAuthToken(data.accessToken); // <-- ¡Añadir esta línea!
+        setUser(data.user); // 
+        setAccessToken(data.accessToken);
+        setAuthToken(data.accessToken);
       } catch (err) {
         console.log("No se pudo refrescar la sesión, cerrando sesión local.");
         setUser(null); // Limpia el estado si el refresh token es inválido
