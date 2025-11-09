@@ -131,7 +131,11 @@ const WallpaperModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="wallpaper-modal-box" ref={modalRef}>
+      <div
+        className="wallpaper-modal-box"
+        ref={modalRef}
+        onClick={(e) => e.stopPropagation()} // <-- ¡CAMBIO CLAVE!
+      >
         <h2 className="modal-title">Cambiar fondo de pantalla</h2>
         <button className="close-button" onClick={onClose} aria-label="Cerrar">
           <i className="fas fa-times"></i>
