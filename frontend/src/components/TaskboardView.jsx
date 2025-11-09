@@ -142,6 +142,7 @@ export const TaskboardView = () => {
             background: "#333",
             color: "#fff",
           },
+          duration: 4000, // <-- ¡CAMBIO CLAVE! Duración por defecto para todos los toasts.
           success: {
             duration: 3000,
           },

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import apiClient from "../api/axios"; // Importamos apiClient directamente
@@ -6,6 +7,7 @@ import "./WallpaperModal.css"; // Renombrado de WallpaperManager.css
 import { getApiService } from "../services/apiService";
 
 const WallpaperModal = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
     user?.wallpaper || "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"
@@ -79,6 +81,33 @@ const WallpaperModal = ({ isOpen, onClose }) => {
       } finally {
         setIsUploading(false);
       }
+    }
+  };
+
+  // Maneja el clic en el botón de subir archivo
+  const handleUploadClick = () => {
+    // Si el usuario es un invitado, muestra un mensaje y no abre el selector de archivos.
+    if (authMode === 'guest') {
+      toast.error(
+        (t) => (
+          <span>
+            Solo los usuarios registrados pueden subir fondos. ¡
+            <a
+              href="/login"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/login');
+                toast.dismiss(t.id);
+              }}
+              style={{ color: 'white', textDecoration: 'underline', cursor: 'pointer' }}
+            >
+              Inicia sesión
+            </a> para personalizar tu espacio!
+          </span>
+        )
+      );
+    } else {
+      fileInputRef.current.click();
     }
   };
 
@@ -179,7 +208,7 @@ const WallpaperModal = ({ isOpen, onClose }) => {
           {!isLoadingWallpapers && predefinedWallpapers.length > 0 && (
             <div
               className="wallpaper-item upload-placeholder"
-              onClick={() => fileInputRef.current.click()}
+              onClick={handleUploadClick}
             >
               {isUploading ? (
                 <span className="spinner-small"></span>
