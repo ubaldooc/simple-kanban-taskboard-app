@@ -78,6 +78,13 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Comprobación del tamaño del archivo
+      const maxSizeInBytes = 5 * 1024 * 1024; // 8 MB
+      if (file.size > maxSizeInBytes) {
+        toast.error("El archivo es demasiado grande. El tamaño máximo es de 8 MB.");
+        return; // Detiene la ejecución si el archivo es muy grande
+      }
+
       try {
         // En modo offline, la subida de archivos no está soportada.
         if (authMode === "guest") {
