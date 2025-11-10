@@ -854,7 +854,7 @@ app.post('/api/auth/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       // Usamos un mensaje genérico para no revelar si el email existe o no
-      return res.status(401).json({ message: 'Credenciales incorrectas.' });
+      return res.status(401).json({ message: 'Correo o contraseña incorrectas.' });
     }
 
     // 3. Verificar que el usuario tenga una contraseña (pudo haberse registrado con Google)
@@ -865,7 +865,7 @@ app.post('/api/auth/login', async (req, res) => {
     // 4. Comparar la contraseña proporcionada con la contraseña hasheada en la BD
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Credenciales incorrectas.' });
+      return res.status(401).json({ message: 'Correo o contraseña incorrectas.' });
     }
 
     // 5. Generar tokens y configurar la cookie de refresh token

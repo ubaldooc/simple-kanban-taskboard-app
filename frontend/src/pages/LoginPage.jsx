@@ -81,7 +81,10 @@ const LoginPage = () => {
               </div>
               <div className="form-group">
                 <label htmlFor="register-password">Contraseña</label>
-                <input type="password" id="register-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <div className="password-input-wrapper">
+                  <input type={showPassword ? "text" : "password"} id="register-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'} password-toggle-icon`} onClick={() => setShowPassword(!showPassword)}></i>
+                </div>
               </div>
               {error && isRegisterView && <p className="error-message">{error}</p>}
               <button type="submit" className="submit-button">Registrarse</button>
