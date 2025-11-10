@@ -956,7 +956,15 @@ app.get('/api/wallpapers/predefined', async (req, res) => {
     });
 
     // Extraemos solo las URLs seguras de los recursos encontrados transformadas con relación de aspecto 16:9.
-    const wallpaperUrls = resources.map((resource) =>
+    const wallpaperUrls = resources.map(resource =>
+      cloudinary.url(resource.public_id, {
+        transformation: [
+          { width: 1920, height: 1080, crop: 'fill', gravity: 'auto' },
+          { quality: 'auto', fetch_format: 'auto' } // Optimización automática
+        ]
+      })
+    );
+    /* const wallpaperUrls = resources.map((resource) =>
       cloudinary.url(resource.public_id, {
         width: 1920, // Ancho deseado
         height: 1080, // Alto deseado (16:9)
@@ -964,7 +972,7 @@ app.get('/api/wallpapers/predefined', async (req, res) => {
         gravity: 'auto', // Centra automáticamente el recorte
         secure: true, // Usa HTTPS
       })
-    );
+    ); */
 
     res.status(200).json(wallpaperUrls);
   } catch (error) {
@@ -983,7 +991,19 @@ app.get('/api/user/wallpapers', protect, async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
-    res.status(200).json(user.customWallpapers || []);
+    // ¡CAMBIO CLAVE! Transformamos las URLs antes de enviarlas al frontend.
+    const optimizedUrls = (user.customWallpapers || []).map(url => {
+      // Extraemos el public_id de la URL guardada
+      const publicIdMatch = url.match(/wallpapers\/.*\/[a-zA-Z0-9_-]+/);
+      if (!publicIdMatch) return url; // Si no se puede parsear, devuelve la original
+
+      return cloudinary.url(publicIdMatch[0], {
+        transformation: [
+          { quality: 'auto', fetch_format: 'auto' } // Optimización automática
+        ]
+      });
+    });
+    res.status(200).json(optimizedUrls);
   } catch (error) {
     console.error('Error al obtener los wallpapers del usuario:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });
