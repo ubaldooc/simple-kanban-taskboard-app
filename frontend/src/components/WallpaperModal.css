@@ -90,6 +90,8 @@
   align-items: center;
   color: white;
   font-size: 1.5rem;
+  z-index: 1;
+  /* Asegura que esté por encima del fondo pero debajo de otros controles */
   opacity: 0;
   transform: scale(0.8);
   transition: opacity 0.2s, transform 0.2s;
@@ -158,6 +160,8 @@
   /* Oculto por defecto */
   transition: opacity 0.2s, background-color 0.2s;
   font-size: 0.8rem;
+  z-index: 2;
+  /* ¡CAMBIO CLAVE! Se asegura de que esté por encima del overlay de selección */
 }
 
 .wallpaper-item:hover .delete-wallpaper-btn {
@@ -168,4 +172,9 @@
 .delete-wallpaper-btn:hover {
   background-color: #C62828;
   /* Rojo más oscuro al pasar el ratón */
+}
+
+/* ¡CAMBIO CLAVE! Hace que el icono no intercepte el clic, pasándolo al botón. */
+.delete-wallpaper-btn i {
+  pointer-events: none;
 }
