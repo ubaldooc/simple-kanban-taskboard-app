@@ -974,25 +974,69 @@ app.get('/api/wallpapers/predefined', async (req, res) => {
 });
 
 
-// WALLPAPER
-app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, res) => { // Acepta un archivo opcional
+// --- Rutas de Wallpapers de Usuario ---
+
+// GET /api/user/wallpapers - Obtiene los fondos de pantalla personalizados del usuario
+app.get('/api/user/wallpapers', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado.' });
+    }
+    res.status(200).json(user.customWallpapers || []);
+  } catch (error) {
+    console.error('Error al obtener los wallpapers del usuario:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
+// DELETE /api/user/wallpapers - Elimina un fondo de pantalla personalizado
+app.delete('/api/user/wallpapers', protect, async (req, res) => {
+  try {
+    const { wallpaperUrl } = req.body;
+    if (!wallpaperUrl) {
+      return res.status(400).json({ message: 'Se requiere la URL del fondo a eliminar.' });
+    }
+
+    // Extrae el public_id de la URL de Cloudinary
+    const publicIdMatch = wallpaperUrl.match(/wallpapers\/.*\/[a-zA-Z0-9_-]+/);
+    if (publicIdMatch) {
+      await cloudinary.uploader.destroy(publicIdMatch[0]);
+    }
+
+    // Elimina la URL del array en la base de datos
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $pull: { customWallpapers: wallpaperUrl } },
+      { new: true }
+    );
+
+    res.status(200).json(updatedUser.customWallpapers);
+  } catch (error) {
+    console.error('Error al eliminar el wallpaper:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
+// PUT /api/user/wallpaper - Establece el wallpaper activo o sube uno nuevo
+app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, res) => {
   try {
     const { wallpaperUrl } = req.body; // O la URL de un fondo predefinido
     let finalWallpaperUrl;
 
     // Caso 1: Se subió un nuevo archivo
     if (req.file) {
-      const user = await User.findById(req.user._id);
-      // Si el usuario ya tiene un wallpaper personalizado en Cloudinary, elimina el anterior
-      if (user.wallpaper && user.wallpaper.includes('cloudinary')) {
-        const publicId = user.wallpaper.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`wallpapers/${publicId}`);
+      const user = await User.findById(req.user._id); // Obtenemos los datos actuales del usuario
+
+      // Verificamos el límite de 4 fondos personalizados antes de subir
+      if (user.customWallpapers && user.customWallpapers.length >= 4) {
+        return res.status(400).json({ message: 'Has alcanzado el límite de 4 fondos personalizados.' });
       }
 
-      // Sube la nueva imagen a Cloudinary y obtén la URL
+      // Sube la nueva imagen a una carpeta específica para el usuario en Cloudinary
       finalWallpaperUrl = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: 'wallpapers' },
+          { folder: `wallpapers/${req.user._id}` }, // Carpeta por usuario
           (error, result) => {
             if (error) return reject(error);
             resolve(result.secure_url);
@@ -1001,26 +1045,33 @@ app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, 
         uploadStream.end(req.file.buffer);
       });
 
+      // Actualiza el wallpaper activo y añade el nuevo a la lista de customWallpapers
+      const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          wallpaper: finalWallpaperUrl,
+          $push: { customWallpapers: finalWallpaperUrl } // Añade la URL al array
+        },
+        { new: true }
+      );
+
+      // Devolvemos el objeto de usuario completo para que el frontend se actualice
+      return res.status(200).json({
+        message: 'Fondo de pantalla actualizado.',
+        user: updatedUser, // Devolvemos el usuario completo
+        wallpaper: updatedUser.wallpaper,
+      });
+
       // Caso 2: Se envió la URL de un fondo predefinido
     } else if (wallpaperUrl) {
-      finalWallpaperUrl = wallpaperUrl;
-
-      // Caso 3: No se proporcionó ni archivo ni URL
-    } else {
-      return res.status(400).json({ message: 'No se proporcionó un fondo de pantalla.' });
+      // Si es un fondo predefinido, solo actualizamos el wallpaper activo
+      const updatedUser = await User.findByIdAndUpdate(req.user._id, { wallpaper: wallpaperUrl }, { new: true });
+      return res.status(200).json({ message: 'Fondo de pantalla actualizado.', user: updatedUser, wallpaper: updatedUser.wallpaper });
     }
 
-    // Actualiza el campo 'wallpaper' del usuario en la base de datos
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      { wallpaper: finalWallpaperUrl },
-      { new: true }
-    );
+    // Caso 3: No se proporcionó ni archivo ni URL
+    return res.status(400).json({ message: 'No se proporcionó un fondo de pantalla.' });
 
-    res.status(200).json({
-      message: 'Fondo de pantalla actualizado.',
-      wallpaper: updatedUser.wallpaper,
-    });
   } catch (error) {
     console.error('Error al subir el wallpaper:', error);
     res.status(500).json({ message: 'Error interno del servidor.' });

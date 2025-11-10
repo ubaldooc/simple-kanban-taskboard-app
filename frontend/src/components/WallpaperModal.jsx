@@ -16,6 +16,8 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   // Nuevos estados para los wallpapers predefinidos y la carga
   const [predefinedWallpapers, setPredefinedWallpapers] = useState([]);
   const [isLoadingWallpapers, setIsLoadingWallpapers] = useState(true);
+  // Nuevo estado para los fondos subidos por el usuario
+  const [customWallpapers, setCustomWallpapers] = useState(user?.customWallpapers || []);
   const [isUploading, setIsUploading] = useState(false);
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -23,6 +25,11 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   const api = useMemo(() => getApiService(authMode), [authMode]);
 
   // Efecto para obtener los wallpapers predefinidos desde el backend
+  useEffect(() => {
+    // Sincroniza los custom wallpapers si el objeto de usuario cambia
+    setCustomWallpapers(user?.customWallpapers || []);
+  }, [user]);
+
   useEffect(() => {
     // Solo hacemos la petición si el modal está abierto y los wallpapers no se han cargado aún.
     if (isOpen && predefinedWallpapers.length === 0) {
@@ -59,21 +66,28 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setIsUploading(true);
-      const formData = new FormData();
-      formData.append("wallpaper", file);
+      // Verificamos el límite ANTES de empezar la subida
+      if (customWallpapers.length >= 4) {
+        toast.error("Has alcanzado el límite de 4 fondos personalizados. Por favor, elimina uno para poder subir otro.");
+        return;
+      }
 
       try {
         // En modo offline, la subida de archivos no está soportada.
         if (authMode === "guest") {
-          toast.error(
-            "La subida de fondos solo está disponible para usuarios registrados."
-          );
+          // Esta lógica ya está en handleUploadClick, pero la dejamos como doble seguridad.
           return;
         }
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("wallpaper", file);
+
         // Usamos la API online para subir el archivo
         const response = await api.updateUserWallpaper(formData);
-        setUser({ ...user, wallpaper: response.wallpaper });
+        
+        // Actualizamos el estado del usuario con la nueva lista de fondos y el fondo activo
+        setUser(response.user);
         setSelectedWallpaper(response.wallpaper);
         toast.success("Fondo de pantalla subido.");
       } catch (error) {
@@ -204,20 +218,32 @@ const WallpaperModal = ({ isOpen, onClose }) => {
             ))
           )}
 
-          {/* Botón de agregar wallpaper solo se muestra si los fondos se cargaron correctamente */}
-          {!isLoadingWallpapers && predefinedWallpapers.length > 0 && (
-            <div
-              className="wallpaper-item upload-placeholder"
-              onClick={handleUploadClick}
-            >
-              {isUploading ? (
-                <span className="spinner-small"></span>
-              ) : (
-                <i className="fas fa-plus"></i>
-              )}
-            </div>
-          )}
         </div>
+
+        {/* Contenedor separado para los fondos del usuario */}
+        {authMode === 'online' && (
+          <>
+            <h3 className="custom-wallpapers-title">Tus fondos</h3>
+            <div className="wallpaper-grid">
+              {/* Renderizamos los fondos personalizados del usuario */}
+              {customWallpapers.map((url, index) => (
+                <div
+                  key={`custom-${index}`}
+                  className={`wallpaper-item ${selectedWallpaper === url ? "selected" : ""}`}
+                  style={{ backgroundImage: `url(${url})` }}
+                  onClick={() => handlePredefinedSelect(url)}
+                >
+                  <div className="selection-checkmark"><i className="fas fa-check"></i></div>
+                </div>
+              ))}
+
+              {/* Botón de agregar wallpaper */}
+              <div className="wallpaper-item upload-placeholder" onClick={handleUploadClick}>
+                {isUploading ? <span className="spinner-small"></span> : <i className="fas fa-plus"></i>}
+              </div>
+            </div>
+          </>
+        )}
 
         <input
           type="file"
