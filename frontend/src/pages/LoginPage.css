@@ -16,44 +16,56 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
   /* Quitamos el padding y el text-align para que el contenedor hijo lo controle */
   padding: 0;
-  overflow: hidden; /* Clave para el efecto de deslizamiento */
+  overflow: hidden;
+  /* Clave para el efecto de deslizamiento */
 }
 
 .form-container {
   display: flex;
-  width: 200%; /* El doble del ancho para contener ambos formularios */
-  transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1); /* Transición suave */
+  width: 200%;
+  /* El doble del ancho para contener ambos formularios */
+  transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+  /* Transición suave */
 }
 
 .form-container.show-register {
-  transform: translateX(-50%); /* Desplaza el contenedor a la izquierda */
+  transform: translateX(-50%);
+  /* Desplaza el contenedor a la izquierda */
 }
 
 .form-section {
-  width: 50%; /* Cada formulario ocupa la mitad del contenedor */
-  padding: 20px 35px; /* Hacemos el padding más compacto */
+  width: 50%;
+  /* Cada formulario ocupa la mitad del contenedor */
+  padding: 15px 30px;
+  /* Hacemos el padding más compacto */
   text-align: center;
   display: flex;
   flex-direction: column;
 }
 
 .login-logo {
-  width: 60px;
+  width: 50px;
+  /* Reducimos el tamaño del logo */
   height: auto;
-  margin-bottom: 12px; /* Reducimos el margen */
-  align-self: center; /* Centra el logo dentro del flex container */
+  margin-bottom: 10px;
+  /* Reducimos el margen */
+  align-self: center;
+  /* Centra el logo dentro del flex container */
 }
 
 .login-box h1 {
-  font-size: 1.7rem; /* Reducimos ligeramente el título */
+  font-size: 1.6rem;
+  /* Reducimos ligeramente el título */
   color: #24292e;
-  margin-bottom: 16px; /* Reducimos el margen */
+  margin-bottom: 12px;
+  /* Reducimos el margen */
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Hacemos el gap más pequeño */
+  gap: 12px;
+  /* Hacemos el gap más pequeño */
   text-align: left;
 }
 
@@ -91,7 +103,8 @@
 
 .password-input-wrapper input {
   width: 100%;
-  padding-right: 40px; /* Espacio para el icono */
+  padding-right: 40px;
+  /* Espacio para el icono */
 }
 
 .password-toggle-icon {
@@ -106,8 +119,10 @@
   font-size: 14px;
 }
 
-.submit-button, .google-button {
-  padding: 12px 24px;
+.submit-button,
+.google-button {
+  padding: 10px 20px;
+  /* Reducimos el padding del botón */
   font-size: 16px;
   cursor: pointer;
   border: none;
@@ -121,7 +136,8 @@
   transition: background-color 0.2s ease-in-out, transform 0.1s ease;
 }
 
-.submit-button:hover, .google-button:hover {
+.submit-button:hover,
+.google-button:hover {
   opacity: 0.9;
 }
 
@@ -130,19 +146,22 @@
   color: white;
 }
 
-.submit-button:active, .google-button:active {
+.submit-button:active,
+.google-button:active {
   transform: scale(0.98);
 }
 
 .divider {
-  margin: 16px 0; /* Hacemos el divisor más compacto */
+  margin: 12px 0;
+  /* Hacemos el divisor más compacto */
   display: flex;
   align-items: center;
   text-align: center;
   color: #666;
 }
 
-.divider::before, .divider::after {
+.divider::before,
+.divider::after {
   content: '';
   flex: 1;
   border-bottom: 1px solid #ccc;
@@ -157,7 +176,8 @@
 }
 
 .auth-switch {
-  padding: 12px 20px; /* Reducimos el padding del pie */
+  padding: 10px 20px;
+  /* Reducimos el padding del pie */
   font-size: 14px;
   color: #586069;
   background-color: #f6f8fa;
@@ -176,8 +196,10 @@
   background-color: #ffffff;
   color: #3c4043;
   border: 1px solid #dadce0;
-  border-radius: 6px; /* Mantenemos consistencia con el otro botón */
-  font-family: 'Roboto', sans-serif; /* Fuente recomendada por Google */
+  border-radius: 6px;
+  /* Mantenemos consistencia con el otro botón */
+  font-family: 'Roboto', sans-serif;
+  /* Fuente recomendada por Google */
   font-weight: 500;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
@@ -185,7 +207,8 @@
 .google-login-button:hover {
   background-color: #f8f9fa;
   box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
-  opacity: 1; /* Sobrescribimos el opacity: 0.9 general */
+  opacity: 1;
+  /* Sobrescribimos el opacity: 0.9 general */
 }
 
 .google-icon {
