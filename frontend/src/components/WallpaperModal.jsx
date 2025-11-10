@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import apiClient from "../api/axios"; // Importamos apiClient directamente
 import "./WallpaperModal.css"; // Renombrado de WallpaperManager.css
 import { getApiService } from "../services/apiService";
+import ConfirmationModal from "./ConfirmationModal"; // Importamos el modal de confirmación
 
 const WallpaperModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   const [isLoadingWallpapers, setIsLoadingWallpapers] = useState(true);
   // Nuevo estado para los fondos subidos por el usuario
   const [customWallpapers, setCustomWallpapers] = useState(user?.customWallpapers || []);
+  // Estado para el modal de confirmación de eliminación
+  const [wallpaperToDelete, setWallpaperToDelete] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const modalRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -182,20 +185,31 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     }
   };
 
-  // Maneja la eliminación de un wallpaper personalizado
-  const handleDeleteWallpaper = async (e, urlToDelete) => {
+  // Paso 1: Inicia el proceso de eliminación abriendo el modal
+  const requestDeleteWallpaper = (e, urlToDelete) => {
     e.stopPropagation(); // Evita que se seleccione el fondo al hacer clic en el botón
+    setWallpaperToDelete(urlToDelete);
+  };
 
+  // Paso 2: Se ejecuta si el usuario confirma la eliminación en el modal
+  const confirmDeleteWallpaper = async () => {
+    if (!wallpaperToDelete) return;
+
+    const urlToDelete = wallpaperToDelete;
     const originalWallpapers = [...customWallpapers];
+
+    // Cierra el modal de confirmación
+    setWallpaperToDelete(null);
+
     // Actualización optimista: elimina el fondo de la UI inmediatamente
     setCustomWallpapers(current => current.filter(url => url !== urlToDelete));
 
     try {
       // Llama a la API para eliminar el fondo
       await api.deleteCustomWallpaper(urlToDelete);
-      toast.success("Fondo eliminado.");
+      toast.success("Fondo de pantalla eliminado.");
     } catch (error) {
-      toast.error("No se pudo eliminar el fondo.");
+      toast.error("No se pudo eliminar el fondo de pantalla.");
       // Revertir en caso de error
       setCustomWallpapers(originalWallpapers);
     }
@@ -266,7 +280,7 @@ const WallpaperModal = ({ isOpen, onClose }) => {
                 >
                   <button
                     className="delete-wallpaper-btn"
-                    onClick={(e) => handleDeleteWallpaper(e, url)}
+                    onClick={(e) => requestDeleteWallpaper(e, url)}
                   >
                     <i className="fas fa-trash-alt"></i>
                   </button>
@@ -289,6 +303,15 @@ const WallpaperModal = ({ isOpen, onClose }) => {
           accept="image/jpeg, image/png, image/webp"
           onChange={handleFileChange}
           disabled={isUploading}
+        />
+
+        {/* Modal de confirmación para eliminar el fondo */}
+        <ConfirmationModal
+          isOpen={!!wallpaperToDelete}
+          onConfirm={confirmDeleteWallpaper}
+          onCancel={() => setWallpaperToDelete(null)}
+          title="Eliminar Fondo de Pantalla"
+          message="¿Estás seguro de que quieres eliminar este fondo de pantalla? Esta acción no se puede deshacer."
         />
       </div>
     </div>
