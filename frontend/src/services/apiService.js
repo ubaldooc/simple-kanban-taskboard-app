@@ -8,40 +8,46 @@ const handleResponse = async (response) => {
 
 // --- Implementación de la API "Online" (usando fetch) ---
 const onlineApi = {
-  
+
   getUserPreferences: () => apiClient.get('/user/preferences').then(handleResponse),
-  
+
   updateUserPreferences: (prefs) => apiClient.put('/user/preferences', prefs).then(handleResponse),
 
   // Nueva función específica para subir wallpapers
-  updateUserWallpaper: (formData) => apiClient.put('/user/wallpaper', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(handleResponse),
+  updateUserWallpaper: (formData) => apiClient.put('/user/wallpaper', formData).then(handleResponse),
+
+  // --- Rutas para fondos de pantalla personalizados ---
+  getCustomWallpapers: () => apiClient.get('/user/wallpapers').then(handleResponse),
+
+  deleteCustomWallpaper: (wallpaperUrl) => apiClient.delete('/user/wallpapers', { data: { wallpaperUrl } }).then(handleResponse),
+  // ----------------------------------------------------
 
   getBoardsList: () => apiClient.get('/boards/list').then(handleResponse),
-  
+
   getBoardDetails: (boardId) => apiClient.get(`/boards/${boardId}`).then(handleResponse),
-  
+
   createBoard: (boardData) => apiClient.post('/boards', boardData).then(handleResponse),
-  
+
   updateBoard: (boardId, updateData) => apiClient.put(`/boards/${boardId}`, updateData).then(handleResponse),
-  
+
   deleteBoard: (boardId) => apiClient.delete(`/boards/${boardId}`).then(handleResponse),
-  
+
   reorderBoards: (boardIds) => apiClient.put('/boards/reorder', { boardIds }).then(handleResponse),
 
   createColumn: (boardId, columnData) => apiClient.post(`/boards/${boardId}/columns`, columnData).then(handleResponse),
-  
+
   updateColumn: (columnId, updateData) => apiClient.put(`/columns/${columnId}`, updateData).then(handleResponse),
-  
+
   deleteColumn: (columnId) => apiClient.delete(`/columns/${columnId}`).then(handleResponse),
-  
+
   reorderColumns: (boardId, columnIds) => apiClient.put(`/boards/${boardId}/reorder-columns`, { columnIds }).then(handleResponse),
 
   createCard: (columnId, cardData) => apiClient.post(`/columns/${columnId}/cards`, cardData).then(handleResponse),
-  
+
   updateCard: (cardId, updateData) => apiClient.put(`/cards/${cardId}`, updateData).then(handleResponse),
-  
+
   deleteCard: (cardId) => apiClient.delete(`/cards/${cardId}`).then(handleResponse),
-  
+
   reorderCards: (boardId, cards) => apiClient.put(`/boards/${boardId}/reorder-cards`, { cards }).then(handleResponse),
 
 };

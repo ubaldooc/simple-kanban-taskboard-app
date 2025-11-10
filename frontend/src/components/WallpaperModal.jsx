@@ -24,12 +24,6 @@ const WallpaperModal = ({ isOpen, onClose }) => {
 
   const api = useMemo(() => getApiService(authMode), [authMode]);
 
-  // Efecto para obtener los wallpapers predefinidos desde el backend
-  useEffect(() => {
-    // Sincroniza los custom wallpapers si el objeto de usuario cambia
-    setCustomWallpapers(user?.customWallpapers || []);
-  }, [user]);
-
   useEffect(() => {
     // Solo hacemos la petición si el modal está abierto y los wallpapers no se han cargado aún.
     if (isOpen && predefinedWallpapers.length === 0) {
@@ -47,6 +41,21 @@ const WallpaperModal = ({ isOpen, onClose }) => {
       };
       fetchWallpapers();
     }
+
+    // Cuando se abre el modal y estamos online, obtenemos los fondos personalizados.
+    if (isOpen && authMode === 'online') {
+      const fetchCustomWallpapers = async () => {
+        try {
+          const customWps = await api.getCustomWallpapers();
+          setCustomWallpapers(customWps);
+        } catch (error) {
+          console.error("Error al cargar los fondos personalizados:", error);
+          toast.error("No se pudieron cargar tus fondos.");
+        }
+      };
+      fetchCustomWallpapers();
+    }
+
   }, [isOpen, predefinedWallpapers.length]); // Se ejecuta cuando el modal se abre
 
   // Efecto para cerrar el modal al hacer clic fuera
@@ -87,7 +96,10 @@ const WallpaperModal = ({ isOpen, onClose }) => {
         const response = await api.updateUserWallpaper(formData);
         
         // Actualizamos el estado del usuario con la nueva lista de fondos y el fondo activo
-        setUser(response.user);
+        const updatedUser = response.user;
+        setUser(updatedUser);
+        // Sincronizamos la lista local de fondos personalizados
+        setCustomWallpapers(updatedUser.customWallpapers);
         setSelectedWallpaper(response.wallpaper);
         toast.success("Fondo de pantalla subido.");
       } catch (error) {
@@ -170,6 +182,25 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Maneja la eliminación de un wallpaper personalizado
+  const handleDeleteWallpaper = async (e, urlToDelete) => {
+    e.stopPropagation(); // Evita que se seleccione el fondo al hacer clic en el botón
+
+    const originalWallpapers = [...customWallpapers];
+    // Actualización optimista: elimina el fondo de la UI inmediatamente
+    setCustomWallpapers(current => current.filter(url => url !== urlToDelete));
+
+    try {
+      // Llama a la API para eliminar el fondo
+      await api.deleteCustomWallpaper(urlToDelete);
+      toast.success("Fondo eliminado.");
+    } catch (error) {
+      toast.error("No se pudo eliminar el fondo.");
+      // Revertir en caso de error
+      setCustomWallpapers(originalWallpapers);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -233,6 +264,12 @@ const WallpaperModal = ({ isOpen, onClose }) => {
                   style={{ backgroundImage: `url(${url})` }}
                   onClick={() => handlePredefinedSelect(url)}
                 >
+                  <button
+                    className="delete-wallpaper-btn"
+                    onClick={(e) => handleDeleteWallpaper(e, url)}
+                  >
+                    <i className="fas fa-trash-alt"></i>
+                  </button>
                   <div className="selection-checkmark"><i className="fas fa-check"></i></div>
                 </div>
               ))}

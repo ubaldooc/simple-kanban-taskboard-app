@@ -138,3 +138,33 @@
   border-top: 1px solid var(--border-primary);
   padding-top: 20px;
 }
+
+.delete-wallpaper-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0;
+  /* Oculto por defecto */
+  transition: opacity 0.2s, background-color 0.2s;
+  font-size: 0.8rem;
+}
+
+.wallpaper-item:hover .delete-wallpaper-btn {
+  opacity: 1;
+  /* Visible al pasar el ratón sobre el item */
+}
+
+.delete-wallpaper-btn:hover {
+  background-color: #EF5350;
+  /* Rojo al pasar el ratón sobre el botón */
+}
