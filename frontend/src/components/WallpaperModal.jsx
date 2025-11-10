@@ -75,12 +75,6 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Verificamos el límite ANTES de empezar la subida
-      if (customWallpapers.length >= 4) {
-        toast.error("Has alcanzado el límite de 4 fondos personalizados. Por favor, elimina uno para poder subir otro.");
-        return;
-      }
-
       try {
         // En modo offline, la subida de archivos no está soportada.
         if (authMode === "guest") {
@@ -131,6 +125,12 @@ const WallpaperModal = ({ isOpen, onClose }) => {
             </a> para personalizar tu espacio!
           </span>
         )
+      );
+    } else if (customWallpapers.length >= 4) {
+      // Comprobación del límite de wallpapers ANTES de abrir el explorador de archivos.
+      toast.error(
+        "Has alcanzado el límite de 4 fondos personalizados. Por favor, elimina uno para poder subir otro.",
+        { duration: 5000 }
       );
     } else {
       fileInputRef.current.click();
