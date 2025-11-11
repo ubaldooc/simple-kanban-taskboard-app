@@ -826,27 +826,75 @@ app.post('/api/auth/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10); // Genera un "salt" para el hash
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4. Crear el nuevo usuario
+    // 4. Generar el token de verificación
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+
+    // 5. Crear el nuevo usuario con los campos de verificación
     const newUser = new User({
       name,
       email,
       password: hashedPassword, // Guardamos la contraseña hasheada
+      isVerified: false,
+      verificationToken: verificationToken,
+      verificationTokenExpires: Date.now() + 24 * 3600000, // 24 horas
     });
     await newUser.save();
 
-    // 5. Generar tokens y configurar la cookie de refresh token
-    const accessToken = await generateTokensAndSetCookie(res, newUser._id);
+    // 6. Enviar el correo de verificación
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: newUser.email,
+      subject: 'Activa tu cuenta en Taskboard',
+      html: `
+        <p>¡Hola ${newUser.name}!</p>
+        <p>Gracias por registrarte. Por favor, haz clic en el siguiente enlace para activar tu cuenta:</p>
+        <a href="${verificationLink}" style="background-color: #0969da; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Activar Cuenta</a>
+        <p>Este enlace expirará en 24 horas.</p>
+      `,
+    };
+    await transporter.sendMail(mailOptions);
 
-    // 6. Enviar la respuesta con el accessToken y los datos del usuario
-    res.status(201).json({ // 201 Created
-      message: 'Usuario registrado exitosamente.',
-      accessToken,
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, picture: newUser.picture, wallpaper: newUser.wallpaper } // SI HAY ALGUN ERROR ES PROBABLE QUE SE ORIGINE PORQUE AÑADI WALLPAPER EN ESTA LINEA
+    // 7. Enviar una respuesta al frontend indicando que se debe verificar el correo
+    res.status(201).json({
+      message: '¡Registro exitoso! Por favor, revisa tu correo para activar tu cuenta.'
     });
 
   } catch (error) {
     console.error('Error durante el registro:', error);
     res.status(500).json({ message: 'Error interno del servidor durante el registro.' });
+  }
+});
+
+// POST /api/auth/verify-email/:token - Verifica la cuenta de un usuario
+app.post('/api/auth/verify-email/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    // 1. Buscar al usuario por el token y verificar que no haya expirado
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() }, // $gt (greater than)
+    });
+
+    // 2. Si no se encuentra, el token es inválido o ha expirado
+    if (!user) {
+      return res.status(400).json({ message: 'El enlace de verificación es inválido o ha expirado.' });
+    }
+
+    // 3. Si se encuentra, actualiza el usuario
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+
+    await user.save();
+
+    // 4. Devolver un mensaje de éxito
+    res.status(200).json({ message: '¡Tu cuenta ha sido verificada con éxito! Ya puedes iniciar sesión.' });
+
+  } catch (error) {
+    console.error('Error durante la verificación del correo:', error);
+    res.status(500).json({ message: 'Error interno del servidor durante la verificación.' });
   }
 });
 
@@ -878,10 +926,17 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: 'Correo o contraseña incorrectas.' });
     }
 
-    // 5. Generar tokens y configurar la cookie de refresh token
+    // 5. ¡NUEVA VERIFICACIÓN! Comprobar si la cuenta está verificada.
+    if (!user.isVerified) {
+      return res.status(403).json({ // 403 Forbidden
+        message: 'Tu cuenta no ha sido verificada. Por favor, revisa tu correo para activar tu cuenta.'
+      });
+    }
+
+    // 6. Generar tokens y configurar la cookie de refresh token
     const accessToken = await generateTokensAndSetCookie(res, user._id);
 
-    // 6. Enviar la respuesta con el accessToken y los datos del usuario
+    // 7. Enviar la respuesta con el accessToken y los datos del usuario
     res.status(200).json({
       message: 'Inicio de sesión exitoso.',
       accessToken,

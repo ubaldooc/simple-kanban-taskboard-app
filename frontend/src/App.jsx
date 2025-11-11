@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { TaskboardView } from "./components/TaskboardView.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx"; // Importamos la nueva página
+import VerifyEmailPage from "./pages/VerifyEmailPage.jsx"; // Importamos la página de verificación
 import WallpaperSetter from "./components/WallpaperSetter.jsx";
 import { getApiService } from "./services/apiService.js";
 
@@ -34,6 +35,9 @@ function App() {
 
         {/* Nueva ruta para restablecer la contraseña */}
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+
+        {/* Nueva ruta para verificar el correo electrónico */}
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
       </Routes>
     </>
   );

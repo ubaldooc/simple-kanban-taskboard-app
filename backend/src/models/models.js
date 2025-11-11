@@ -47,6 +47,11 @@ const UserSchema = new Schema({
   googleId: { type: String, unique: true, sparse: true }, // ID único de Google, permite nulos
   picture: { type: String }, // URL de la imagen de perfil de Google
   password: { type: String }, // Campo para la contraseña hasheada
+  // --- Campos para verificación de correo ---
+  isVerified: { type: Boolean, default: false },
+  verificationToken: { type: String },
+  verificationTokenExpires: { type: Date },
+
   // Referencia al último tablero que el usuario tuvo activo.
   lastActiveBoard: { type: Schema.Types.ObjectId, ref: 'Board', default: null },
   wallpaper: { type: String, default: 'https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp' }, // Wallpaper del usuario
