@@ -58,6 +58,9 @@ const LoginPage = () => {
                   <input type={showPassword ? "text" : "password"} id="login-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                   <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'} password-toggle-icon`} onClick={() => setShowPassword(!showPassword)}></i>
                 </div>
+                <div className="forgot-password-link">
+                  <a href="#">¿Olvidaste tu contraseña?</a>
+                </div>
               </div>
               {error && !isRegisterView && <p className="error-message">{error}</p>}
               <button type="submit" className="submit-button">Iniciar Sesión</button>

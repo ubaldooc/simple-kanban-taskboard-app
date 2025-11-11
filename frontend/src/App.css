@@ -508,7 +508,7 @@ div.column-title-input:focus {
     padding: 12px;
     text-align: center;
     cursor: pointer;
-    color: var(--text-secondary);
+    color: white;
     font-size: 0.9em;
     display: flex;
     align-items: center;
