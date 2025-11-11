@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { TaskboardView } from "./components/TaskboardView.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx"; // Importamos la nueva página
 import WallpaperSetter from "./components/WallpaperSetter.jsx";
 import { getApiService } from "./services/apiService.js";
 
@@ -30,6 +31,9 @@ function App() {
         />
         {/* La ruta de login sigue siendo pública */}
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Nueva ruta para restablecer la contraseña */}
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       </Routes>
     </>
   );

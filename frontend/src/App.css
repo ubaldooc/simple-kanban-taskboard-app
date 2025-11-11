@@ -735,6 +735,7 @@ div.column-title-input:focus {
 }
 
 .modal-actions {
+    margin-top: 10px;
     display: flex;
     justify-content: center;
     gap: 15px;
@@ -771,6 +772,12 @@ div.column-title-input:focus {
 
 .modal-btn-confirm:hover {
     background-color: color-mix(in srgb, var(--color-danger) 90%, #fff 10%);
+}
+
+/* Ajuste para el botón de confirmación en el modal de contraseña */
+.modal-btn-confirm:disabled {
+    background-color: #555;
+    cursor: not-allowed;
 }
 
 /* --- Modal Informativo (sin botones) --- */

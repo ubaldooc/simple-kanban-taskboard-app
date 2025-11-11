@@ -9,6 +9,7 @@ import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 
@@ -33,6 +34,17 @@ cloudinary.config({
 // Configuración de multer para manejar archivos temporales
 const storage = multer.memoryStorage(); // Almacena los archivos en memoria
 const upload = multer({ storage });
+
+// --- Configuración de Nodemailer ---
+// Te recomiendo usar variables de entorno para las credenciales.
+// Aquí usamos Gmail como ejemplo, pero para producción es mejor un servicio como SendGrid o Mailgun.
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', // o tu proveedor de SMTP
+  auth: {
+    user: process.env.EMAIL_USER, // tu correo: 'tu-correo@gmail.com'
+    pass: process.env.EMAIL_PASS, // tu contraseña de aplicación de gmail
+  },
+});
 
 
 // Middleware para habilitar CORS
@@ -937,6 +949,90 @@ app.post('/api/auth/logout', async (req, res) => {
   res.clearCookie('refreshToken');
   res.status(200).json({ message: 'Cierre de sesión exitoso.' });
 });
+
+// --- 1. ENDPOINT PARA SOLICITAR RESTABLECIMIENTO DE CONTRASEÑA ---
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    // ¡Importante! No reveles si el usuario existe o no.
+    // Siempre envía una respuesta genérica para evitar la enumeración de usuarios.
+    if (!user) {
+      return res.status(200).json({ message: 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.' });
+    }
+
+    // Generar un token seguro
+    const token = crypto.randomBytes(20).toString('hex');
+
+    // Guardar el token y la fecha de expiración (ej. 1 hora) en el usuario
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora en milisegundos
+    await user.save();
+
+    // Crear el enlace de restablecimiento
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    // Configurar el correo
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: 'Restablecimiento de contraseña para Taskboard',
+      html: `
+        <p>Hola ${user.name},</p>
+        <p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:</p>
+        <a href="${resetLink}" style="background-color: #2ea44f; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
+        <p>Si no solicitaste esto, puedes ignorar este correo.</p>
+        <p>El enlace expirará en 1 hora.</p>
+      `,
+    };
+
+    // Enviar el correo
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.' });
+
+  } catch (error) {
+    console.error('Error en /forgot-password:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+});
+
+// --- 2. ENDPOINT PARA RESTABLECER LA CONTRASEÑA ---
+app.post('/api/auth/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    // Buscar al usuario por el token y verificar que no haya expirado
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }, // $gt (greater than)
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'El token es inválido o ha expirado.' });
+    }
+
+    // Hashear la nueva contraseña
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+
+    // Limpiar el token para que no se pueda reutilizar
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: '¡Contraseña actualizada con éxito!' });
+
+  } catch (error) {
+    console.error('Error en /reset-password:', error);
+    res.status(500).json({ message: 'Error del servidor.' });
+  }
+});
+
 
 
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import './LoginPage.css'; // Estilos para el formulario
 import logoImage from '../assets/logo.png'; // Importamos el logo
+import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importamos el modal
 
 const LoginPage = () => {
   const { user, login, register, loginWithGoogle } = useAuth();
@@ -13,6 +15,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   // Si el usuario ya está logueado (p.ej. por una sesión previa guardada),
   // lo redirigimos inmediatamente al dashboard principal para que no vea el login.
@@ -41,6 +44,15 @@ const LoginPage = () => {
 
   return (
     <div className="login-page-container">
+      {/* Contenedor para las notificaciones flotantes */}
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: { background: '#333', color: '#fff' },
+          duration: 4000,
+        }}
+      />
+
       <div className="login-box">
         <div className={`form-container ${isRegisterView ? 'show-register' : ''}`}>
           {/* --- Formulario de Iniciar Sesión --- */}
@@ -59,7 +71,13 @@ const LoginPage = () => {
                   <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'} password-toggle-icon`} onClick={() => setShowPassword(!showPassword)}></i>
                 </div>
                 <div className="forgot-password-link">
-                  <a href="#">¿Olvidaste tu contraseña?</a>
+                  <a 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsForgotPasswordOpen(true);
+                    }}
+                  >¿Olvidaste tu contraseña?</a>
                 </div>
               </div>
               {error && !isRegisterView && <p className="error-message">{error}</p>}
@@ -104,6 +122,11 @@ const LoginPage = () => {
           )}
         </div>
       </div>
+
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
     </div>
   );
 };

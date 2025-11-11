@@ -52,6 +52,9 @@ const UserSchema = new Schema({
   wallpaper: { type: String, default: 'https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp' }, // Wallpaper del usuario
   // Array para almacenar las URLs de los fondos de pantalla subidos por el usuario.
   customWallpapers: [{ type: String }],
+  // --- Campos para restablecimiento de contraseña ---
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 }, { timestamps: true });
 
 // --- Refresh Token Schema ---
