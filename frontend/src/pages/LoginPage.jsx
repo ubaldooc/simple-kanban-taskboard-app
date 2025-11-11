@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast';
 import './LoginPage.css'; // Estilos para el formulario
 import logoImage from '../assets/logo.png'; // Importamos el logo
 import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importamos el modal
@@ -16,6 +16,8 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Si el usuario ya está logueado (p.ej. por una sesión previa guardada),
   // lo redirigimos inmediatamente al dashboard principal para que no vea el login.
@@ -31,15 +33,29 @@ const LoginPage = () => {
     setError('');
     let result;
     if (isRegisterView) {
-      // NOTA: La ruta para este registro aún no existe en tu backend.
       result = await register(name, email, password);
+      if (result.success) {
+        setSuccessMessage(result.message);
+        setShowSuccessModal(true);
+      } else {
+        setError(result.message || 'Ocurrió un error en el registro.');
+      }
     } else {
+      // Lógica para el inicio de sesión
       result = await login(email, password);
+      if (!result.success) {
+        setError(result.message || 'Ocurrió un error al iniciar sesión.');
+      }
     }
+  };
 
-    if (!result.success) {
-      setError(result.message || 'Ocurrió un error.');
-    }
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setIsRegisterView(false); // Cambia a la vista de login
+    // Limpiamos los campos
+    setName('');
+    setPassword('');
+    // Dejamos el email por si el usuario quiere intentar iniciar sesión
   };
 
   return (
@@ -127,6 +143,22 @@ const LoginPage = () => {
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
       />
+
+      {/* --- Modal de Éxito de Registro --- */}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="status-icon success" style={{ fontSize: '3rem', marginBottom: '15px' }}>
+              <i className="fas fa-check-circle"></i>
+            </div>
+            <h2>¡Registro Exitoso!</h2>
+            <p>{successMessage}</p>
+            <button onClick={handleCloseSuccessModal} className="submit-button" style={{ marginTop: '20px' }}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
