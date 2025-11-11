@@ -911,8 +911,8 @@ app.post('/api/auth/login', async (req, res) => {
     // 2. Buscar al usuario por su correo electrónico
     const user = await User.findOne({ email });
     if (!user) {
-      // Usamos un mensaje genérico para no revelar si el email existe o no
-      return res.status(401).json({ message: 'Correo o contraseña incorrectas.' });
+      // Si el usuario no existe, le sugerimos que se registre.
+      return res.status(401).json({ message: 'Aun no tienes una cuenta crea una ' });
     }
 
     // 3. Verificar que el usuario tenga una contraseña (pudo haberse registrado con Google)
