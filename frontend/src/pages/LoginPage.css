@@ -140,6 +140,20 @@
   font-size: 14px;
 }
 
+.error-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.resend-link {
+  font-size: 13px;
+  color: #0366d6;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+}
+
 .submit-button,
 .google-button {
   padding: 10px 20px;

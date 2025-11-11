@@ -898,6 +898,49 @@ app.post('/api/auth/verify-email/:token', async (req, res) => {
   }
 });
 
+// POST /api/auth/resend-verification - Reenvía el correo de verificación
+app.post('/api/auth/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'El correo electrónico es requerido.' });
+    }
+
+    const user = await User.findOne({ email });
+
+    // Si el usuario no existe, enviamos una respuesta genérica para no revelar información.
+    if (!user) {
+      return res.status(200).json({ message: 'Si una cuenta con ese correo existe y no está verificada, se ha enviado un nuevo enlace.' });
+    }
+
+    // Si el usuario ya está verificado, no hacemos nada.
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Esta cuenta ya ha sido verificada.' });
+    }
+
+    // Generamos un nuevo token y actualizamos la fecha de expiración para invalidar el anterior.
+    const verificationToken = crypto.randomBytes(20).toString('hex');
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpires = Date.now() + 24 * 3600000; // 24 horas
+    await user.save();
+
+    // Enviamos el nuevo correo de verificación.
+    const verificationLink = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: 'Activa tu cuenta en Taskboard (Reenvío)',
+      html: `<p>Hola ${user.name},</p><p>Aquí tienes tu nuevo enlace para activar la cuenta: <a href="${verificationLink}">Activar Cuenta</a></p><p>Este enlace expirará en 24 horas.</p>`,
+    };
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Se ha enviado un nuevo enlace de verificación a tu correo.' });
+  } catch (error) {
+    console.error('Error al reenviar el correo de verificación:', error);
+    res.status(500).json({ message: 'Error interno del servidor.' });
+  }
+});
+
 // POST /api/auth/login - Inicia sesión con email y contraseña
 app.post('/api/auth/login', async (req, res) => {
   try {

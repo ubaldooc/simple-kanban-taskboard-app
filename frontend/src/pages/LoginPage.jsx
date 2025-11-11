@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../api/axios';
 import toast, { Toaster } from 'react-hot-toast';
 import './LoginPage.css'; // Estilos para el formulario
 import logoImage from '../assets/logo.png'; // Importamos el logo
@@ -19,6 +20,7 @@ const LoginPage = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Nuevo estado para la carga
+  const [showResendLink, setShowResendLink] = useState(false);
 
   // Si el usuario ya está logueado (p.ej. por una sesión previa guardada),
   // lo redirigimos inmediatamente al dashboard principal para que no vea el login.
@@ -32,6 +34,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setShowResendLink(false);
     setIsLoading(true); // Inicia la carga
     let result;
     try {
@@ -47,7 +50,11 @@ const LoginPage = () => {
         // Lógica para el inicio de sesión
         result = await login(email, password);
         if (!result.success) {
-          setError(result.message || 'Ocurrió un error al iniciar sesión.');
+          const errorMessage = result.message || 'Ocurrió un error al iniciar sesión.';
+          setError(errorMessage);
+          if (errorMessage.includes('Tu cuenta no ha sido verificada')) {
+            setShowResendLink(true);
+          }
         }
       }
     } catch (error) {
@@ -64,6 +71,19 @@ const LoginPage = () => {
     setName('');
     setPassword('');
     // Dejamos el email por si el usuario quiere intentar iniciar sesión
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      toast.error('Por favor, ingresa tu correo electrónico en el campo correspondiente.');
+      return;
+    }
+    try {
+      const { data } = await apiClient.post('/auth/resend-verification', { email });
+      toast.success(data.message, { duration: 6000 });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'No se pudo reenviar el correo.');
+    }
   };
 
   return (
@@ -104,7 +124,16 @@ const LoginPage = () => {
                   >¿Olvidaste tu contraseña?</a>
                 </div>
               </div>
-              {error && !isRegisterView && <p className="error-message">{error}</p>}
+              {error && !isRegisterView && (
+                <div className="error-container">
+                  <p className="error-message">{error}</p>
+                  {showResendLink && (
+                    <span className="resend-link" onClick={handleResendVerification}>
+                      Reenviar correo de verificación
+                    </span>
+                  )}
+                </div>
+              )}
               <button type="submit" className="submit-button">Iniciar Sesión</button>
             </form>
             <div className="divider"><span>O</span></div>
@@ -166,8 +195,10 @@ const LoginPage = () => {
               <i className="fas fa-check-circle"></i>
             </div>
             <h2>¡Registro Exitoso!</h2>
-            <p>{successMessage}</p>
-            <button onClick={handleCloseSuccessModal} className="submit-button" style={{ marginTop: '20px' }}>
+            <p>
+              Te hemos enviado un correo electrónico. Por favor, haz clic en el enlace de activación para confirmar tu cuenta y poder iniciar sesión.
+            </p>
+            <button onClick={handleCloseSuccessModal} className="submit-button" style={{ marginTop: '15px' }}>
               Entendido
             </button>
           </div>
