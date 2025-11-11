@@ -9,6 +9,7 @@ import { OAuth2Client } from 'google-auth-library';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import cron from 'node-cron';
 import nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
@@ -73,6 +74,42 @@ const startServer = async () => {
 
 startServer();
 
+// --- Tarea Programada (Cron Job) para Limpieza de Cuentas no Verificadas ---
+// Se ejecuta una vez al día a las 3:00 AM.
+cron.schedule('0 3 * * *', async () => {
+  console.log('Ejecutando tarea de limpieza de cuentas no verificadas...');
+  try {
+    // Calcula la fecha límite: cuentas con más de 15 días de antigüedad.
+    const cutoffDate = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000);
+
+    // 1. Encontrar los usuarios que se van a eliminar.
+    const usersToDelete = await User.find({
+      isVerified: false,
+      createdAt: { $lt: cutoffDate }, // Usamos el timestamp de creación
+    });
+
+    if (usersToDelete.length > 0) {
+      console.log(`Se encontraron ${usersToDelete.length} cuentas no verificadas para eliminar.`);
+
+      // 2. Iterar sobre cada usuario para eliminar sus recursos y luego el usuario mismo.
+      for (const user of usersToDelete) {
+        const userFolder = `wallpapers/${user._id}`;
+
+        // 3. Eliminar todos los recursos dentro de la carpeta del usuario en Cloudinary.
+        await cloudinary.api.delete_resources_by_prefix(userFolder);
+
+        // 4. Eliminar la carpeta vacía del usuario en Cloudinary.
+        await cloudinary.api.delete_folder(userFolder);
+
+        // 5. Finalmente, eliminar el registro del usuario de la base de datos.
+        await User.findByIdAndDelete(user._id);
+      }
+      console.log(`Limpieza completada: Se eliminaron ${usersToDelete.length} cuentas y sus archivos asociados.`);
+    }
+  } catch (error) {
+    console.error('Error durante la limpieza de cuentas no verificadas:', error);
+  }
+});
 
 // Define una ruta simple para probar que el servidor funciona
 app.get('/', (req, res) => {
