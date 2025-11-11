@@ -36,8 +36,6 @@ const storage = multer.memoryStorage(); // Almacena los archivos en memoria
 const upload = multer({ storage });
 
 // --- Configuración de Nodemailer ---
-// Te recomiendo usar variables de entorno para las credenciales.
-// Aquí usamos Gmail como ejemplo, pero para producción es mejor un servicio como SendGrid o Mailgun.
 const transporter = nodemailer.createTransport({
   service: 'Gmail', // o tu proveedor de SMTP
   auth: {
