@@ -18,6 +18,7 @@ const LoginPage = () => {
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Nuevo estado para la carga
 
   // Si el usuario ya está logueado (p.ej. por una sesión previa guardada),
   // lo redirigimos inmediatamente al dashboard principal para que no vea el login.
@@ -31,21 +32,28 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true); // Inicia la carga
     let result;
-    if (isRegisterView) {
-      result = await register(name, email, password);
-      if (result.success) {
-        setSuccessMessage(result.message);
-        setShowSuccessModal(true);
+    try {
+      if (isRegisterView) {
+        result = await register(name, email, password);
+        if (result.success) {
+          setSuccessMessage(result.message);
+          setShowSuccessModal(true);
+        } else {
+          setError(result.message || 'Ocurrió un error en el registro.');
+        }
       } else {
-        setError(result.message || 'Ocurrió un error en el registro.');
+        // Lógica para el inicio de sesión
+        result = await login(email, password);
+        if (!result.success) {
+          setError(result.message || 'Ocurrió un error al iniciar sesión.');
+        }
       }
-    } else {
-      // Lógica para el inicio de sesión
-      result = await login(email, password);
-      if (!result.success) {
-        setError(result.message || 'Ocurrió un error al iniciar sesión.');
-      }
+    } catch (error) {
+      setError('Ocurrió un error inesperado. Inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false); // Finaliza la carga
     }
   };
 
@@ -124,7 +132,13 @@ const LoginPage = () => {
                 </div>
               </div>
               {error && isRegisterView && <p className="error-message">{error}</p>}
-              <button type="submit" className="submit-button">Registrarse</button>
+              <button type="submit" className="submit-button" disabled={isLoading}>
+                {isLoading && isRegisterView ? (
+                  <>
+                    <span className="spinner-small"></span> Registrando...
+                  </>
+                ) : 'Registrarse'}
+              </button>
             </form>
             <div className="divider"><span>O</span></div>
             <button onClick={() => loginWithGoogle()} className="google-login-button"><span className="google-icon"></span><span>Iniciar Sesión con Google</span></button>

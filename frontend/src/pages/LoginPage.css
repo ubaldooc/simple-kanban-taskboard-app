@@ -172,6 +172,25 @@
   transform: scale(0.98);
 }
 
+.submit-button:disabled {
+  background-color: #94d3a2;
+  /* Un verde más claro para el estado deshabilitado */
+  cursor: not-allowed;
+}
+
+/* Spinner pequeño para botones */
+.spinner-small {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  -webkit-animation: spin 1s ease-in-out infinite;
+}
+
+
 .divider {
   margin: 12px 0;
   /* Hacemos el divisor más compacto */
