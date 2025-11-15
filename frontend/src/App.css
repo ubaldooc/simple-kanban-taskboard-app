@@ -431,8 +431,7 @@ div.column-title-input:focus {
 /* --- Estilo para el clon de la columna en el DragOverlay --- */
 /* Asegura que una columna vacía no se encoja al ser arrastrada. */
 .dnd-overlay-column .column {
-    min-height: 200px;
-    /* O un valor que se ajuste a tu diseño */
+    height: 100%;
 }
 
 /* --- Estilos para la tarjeta arrastrada y su placeholder --- */

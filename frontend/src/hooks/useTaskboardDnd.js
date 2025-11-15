@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
+import toast from 'react-hot-toast';
 import { useTaskboardContext } from '../context/TaskboardContext';
 
 const ANIMATION_DURATION = 400;
@@ -51,7 +52,7 @@ export const useTaskboardDnd = () => {
       updateActiveBoard(board => {
         const oldIndex = board.columns.findIndex(c => c.id === active.id);
         const newIndex = board.columns.findIndex(c => c.id === over.id);
-        
+
         // Si los índices son válidos, mueve la columna en el estado
         if (oldIndex !== -1 && newIndex !== -1) {
           return {
@@ -84,11 +85,11 @@ export const useTaskboardDnd = () => {
         // Si no se encuentra la tarjeta sobre la que se arrastra, no hacer nada.
         // Esto puede pasar si se arrastra sobre una columna vacía, lo manejaremos de otra forma.
         if (overIndex === -1) {
-            // Si se arrastra sobre una columna (y no una tarjeta), actualiza la columna de la tarjeta activa.
-            if (isOverAColumn && board.cards[activeIndex].column !== overColumnId) {
-                board.cards[activeIndex].column = overColumnId;
-            }
-            return board; // Devuelve el tablero con la columna actualizada si es el caso.
+          // Si se arrastra sobre una columna (y no una tarjeta), actualiza la columna de la tarjeta activa.
+          if (isOverAColumn && board.cards[activeIndex].column !== overColumnId) {
+            board.cards[activeIndex].column = overColumnId;
+          }
+          return board; // Devuelve el tablero con la columna actualizada si es el caso.
         }
 
         if (board.cards[activeIndex].column !== overColumnId) {
@@ -130,6 +131,7 @@ export const useTaskboardDnd = () => {
       // Solo persistimos si la columna realmente cambió de posición.
       if (active.id !== over.id) {
         reorderColumns(active.data.current.sortable.index, over.data.current.sortable.index);
+        toast.success('Orden de las columnas actualizado.');
       }
     }
 
