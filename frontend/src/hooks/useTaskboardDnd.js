@@ -128,11 +128,8 @@ export const useTaskboardDnd = () => {
 
     // --- Manejo de reordenamiento de COLUMNAS ---
     if (activeType === 'Column') {
-      // Solo persistimos si la columna realmente cambió de posición.
-      if (active.id !== over.id) {
-        reorderColumns(active.data.current.sortable.index, over.data.current.sortable.index);
-        toast.success('Orden de las columnas actualizado.');
-      }
+      // Solo persistimos si la columna realmente cambió de posición.    
+      reorderColumns();
     }
 
     // --- Manejo de reordenamiento de TARJETAS ---
