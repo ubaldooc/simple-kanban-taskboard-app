@@ -47,25 +47,40 @@ export const useTaskboardDnd = () => {
     const activeType = active.data.current?.type;
     const overType = over.data.current?.type;
 
-    // --- Lógica para reordenar COLUMNAS mientras se arrastran ---
-    if (activeType === 'Column' && overType === 'Column' && active.id !== over.id) {
-      updateActiveBoard(board => {
-        const oldIndex = board.columns.findIndex(c => c.id === active.id);
-        const newIndex = board.columns.findIndex(c => c.id === over.id);
+    // --- Lógica para reordenar COLUMNAS ---
+    // Se activa si estamos arrastrando una columna.
+    if (activeType === 'Column') {
+      // ¡CAMBIO CLAVE! Si estamos sobre una tarjeta, no hacemos nada.
+      // Esto evita que dnd-kit intente interactuar con el contenedor
+      // con scroll de las tarjetas, previniendo el scroll automático.
+      if (overType === 'Card') {
+        return;
+      }
 
-        // Si los índices son válidos, mueve la columna en el estado
-        if (oldIndex !== -1 && newIndex !== -1) {
-          return {
-            ...board,
-            columns: arrayMove(board.columns, oldIndex, newIndex),
-          };
-        }
-        return board;
-      });
+      // Solo reordenamos si estamos sobre otra columna diferente.
+      if (overType === 'Column' && active.id !== over.id) {
+        updateActiveBoard(board => {
+          const oldIndex = board.columns.findIndex(c => c.id === active.id);
+          const newIndex = board.columns.findIndex(c => c.id === over.id);
+
+          if (oldIndex !== -1 && newIndex !== -1) {
+            return { ...board, columns: arrayMove(board.columns, oldIndex, newIndex) };
+          }
+          return board;
+        });
+      }
+      return; // Detenemos la ejecución para no pasar a la lógica de tarjetas.
     }
 
     // --- Lógica para mover una tarjeta sobre otra columna o tarjeta ---
-    if (activeType !== 'Card') return;
+    // ¡CAMBIO CLAVE! Esta lógica solo se ejecuta si estamos arrastrando una tarjeta.
+    // Si estamos arrastrando una columna, la ignoramos para evitar que se active
+    // el scroll de la columna de destino al pasar sobre sus tarjetas.
+    if (activeType !== 'Card') {
+      return;
+    }
+
+    // El resto de la lógica solo se aplica al arrastre de tarjetas.
     const isOverAColumn = over.data.current?.type === 'Column';
     const isOverACard = over.data.current?.type === 'Card';
 

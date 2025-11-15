@@ -186,6 +186,7 @@ export const TaskboardView = () => {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          autoScroll={active?.data.current?.type !== "Column"}
           collisionDetection={closestCenter}
         >
           <SortableContext items={columns.map((col) => col.id)}>
