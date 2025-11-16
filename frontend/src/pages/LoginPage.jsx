@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/axios';
 import toast, { Toaster } from 'react-hot-toast';
 import './LoginPage.css'; // Estilos para el formulario
-import logoImage from '../assets/logo.webp'; // Importamos el logo
+import logoImage from '../assets/logo-dark.webp'; // Importamos el logo
 import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importamos el modal
 
 const LoginPage = () => {

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import apiClient from '../api/axios'; // Importamos apiClient
 import './ResetPasswordPage.css';
-import logoImage from '../assets/logo.webp';
+import logoImage from '../assets/logo-dark.webp';
 
 const ResetPasswordPage = () => {
   const { token } = useParams();
