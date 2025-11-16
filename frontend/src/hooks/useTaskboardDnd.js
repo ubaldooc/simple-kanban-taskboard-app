@@ -21,19 +21,26 @@ export const useTaskboardDnd = () => {
   // Estado para guardar las dimensiones del elemento arrastrado
   const [dragItemStyles, setDragItemStyles] = useState(null);
 
+  // Estado para guardar el índice inicial al arrastrar
+  const [dragStartIndex, setDragStartIndex] = useState(null);
+
   const handleDragStart = (event) => {
     const { active } = event;
     if (active.data.current?.type === "Card" || active.data.current?.type === "Column") {
       setIsDragging(true);
       setActive(active);
 
-      // Capturamos el tamaño del nodo DOM original
-      const node = active.data.current?.sortable?.node?.current;
-      if (node) {
-        setDragItemStyles({
-          width: node.offsetWidth,
-          height: node.offsetHeight,
-        });
+      // Solo capturamos el tamaño para las tarjetas, para que el clon mantenga su tamaño.
+      if (active.data.current.type === 'Card') {
+        const node = active.data.current?.sortable?.node?.current;
+        if (node) {
+          setDragItemStyles({ width: node.offsetWidth, height: node.offsetHeight });
+        }
+      }
+
+      // Guardamos el índice inicial para comparar en handleDragEnd
+      if (active.data.current.type === 'Column') {
+        updateActiveBoard(board => { setDragStartIndex(board.columns.findIndex(c => c.id === active.id)); return board; });
       }
     }
   };
@@ -132,6 +139,7 @@ export const useTaskboardDnd = () => {
     setIsDragging(false);
     setIsOverDeleteZone(false);
     setDragItemStyles(null); // Limpiamos los estilos
+    setDragStartIndex(null); // Limpiamos el índice inicial
 
     if (!over) return;
 
@@ -146,8 +154,14 @@ export const useTaskboardDnd = () => {
 
     // --- Manejo de reordenamiento de COLUMNAS ---
     if (activeType === 'Column') {
-      // Solo persistimos si la columna realmente cambió de posición.    
-      reorderColumns();
+      updateActiveBoard(board => {
+        const newIndex = board.columns.findIndex(c => c.id === active.id);
+        // Solo persistimos si la columna realmente cambió de posición.
+        if (dragStartIndex !== null && dragStartIndex !== newIndex) {
+          reorderColumns();
+        }
+        return board;
+      });
     }
 
     // --- Manejo de reordenamiento de TARJETAS ---
@@ -168,6 +182,6 @@ export const useTaskboardDnd = () => {
     handleDragStart,
     handleDragOver,
     handleDragEnd,
-    dragItemStyles, // Exportamos los estilos
+    dragItemStyles,
   };
 };
