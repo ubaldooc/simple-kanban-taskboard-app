@@ -661,7 +661,8 @@ div.column-title-input:focus {
     right: 0;
     bottom: 0;
     width: 50px;
-    background-color: rgba(211, 72, 72, 0.2);
+    /* background-color: rgba(211, 72, 72, 0.2); */
+    background-color: rgb(204, 44, 44);
     /* Fondo rojo semitransparente */
     border-left: 2px dashed rgba(255, 82, 82, 0.5);
     display: flex;

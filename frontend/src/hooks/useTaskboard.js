@@ -15,8 +15,8 @@ export const useTaskboard = () => {
 
   // console.log(authMode);
   // console.log(api);
-  
-  
+
+
   // --- State Management ---  DEFINIMOS LOS ESTADOS PRINCIPALES
   const [boards, setBoards] = useState([]);
   const [activeBoardId, setActiveBoardIdState] = useState(null);
@@ -43,7 +43,7 @@ export const useTaskboard = () => {
       // Usamos el servicio de API
       const detailedBoard = await api.getBoardDetails(boardId);
       // console.log(detailedBoard);
-      
+
       if (!detailedBoard) throw new Error('No se pudieron cargar los detalles del tablero.');
 
       // --- ¡Solución! Ordenar las tarjetas en el frontend ---
@@ -54,10 +54,10 @@ export const useTaskboard = () => {
       setBoards(prevBoards => prevBoards.map(board =>
         board.id === detailedBoard._id
           ? {
-              ...board, // Mantiene el 'id' del frontend
-              columns: detailedBoard.columns.map(col => ({ ...col, id: col._id })),
-              cards: sortedCards.map(card => ({ ...card, id: card._id })),
-            }
+            ...board, // Mantiene el 'id' del frontend
+            columns: detailedBoard.columns.map(col => ({ ...col, id: col._id })),
+            cards: sortedCards.map(card => ({ ...card, id: card._id })),
+          }
           : board
       ));
     } catch (error) {
@@ -156,7 +156,7 @@ export const useTaskboard = () => {
 
 
 
-  
+
 
 
   // --- Board Management ---
@@ -170,10 +170,10 @@ export const useTaskboard = () => {
         title: 'Nuevo Tablero', // Título por defecto en el backend
         columns: [{ title: 'To Do', color: '#42A5F5' }],
       };
-  
+
       const createdBoard = await api.createBoard(newBoardDataForBackend);
       if (!createdBoard) throw new Error('Error al crear el tablero');
-  
+
       // 2. Transformar la respuesta del backend al formato del estado del frontend.
       const newBoardForState = {
         ...createdBoard,
@@ -181,14 +181,14 @@ export const useTaskboard = () => {
         columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
         cards: createdBoard.cards || [],
       };
-  
+
       // 3. Añadir el nuevo tablero al estado.
       setBoards(prevBoards => [...prevBoards, newBoardForState]);
-  
+
       // 4. Establecer el nuevo tablero como activo e iniciar la edición de su título.
       setActiveBoardId(createdBoard._id);
       setNewBoardIdToEdit(createdBoard._id);
-  
+
     } catch (error) {
       console.error("Error en addBoard:", error);
       toast.error('No se pudo crear el tablero.');
@@ -197,7 +197,7 @@ export const useTaskboard = () => {
 
 
 
-    // EDITAR BOARD TITULO
+  // EDITAR BOARD TITULO
   const editBoard = async (boardId, newTitle) => {
     if (newTitle && newTitle.trim() !== '') {
       const trimmedTitle = newTitle.trim();
@@ -273,9 +273,9 @@ export const useTaskboard = () => {
   // REORDENAR CARDS
   const reorderCards = async () => {
     if (!activeBoardId || !activeBoard) return;
-  
+
     const originalCards = activeBoard.cards; // Guardar el estado original para posible reversión
-  
+
     // 1. Crear un mapa para acceder fácilmente a las tarjetas por su columna
     const cardsByColumn = new Map();
     activeBoard.columns.forEach(col => cardsByColumn.set(col.id, []));
@@ -291,19 +291,19 @@ export const useTaskboard = () => {
     const cardsToUpdate = [];
     cardsByColumn.forEach((cardArray, columnId) => {
       cardArray.forEach((card, index) => {
-        cardsToUpdate.push({ 
+        cardsToUpdate.push({
           _id: card.id, // El ID de la tarjeta
           order: index, // El nuevo índice de orden dentro de la columna
           column: columnId // El ID de la columna a la que pertenece
         });
       });
     });
-    
+
     // 3. Enviar la petición al backend (sin actualización optimista, ya que la UI ya está actualizada)
     try {
       const result = await api.reorderCards(activeBoardId, cardsToUpdate);
       if (!result) throw new Error('No se pudo guardar el nuevo orden de las tarjetas.');
-      toast.success('Orden de tarjetas guardado.');
+      // toast.success('Orden de tarjetas guardado.');
     } catch (error) {
       toast.error(error.message);
       // Revertir el estado al original si la API falla
@@ -322,11 +322,11 @@ export const useTaskboard = () => {
     if (boardToDelete) {
       const originalBoards = boards; // Guarda el estado original para poder revertirlo
       const boardIdToDelete = boardToDelete; // Guarda el ID antes de limpiar el estado
-      
+
       // Actualización optimista: elimina el tablero de la UI inmediatamente para una mejor UX
       setBoards(prevBoards => prevBoards.filter(b => b.id !== boardIdToDelete));
       setBoardToDelete(null);
-      
+
       try {
         const result = await api.deleteBoard(boardIdToDelete);
         // En modo guest, el resultado puede no tener un `ok`. Asumimos que si no hay error, todo fue bien.
@@ -345,7 +345,7 @@ export const useTaskboard = () => {
 
 
 
-  
+
   // --- Item Management ---
 
 
@@ -365,7 +365,7 @@ export const useTaskboard = () => {
       // 3. Enviar la petición al backend para crear la columna con un título por defecto
       const createdColumn = await api.createColumn(activeBoardId, { title: '' });
       if (!createdColumn) throw new Error('No se pudo crear la columna.');
-      
+
       // 4. Reemplazar la columna temporal con la real del backend
       updateActiveBoard(board => ({
         ...board,
@@ -384,7 +384,7 @@ export const useTaskboard = () => {
 
 
 
-    // AGREGAR CARDS
+  // AGREGAR CARDS
   const addCard = async (columnId) => {
     // 1. Crear una tarjeta temporal para la UI
     const tempId = `temp-card-${crypto.randomUUID()}`;
