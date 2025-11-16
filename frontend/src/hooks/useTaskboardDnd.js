@@ -60,10 +60,13 @@ export const useTaskboardDnd = () => {
       // Solo reordenamos si estamos sobre otra columna diferente.
       if (overType === 'Column' && active.id !== over.id) {
         updateActiveBoard(board => {
-          const oldIndex = board.columns.findIndex(c => c.id === active.id);
-          const newIndex = board.columns.findIndex(c => c.id === over.id);
+          const activeColumn = board.columns.find(c => c.id === active.id);
+          const overColumn = board.columns.find(c => c.id === over.id);
+          if (!activeColumn || !overColumn) return board;
 
-          if (oldIndex !== -1 && newIndex !== -1) {
+          if (activeColumn.id !== overColumn.id) {
+            const oldIndex = board.columns.findIndex(c => c.id === active.id);
+            const newIndex = board.columns.findIndex(c => c.id === over.id);
             return { ...board, columns: arrayMove(board.columns, oldIndex, newIndex) };
           }
           return board;
