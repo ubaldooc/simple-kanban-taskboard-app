@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import profileImage from "../assets/profile.webp";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
+import guestAvatar from "../assets/avatar-guest.webp"; // Imagen para invitados
+import defaultAvatar from "../assets/avatar-default.webp"; // Imagen para usuarios online sin foto
 
 const ProfileDropdown = ({ onOpenHelpModal, onOpenWallpaperModal }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -34,8 +35,17 @@ const ProfileDropdown = ({ onOpenHelpModal, onOpenWallpaperModal }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Determina qué imagen de perfil mostrar
-  const avatarSrc = user?.picture || profileImage;
+  // --- Lógica mejorada para determinar la imagen de perfil ---
+  const getAvatarSrc = () => {
+    if (isOnline) {
+      // Si está online, usa su foto o la predefinida para usuarios registrados.
+      return user?.picture || defaultAvatar;
+    }
+    // Si está offline (invitado), usa la imagen de invitado.
+    return guestAvatar;
+  };
+
+  const avatarSrc = getAvatarSrc();
 
   return (
     <div className="profile-dropdown-container" ref={dropdownRef}>
@@ -58,11 +68,7 @@ const ProfileDropdown = ({ onOpenHelpModal, onOpenWallpaperModal }) => {
             </div>
           ) : (
             <div className="profile-dropdown-header">
-              <img
-                src={profileImage}
-                alt="User Avatar"
-                className="avatar-large"
-              />
+              <img src={avatarSrc} alt="Guest Avatar" className="avatar-large" />
               <div className="user-info">
                 <strong>Invitado</strong>
                 <button
