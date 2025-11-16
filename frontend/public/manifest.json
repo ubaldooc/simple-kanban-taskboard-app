@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "SimpleKanban",
+  "name": "SimpleKanban - Tu tablero Kanban simple y rápido",
   "icons": [
     {
       "src": "favicon.ico",

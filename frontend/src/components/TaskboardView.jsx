@@ -23,7 +23,7 @@ import BoardSelector from "./BoardSelector.jsx";
 import LoggingOutModal from "./LoggingOutModal.jsx";
 import ProfileDropdown from "./ProfileDropdown.jsx";
 import HelpModal from "./HelpModal.jsx";
-import logoImage from "../assets/logo.png";
+import logoImage from "../assets/logo.webp";
 import WallpaperModal from "./WallpaperModal.jsx";
 import { useTaskboardContext } from "../context/TaskboardContext";
 import { useAuth } from "../context/AuthContext.jsx";

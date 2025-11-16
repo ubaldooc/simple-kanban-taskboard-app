@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../api/axios';
 import './VerifyEmailPage.css';
-import logoImage from '../assets/logo.png';
+import logoImage from '../assets/logo.webp';
 
 const VerifyEmailPage = () => {
   const { token } = useParams();
