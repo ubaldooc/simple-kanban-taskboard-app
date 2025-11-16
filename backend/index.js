@@ -805,24 +805,25 @@ app.post('/api/auth/google', async (req, res) => {
     const { sub: googleId, email, name, picture } = profile;
 
     // 3. Buscar si el usuario ya existe en la base de datos (por email o googleId)
-    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+    let user = await User.findOne({ email: email });
 
     if (!user) {
       // Si no existe, crea un nuevo usuario con los datos de Google
-      user = new User({
+      user = await User.create({
         name: name || 'Usuario de Google',
         email,
         googleId,
         picture,
+        isVerified: true, // Los usuarios de Google están verificados por defecto
       });
-    } else if (!user.googleId) {
+    } else {
       // Si el usuario ya existía (p.ej. se registró con email/pass) pero ahora usa Google,
-      // vinculamos la cuenta actualizando su googleId y foto.
-      user.googleId = googleId;
-      user.picture = picture;
+      // vinculamos la cuenta actualizando su googleId y foto si es necesario.
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
     }
-    // Guardar el usuario (sea nuevo o actualizado)
-    await user.save();
 
     // 4. Generar tokens y configurar la cookie de refresh token
     const accessToken = await generateTokensAndSetCookie(res, user._id);
