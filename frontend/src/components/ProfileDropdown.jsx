@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import profileImage from "../assets/profile.png";
+import profileImage from "../assets/profile.webp";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";

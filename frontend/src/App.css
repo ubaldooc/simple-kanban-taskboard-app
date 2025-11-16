@@ -1296,6 +1296,7 @@ body.dark .board-name-input {
 .dropdown-action-button {
     width: 100%;
     padding: 10px 12px;
+    margin-top: 6px;
     border: none;
     border-radius: 6px;
     background-color: var(--color-success);
