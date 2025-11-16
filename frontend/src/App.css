@@ -564,9 +564,11 @@ div.column-title-input:focus {
 
 .color-palette-container {
     display: grid;
+    justify-items: center;
     grid-template-columns: repeat(4, 1fr);
+    /* background: white; */
     gap: 6px;
-    padding: 4px 12px 8px;
+    padding: 6px 6px 8px 6px;
 }
 
 .dropdown-divider {
@@ -576,8 +578,8 @@ div.column-title-input:focus {
 }
 
 .color-swatch {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 4px;
     cursor: pointer;
     border: 2px solid transparent;
@@ -1353,4 +1355,12 @@ body.dark .board-name-input {
     --rosa-fucsia: #ff00ff;
     --verde-lima: #32cd32;
     --morado-oscuro: #800080;
+
+
+
+    --hm: #08c0ce;
+
+    --capuccino: #a66242;
+    --capuccino-claro: #d88f5f;
+    --chocolate: #835038;
 } */

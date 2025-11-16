@@ -13,10 +13,11 @@ const ColumnOptionsDropdown = ({
   const [style, setStyle] = useState({ opacity: 0 }); // Inicia invisible
 
   const columnColors = [
-    '#EF5350', '#AB47BC', '#5C6BC0', '#42A5F5',
-    '#26A69A', '#66BB6A', '#FFEE58', '#FF7043'
+    '#df1e1d', '#ff670b', '#5C6BC0', '#42A5F5', // Rojo, Púrpura, Índigo, Azul
+    '#26A69A', '#66BB6A', '#a66242', '#AB47BC', // Teal, Verde, Amarillo, Naranja
+    '#9E9E9E', '#ffc600', '#EC407A', '#ff70a6'  // Gris, Cian, Rosa, Verde Lima
   ];
-
+  
   // Hook para cerrar el dropdown si se hace clic fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
