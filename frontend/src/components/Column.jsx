@@ -6,6 +6,7 @@ import { useTaskboardContext } from '../context/TaskboardContext.jsx';
 const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   const {
 
+    editingCardId, // <-- Añadir esta línea
     editingColumnId,
     setEditingColumnId,
     updateColumnTitle,
@@ -15,6 +16,7 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     handleDeleteColumnRequest,
     deleteColumn, // Importamos la función de eliminación directa
   } = useTaskboardContext();
+  const cardsContainerRef = useRef(null);
   const titleInputRef = useRef(null);
   const optionsButtonRef = useRef(null); // Ref para el botón de opciones
   
@@ -35,6 +37,25 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
       }
     }
   }, [isEditing]);
+
+  // Efecto para hacer scroll automático al añadir una nueva tarjeta.
+  useEffect(() => {
+    // Comprobamos si la tarjeta que se está editando activamente pertenece a esta columna.
+    const isNewCardInThisColumn = cards.some(card => card.id === editingCardId && card.column === column.id);
+
+    // Si es una tarjeta nueva en esta columna y el contenedor existe...
+    if (isNewCardInThisColumn && cardsContainerRef.current) {
+      // Usamos un setTimeout con 0ms. Esto pospone la ejecución del scroll hasta
+      // el siguiente ciclo de renderizado del navegador. Para entonces, el DOM
+      // se habrá actualizado con la nueva tarjeta y `scrollHeight` tendrá el valor correcto.
+      setTimeout(() => {
+        const container = cardsContainerRef.current;
+        if (container) {
+          container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        }
+      }, 0);
+    }
+  }, [cards.length, editingCardId]); // Se ejecuta si cambia el número de tarjetas o la tarjeta en edición.
 
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -133,7 +154,7 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
         </div>
         <i ref={optionsButtonRef} className="fas fa-ellipsis-h column-options" onClick={toggleOptions} ></i>
       </div>
-      <div className="cards-container">
+      <div className="cards-container" ref={cardsContainerRef}>
         <SortableContext items={cards.map((card) => card.id)}>
           {cards.map((card) => (
             <Card key={card.id} card={card} />
