@@ -144,6 +144,7 @@ export const TaskboardView = () => {
             color: "#fff",
           },
           duration: 4000, // <-- ¡CAMBIO CLAVE! Duración por defecto para todos los toasts.
+          duration: 4000, // <-- Duración por defecto para todos los toasts.
           success: {
             duration: 3000,
           },
@@ -217,8 +218,8 @@ export const TaskboardView = () => {
             ) : activeColumn ? (
               <Column
                 column={activeColumn}
-                cards={cards.filter((card) => card.column === activeColumn.id)}
-                exitingItemIds={exitingItemIds}
+                // Pasamos un array vacío para no renderizar las tarjetas en el overlay.
+                cards={[]}
               />
             ) : null}
           </DragOverlay>
