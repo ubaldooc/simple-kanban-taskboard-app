@@ -152,7 +152,7 @@ export const TaskboardView = () => {
 
       <header className="task-board-header">
         <div className="header-left">
-          <img src={logoImage} alt="Taskboard Logo" className="header-logo" />
+          <img src={logoImage} alt="Taskboard Logo" className="header-logo" draggable="false" />
           <BoardSelector />
         </div>
         <div className="header-right">

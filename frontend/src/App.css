@@ -142,6 +142,7 @@ body {
     height: 122px;
     /* Ajusta la altura según necesites */
     width: auto;
+    user-select: none;
     object-fit: contain;
 }
 
