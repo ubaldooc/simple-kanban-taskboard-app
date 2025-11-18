@@ -816,6 +816,34 @@ div.column-title-input:focus {
     font-weight: 600;
 }
 
+/* --- Estilos para el Loader de Carga Inicial --- */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--background-overlay);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    /* Asegura que esté por encima de todo */
+    backdrop-filter: blur(5px);
+}
+
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    color: var(--text-secondary);
+}
+
+.loader-content h2 {
+    font-size: 1.3em;
+}
+
 /* --- Estilos para el Modal de Ayuda --- */
 .modal-content.help-modal {
     text-align: left;

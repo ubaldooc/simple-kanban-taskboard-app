@@ -26,6 +26,7 @@ import HelpModal from "./HelpModal.jsx";
 import logoImage from "../assets/logo-dark.webp";
 import WallpaperModal from "./WallpaperModal.jsx";
 import { useTaskboardContext } from "../context/TaskboardContext";
+import Loader from "./Loader.jsx"; // <-- 1. Importamos el nuevo componente
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTaskboardDnd } from "../hooks/useTaskboardDnd";
 export const TaskboardView = () => {
@@ -111,7 +112,7 @@ export const TaskboardView = () => {
   );
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loader />; // <-- 2. Usamos el nuevo componente
   }
 
   // --- Render Logic ---
