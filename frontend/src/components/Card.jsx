@@ -53,14 +53,17 @@ const CardComponent = ({ card }) => {
 
   const handleBlur = () => {
     setIsEditing(false);
-    setEditingCardId(null);
     const trimmedTitle = inputRef.current.innerText.trim();
+    // Actualizamos el estado local inmediatamente para evitar el parpadeo.
+    setTitle(trimmedTitle);
+
     if (trimmedTitle === '') {
       deleteCard(card.id);
       // Si era una tarjeta nueva y se cancela, no creamos otra.
     } else {
       updateCardTitle(card.id, trimmedTitle);
     }
+    setEditingCardId(null);
   };
 
   const handleInput = (e) => {
@@ -102,7 +105,7 @@ const CardComponent = ({ card }) => {
           spellCheck="false"
         >{title}</div>
       ) : (
-        <p>{card.title}</p>
+        <p>{title}</p>
       )}
     </div>
   );
