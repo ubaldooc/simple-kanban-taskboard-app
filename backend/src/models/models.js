@@ -54,7 +54,7 @@ const UserSchema = new Schema({
 
   // Referencia al último tablero que el usuario tuvo activo.
   lastActiveBoard: { type: Schema.Types.ObjectId, ref: 'Board', default: null },
-  wallpaper: { type: String, default: 'https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp' }, // Wallpaper del usuario
+  wallpaper: { type: String, default: () => process.env.DEFAULT_WALLPAPER_URL }, // Wallpaper del usuario
   // Array para almacenar las URLs de los fondos de pantalla subidos por el usuario.
   customWallpapers: [{ type: String }],
   // --- Campos para restablecimiento de contraseña ---

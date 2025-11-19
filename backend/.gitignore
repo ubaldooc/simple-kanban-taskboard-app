@@ -1,0 +1,50 @@
+# ===================================================================
+# .gitignore para el proyecto Taskboard (Frontend + Backend)
+# ===================================================================
+
+# -------------------------------------------
+# Archivos de Reparacion y Miscelaneo
+# -------------------------------------------
+.reclaim_data
+.migrate_wallpapers
+
+# -------------------------------------------
+# Archivos de Variables de Entorno (¡MUY IMPORTANTE!)
+# Contienen secretos y configuraciones locales. NUNCA deben estar en el repositorio.
+# -------------------------------------------
+.env
+.env.*.local
+.env.local
+
+# -------------------------------------------
+# Dependencias (node_modules)
+# Se instalan con 'npm install' y no deben subirse al repositorio.
+# Afecta a /frontend/node_modules y /backend/node_modules
+# -------------------------------------------
+node_modules/
+
+# -------------------------------------------
+# Archivos de Build y Producción
+# Se generan al construir el proyecto y no son parte del código fuente.
+# -------------------------------------------
+dist/
+build/
+
+# -------------------------------------------
+# Archivos de Log y Reportes
+# -------------------------------------------
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------------------------
+# Archivos específicos del Sistema Operativo
+# -------------------------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------------------------
+# Archivos de configuración de Editores de Código
+# -------------------------------------------
+.vscode/
+.idea/

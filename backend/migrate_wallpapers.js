@@ -9,6 +9,9 @@ const MONGO_URI = process.env.MONGO_URI;
  * que tienen el campo 'wallpaper' con el valor "default"
  * y lo cambia a la nueva URL '/wallpapers/wallpaper-0.jpg'.
  */
+
+const wallpaperPorDefecto = 'https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp';
+
 const runMigration = async () => {
   if (!MONGO_URI) {
     console.error('Error: La variable de entorno MONGO_URI no está definida.');
@@ -21,7 +24,7 @@ const runMigration = async () => {
     console.log('Conexión exitosa. Ejecutando migración...');
 
     const oldWallpaperValue = 'default';
-    const newWallpaperValue = '/wallpapers/wallpaper-0.jpg';
+    const newWallpaperValue = wallpaperPorDefecto;
 
     // Usamos updateMany para actualizar todos los documentos que coincidan con el filtro.
     const result = await User.updateMany(
