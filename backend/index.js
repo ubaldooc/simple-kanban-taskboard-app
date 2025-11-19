@@ -13,6 +13,8 @@ import cron from 'node-cron';
 import nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
+import { body, validationResult } from 'express-validator';
 
 import { Board, Column, Card, User, RefreshToken } from './src/models/models.js';
 import { protect } from './src/middleware/authMiddleware.js';
@@ -55,6 +57,16 @@ app.use(cors({
 app.use(cookieParser()); // Usa el middleware para parsear cookies
 // Middleware para analizar el cuerpo de las peticiones en formato JSON
 app.use(express.json());
+
+// --- Configuración de Rate Limiting ---
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // Limita cada IP a 10 peticiones en la ventana de 15 minutos
+  standardHeaders: true, // Devuelve la información del límite en los headers `RateLimit-*`
+  legacyHeaders: false, // Deshabilita los headers `X-RateLimit-*`
+  message: { message: 'Demasiadas peticiones desde esta IP, por favor intenta de nuevo en 15 minutos.' },
+});
+
 
 
 
@@ -617,59 +629,63 @@ app.put('/api/boards/:boardId/reorder-cards', protect, async (req, res) => {
 
 
 // POST /api/columns/:columnId/cards - Crea una nueva tarjeta en una columna
-app.post('/api/columns/:columnId/cards', protect, async (req, res) => {
-  try {
-    const { columnId } = req.params;
-    const { title } = req.body;
-
-    // 1. Validar que el ID de la columna sea válido
-    if (!mongoose.Types.ObjectId.isValid(columnId)) {
-      return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+app.post(
+  '/api/columns/:columnId/cards',
+  protect,
+  // --- ¡AQUÍ EMPIEZA LA MAGIA DE EXPRESS-VALIDATOR! ---
+  body('title')
+    .notEmpty().withMessage('El título de la tarjeta es requerido.')
+    .trim() // Elimina espacios en blanco al inicio y al final
+    .escape(), // Convierte caracteres HTML (<, >, &, ', ") a sus entidades correspondientes
+  async (req, res) => {
+    // 1. Comprobar si hubo errores de validación
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // 2. Validar que se haya proporcionado un título
-    if (!title || title.trim() === '') {
-      return res.status(400).json({ message: 'El título de la tarjeta es requerido.' });
+    try {
+      const { columnId } = req.params;
+      const { title } = req.body; // 'title' ya viene sanitizado
+
+      if (!mongoose.Types.ObjectId.isValid(columnId)) {
+        return res.status(400).json({ message: 'El ID de la columna no es válido.' });
+      }
+
+      const parentColumn = await Column.findById(columnId);
+      if (!parentColumn) {
+        return res.status(404).json({ message: 'La columna especificada no existe.' });
+      }
+
+      const board = await Board.findOne({ _id: parentColumn.board, owner: req.user._id });
+      if (!board) {
+        return res.status(403).json({ message: 'No tienes permiso para añadir tarjetas a esta columna.' });
+      }
+
+      const cardCount = await Card.countDocuments({ column: columnId });
+
+      const newCard = new Card({
+        title: title, // Usamos el título ya sanitizado
+        column: columnId,
+        board: parentColumn.board,
+        order: cardCount,
+      });
+      await newCard.save();
+
+      await Column.findByIdAndUpdate(columnId, { $push: { cards: newCard._id } });
+
+      res.status(201).json(newCard);
+    } catch (error) {
+      console.error('Error al crear la tarjeta:', error);
+      res.status(500).json({ message: 'Error interno del servidor al crear la tarjeta.' });
     }
-
-    // 3. Encontrar la columna para obtener el ID del tablero
-    const parentColumn = await Column.findById(columnId);
-    if (!parentColumn) {
-      return res.status(404).json({ message: 'La columna especificada no existe.' });
-    }
-
-    // Verificamos que la columna padre pertenezca a un tablero del usuario
-    const board = await Board.findOne({ _id: parentColumn.board, owner: req.user._id });
-    if (!board) {
-      return res.status(403).json({ message: 'No tienes permiso para añadir tarjetas a esta columna.' });
-    }
-
-    // 4. Contar cuántas tarjetas existen en la columna para asignar el siguiente 'order'
-    const cardCount = await Card.countDocuments({ column: columnId });
-
-    // 5. Crear la nueva tarjeta
-    const newCard = new Card({
-      title: title.trim(),
-      column: columnId,
-      board: parentColumn.board, // Asignamos el ID del tablero desde la columna padre
-      order: cardCount,
-    });
-    await newCard.save();
-
-    // 5. Añadir la referencia de la nueva tarjeta al array 'cards' de la columna
-    await Column.findByIdAndUpdate(columnId, { $push: { cards: newCard._id } });
-
-    res.status(201).json(newCard);
-  } catch (error) {
-    console.error('Error al crear la tarjeta:', error);
-    res.status(500).json({ message: 'Error interno del servidor al crear la tarjeta.' });
   }
-});
+);
 
 
 
 // PUT /api/cards/:id - Actualiza una tarjeta (título, columna, orden)
-app.put('/api/cards/:id', protect, async (req, res) => {
+app.put('/api/cards/:id', protect, body('title').optional().trim().escape(), async (req, res) => {
   try {
     const { id } = req.params;
     const { title, column, order } = req.body;
@@ -842,7 +858,7 @@ app.post('/api/auth/google', async (req, res) => {
 });
 
 // POST /api/auth/register - Registra un nuevo usuario con email y contraseña
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', authLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -937,7 +953,7 @@ app.post('/api/auth/verify-email/:token', async (req, res) => {
 });
 
 // POST /api/auth/resend-verification - Reenvía el correo de verificación
-app.post('/api/auth/resend-verification', async (req, res) => {
+app.post('/api/auth/resend-verification', authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -980,7 +996,7 @@ app.post('/api/auth/resend-verification', async (req, res) => {
 });
 
 // POST /api/auth/login - Inicia sesión con email y contraseña
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -1085,7 +1101,7 @@ app.post('/api/auth/logout', async (req, res) => {
 });
 
 // --- 1. ENDPOINT PARA SOLICITAR RESTABLECIMIENTO DE CONTRASEÑA ---
-app.post('/api/auth/forgot-password', async (req, res) => {
+app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
   const { email } = req.body;
 
   try {
@@ -1134,7 +1150,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 });
 
 // --- 2. ENDPOINT PARA RESTABLECER LA CONTRASEÑA ---
-app.post('/api/auth/reset-password/:token', async (req, res) => {
+app.post('/api/auth/reset-password/:token', authLimiter, async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
