@@ -93,7 +93,7 @@ cron.schedule('0 3 * * *', async () => {
 
       // 2. Iterar sobre cada usuario para eliminar sus recursos y luego el usuario mismo.
       for (const user of usersToDelete) {
-        const userFolder = `wallpapers/${user._id}`;
+        const userFolder = `users_wallpapers/${user._id}`;
 
         // 3. Eliminar todos los recursos dentro de la carpeta del usuario en Cloudinary.
         await cloudinary.api.delete_resources_by_prefix(userFolder);
@@ -1224,7 +1224,7 @@ app.get('/api/user/wallpapers', protect, async (req, res) => {
     // ¡CAMBIO CLAVE! Transformamos las URLs antes de enviarlas al frontend.
     const optimizedUrls = (user.customWallpapers || []).map(url => {
       // Extraemos el public_id de la URL guardada
-      const publicIdMatch = url.match(/wallpapers\/.*\/[a-zA-Z0-9_-]+/);
+      const publicIdMatch = url.match(/users_wallpapers\/.*\/[a-zA-Z0-9_-]+/);
       if (!publicIdMatch) return url; // Si no se puede parsear, devuelve la original
 
       return cloudinary.url(publicIdMatch[0], {
@@ -1249,7 +1249,7 @@ app.delete('/api/user/wallpapers', protect, async (req, res) => {
     }
 
     // Extrae el public_id de la URL de Cloudinary
-    const publicIdMatch = wallpaperUrl.match(/wallpapers\/.*\/[a-zA-Z0-9_-]+/);
+    const publicIdMatch = wallpaperUrl.match(/users_wallpapers\/.*\/[a-zA-Z0-9_-]+/);
     if (publicIdMatch) {
       await cloudinary.uploader.destroy(publicIdMatch[0]);
     }
@@ -1286,7 +1286,7 @@ app.put('/api/user/wallpaper', protect, upload.single('wallpaper'), async (req, 
       // Sube la nueva imagen a una carpeta específica para el usuario en Cloudinary
       finalWallpaperUrl = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: `wallpapers/${req.user._id}` }, // Carpeta por usuario
+          { folder: `users_wallpapers/${req.user._id}` }, // Carpeta por usuario
           (error, result) => {
             if (error) return reject(error);
             resolve(result.secure_url);
