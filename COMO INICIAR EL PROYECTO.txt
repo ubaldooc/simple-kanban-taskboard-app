@@ -2,11 +2,7 @@
 
 -------------- PARA INICIAR EL PROYECTO --------------------
 
-1. Abre el archivo llamado "iniciar-proyecto" , es un bat que se encarga de iniciar el 
-	servidor de vite para el frontend y node para el backend. Actualmente estoy usando fnm para 
-	el control de versiones de node por lo que si no te funciona tendras que iniciar el proyecto
-	manualmente usando los comandos de la terminal "npm run dev" en la carpeta del frontent y otro en la
-	carpeta del backend
+1. Instalar las dependencias en cada carpeta, la carpeta raiz, frontend y backend. Comando "npm install".
 
 
 2. Debes configurar las variables de entorno con tus propias configuraciones: 
@@ -34,7 +30,14 @@
 	-- DEFAULT_WALLPAPER_URL "(url del wallpaper por defecto, desde Cloudinary)."
 
 
-3. 
+3. Abre el archivo llamado "iniciar-proyecto" , es un bat que se encarga de iniciar el 
+	servidor de vite para el frontend y node para el backend. Actualmente estoy usando fnm para 
+	el control de versiones de node por lo que si no te funciona tendras que iniciar el proyecto
+	manualmente usando los comandos de la terminal "npm run dev" en la carpeta del frontent y otro en la
+	carpeta del backend.
+
+
+4. Ve al navegador y pon la ruta del servidor de vite y Listo.
 
 
 

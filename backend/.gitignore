@@ -5,8 +5,8 @@
 # -------------------------------------------
 # Archivos de Reparacion y Miscelaneo
 # -------------------------------------------
-.reclaim_data
-.migrate_wallpapers
+reclaim_data
+migrate_wallpapers
 
 # -------------------------------------------
 # Archivos de Variables de Entorno (¡MUY IMPORTANTE!)
