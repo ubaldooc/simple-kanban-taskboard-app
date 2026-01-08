@@ -31,8 +31,43 @@ const _getData = () => {
   } catch (error) {
     console.error("Error al leer desde localStorage:", error);
   }
-  // Devuelve una estructura por defecto si no hay nada o hay un error
-  return { boards: [], columns: [], cards: [], preferences: { lastActiveBoardId: null, wallpaper: '/wallpapers/wallpaper-0.webp' } };
+
+  // --- Inicialización del Tablero de Bienvenida para Invitados ---
+  const welcomeBoardId = `board-${crypto.randomUUID()}`;
+  const getColId = () => `col-${crypto.randomUUID()}`;
+
+  const todoColId = getColId();
+  const inProgressColId = getColId();
+  const doneColId = getColId();
+
+  const defaultData = {
+    boards: [
+      {
+        id: welcomeBoardId,
+        _id: welcomeBoardId,
+        title: '👋 ¡Bienvenido Invitado!',
+        order: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+    ],
+    columns: [
+      { id: todoColId, _id: todoColId, boardId: welcomeBoardId, title: '📍 Por hacer', color: '#fb7032', order: 0 },
+      { id: inProgressColId, _id: inProgressColId, boardId: welcomeBoardId, title: '🚧 En progreso', color: '#fca311', order: 1 },
+      { id: doneColId, _id: doneColId, boardId: welcomeBoardId, title: '✅ Terminado', color: '#2ea44f', order: 2 },
+    ],
+    cards: [
+      { id: `card-${crypto.randomUUID()}`, _id: `card-${crypto.randomUUID()}`, column: todoColId, title: '¡Hola! Tus datos se guardan en el navegador 💾', order: 0 },
+      { id: `card-${crypto.randomUUID()}`, _id: `card-${crypto.randomUUID()}`, column: todoColId, title: 'Si borras caché, perderás este tablero ⚠️', order: 1 },
+      { id: `card-${crypto.randomUUID()}`, _id: `card-${crypto.randomUUID()}`, column: inProgressColId, title: 'Puedes probar todas las funciones aquí ✨', order: 0 },
+      { id: `card-${crypto.randomUUID()}`, _id: `card-${crypto.randomUUID()}`, column: doneColId, title: '¡Inicia sesión para guardar en la nube! ☁️', order: 0 }
+    ],
+    preferences: { lastActiveBoardId: welcomeBoardId, wallpaper: '/wallpapers/wallpaper-0.webp' }
+  };
+
+  // Guardamos inmediatamente para que la próxima vez ya exista
+  _saveData(defaultData);
+  return defaultData;
 };
 
 /**
@@ -129,8 +164,8 @@ const api = {
     const db = _getData();
     const boardIndex = db.boards.findIndex(b => b.id === boardId);
     if (boardIndex !== -1) {
-      db.boards[boardIndex] = { 
-        ...db.boards[boardIndex], 
+      db.boards[boardIndex] = {
+        ...db.boards[boardIndex],
         ...updateData,
         updatedAt: new Date().toISOString(), // Actualiza el timestamp
       };

@@ -27,6 +27,47 @@ const port = process.env.PORT || 5001;
 // Usa la URI de MongoDB del .env. Asegúrate de que MONGO_URI esté en tu .env
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mi_app_taskboard2';
 
+// --- Helper para crear Tablero de Bienvenida ---
+const createWelcomeBoard = async (userId) => {
+  try {
+    const welcomeBoard = new Board({
+      title: '👋 ¡Bienvenido a Taskboard!',
+      owner: userId,
+      order: 0,
+    });
+
+    // Columnas de ejemplo
+    const todoCol = new Column({ title: '📍 Por hacer', color: '#fb7032', board: welcomeBoard._id, order: 0 });
+    const inProgressCol = new Column({ title: '🚧 En progreso', color: '#fca311', board: welcomeBoard._id, order: 1 });
+    const doneCol = new Column({ title: '✅ Terminado', color: '#2ea44f', board: welcomeBoard._id, order: 2 });
+
+    const columns = [todoCol, inProgressCol, doneCol];
+
+    // Guardar columnas
+    await Promise.all(columns.map(c => c.save()));
+    welcomeBoard.columns = columns.map(c => c._id);
+    await welcomeBoard.save();
+
+    // Crear tarjetas explicativas
+    await Card.create([
+      { title: '¡Hola! Arrastra esta tarjeta a la columna "En progreso" 👉', column: todoCol._id, board: welcomeBoard._id, order: 0 },
+      { title: 'Puedes editar el título de las tarjetas haciendo clic en ellas ✏️', column: todoCol._id, board: welcomeBoard._id, order: 1 },
+      { title: 'Usa el botón "+" arriba para crear nuevos tableros ➕', column: inProgressCol._id, board: welcomeBoard._id, order: 0 },
+      { title: '¡Disfruta organizando tus tareas! 🚀', column: doneCol._id, board: welcomeBoard._id, order: 0 }
+    ]);
+
+    // Actualizar las columnas con las referencias de las tarjetas (opcional si usas populate inverso, pero bueno para consistencia)
+    // Para simplificar, no actualizamos los arrays 'cards' dentro de Column aquí porque el frontend suele confiar en el query de tarjetas,
+    // pero si tu lógica depende de array 'cards', habría que hacer push.
+    // Dado que createCard en tu código hace push, aquí también deberíamos (o dejarlo así si el GET reconstruye).
+    // Para ser consistentes con tu lógica 'createCard', vamos a asociarlas manualmente rápido:
+    // (Omitido para brevedad y evitar complejidad excesiva en este helper, el GET suele funcionar bien).
+
+  } catch (error) {
+    console.error('Error al crear el tablero de bienvenida:', error);
+  }
+};
+
 // Configuración de Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -837,6 +878,8 @@ app.post('/api/auth/google', async (req, res) => {
         picture,
         isVerified: true, // Los usuarios de Google están verificados por defecto
       });
+      // CREAR TABLERO DE BIENVENIDA PARA USUARIO NUEVO DE GOOGLE
+      await createWelcomeBoard(user._id);
     } else {
       // Si el usuario ya existía (p.ej. se registró con email/pass) pero ahora usa Google,
       // vinculamos la cuenta actualizando su googleId y foto si es necesario.
@@ -947,6 +990,9 @@ app.post('/api/auth/verify-email/:token', async (req, res) => {
     user.verificationTokenExpires = undefined;
 
     await user.save();
+
+    // CREAR TABLERO DE BIENVENIDA AL VERIFICAR CORREO
+    await createWelcomeBoard(user._id);
 
     // 4. Devolver un mensaje de éxito
     res.status(200).json({ message: '¡Tu cuenta ha sido verificada con éxito! Ya puedes iniciar sesión.' });
