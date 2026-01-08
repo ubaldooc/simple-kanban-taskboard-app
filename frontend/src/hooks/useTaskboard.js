@@ -178,7 +178,7 @@ export const useTaskboard = () => {
       const newBoardForState = {
         ...createdBoard,
         id: createdBoard._id,
-        columns: createdBoard.columns.map(col => ({ ...col, id: col._id })),
+        columns: (createdBoard.columns || []).map(col => ({ ...col, id: col._id })),
         cards: createdBoard.cards || [],
       };
 
