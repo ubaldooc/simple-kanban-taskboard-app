@@ -75,13 +75,13 @@ const startServer = async () => {
   try {
     await mongoose.connect(MONGO_URI);
     console.log('Conectado a MongoDB exitosamente.');
-
-    app.listen(port, '0.0.0.0', () => {
-      console.log(`Servidor escuchando en http://0.0.0.0:${port}`);
-    });
   } catch (error) {
     console.error('Error al conectar con MongoDB:', error);
   }
+
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Servidor escuchando en http://0.0.0.0:${port}`);
+  });
 };
 
 startServer();
