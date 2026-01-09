@@ -839,6 +839,7 @@ const generateTokensAndSetCookie = async (res, userId) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    partitioned: true, // Agrega esto para compatibilidad con Chrome/Edge modernos
     expires
   });
 

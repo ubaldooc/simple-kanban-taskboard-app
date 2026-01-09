@@ -2,9 +2,7 @@ import axios from 'axios';
 
 const host = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
 
-// Tengo esta por si necesito la ruta con /api, en local funciona sin la /api y en servidor render con /api.
 const API_BASE_URL = `${host.replace(/\/$/, '')}/api`;
-// const API_BASE_URL = `${host.replace(/\/$/, '')}`;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
