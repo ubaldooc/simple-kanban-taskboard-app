@@ -11,7 +11,7 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
-    user?.wallpaper || "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"
+    user?.wallpaper || "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp"
   );
   const [file, setFile] = useState(null);
   // Nuevos estados para los wallpapers predefinidos y la carga
