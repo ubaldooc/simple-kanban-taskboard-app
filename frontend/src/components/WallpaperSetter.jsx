@@ -23,14 +23,12 @@ const WallpaperSetter = () => {
   }, []); // El array vacío asegura que este efecto se configure solo una vez.
 
   useEffect(() => {
-    if (isAuthLoading) return;
-
-    const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp";
+    const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp";
     let finalWallpaperUrl = defaultWallpaper;
 
-    if (authMode === "online" && user?.wallpaper) {
+    if (!isAuthLoading && authMode === "online" && user?.wallpaper) {
       finalWallpaperUrl = user.wallpaper;
-    } else if (authMode === "guest") {
+    } else if (!isAuthLoading && authMode === "guest") {
       const guestData = JSON.parse(localStorage.getItem("taskboardData")) || { preferences: {} };
       finalWallpaperUrl = guestData.preferences?.wallpaper || defaultWallpaper;
     }
