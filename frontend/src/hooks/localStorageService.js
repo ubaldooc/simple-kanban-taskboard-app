@@ -102,7 +102,7 @@ const api = {
   getBoardsList: async () => {
     const db = _getData();
     // Devuelve la lista de tableros ordenada. Si no hay, devuelve un array vacío.
-    return [...db.boards].sort((a, b) => a.order - b.order);
+    return [...(db.boards || [])].sort((a, b) => a.order - b.order);
   },
 
   getBoardDetails: async (boardId) => {
