@@ -96,20 +96,21 @@ export const TaskboardView = () => {
   // --- Keyboard Shortcuts ---
   const hotkeys = useMemo(
     () => ({
-      "ctrl+n": addColumn,
-      "alt+arrowright": () => {
-        const currentIndex = boards.findIndex((b) => b.id === activeBoardId);
-        const nextIndex = (currentIndex + 1) % boards.length;
-        setActiveBoardId(boards[nextIndex].id);
-      },
-      "alt+arrowleft": () => {
+      "n": addColumn,
+      "[": () => {
         const currentIndex = boards.findIndex((b) => b.id === activeBoardId);
         const prevIndex = (currentIndex - 1 + boards.length) % boards.length;
         setActiveBoardId(boards[prevIndex].id);
       },
+      "]": () => {
+        const currentIndex = boards.findIndex((b) => b.id === activeBoardId);
+        const nextIndex = (currentIndex + 1) % boards.length;
+        setActiveBoardId(boards[nextIndex].id);
+      },
     }),
     [boards, activeBoardId, addColumn, setActiveBoardId]
   );
+  useHotkeys(hotkeys);
 
   if (isLoading) {
     return <Loader />; // <-- 2. Usamos el nuevo componente
