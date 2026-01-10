@@ -127,7 +127,7 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
   // La animación se aplica solo si la columna está en modo edición Y su título original está vacío.
   // Esto diferencia una columna nueva de una existente que se está editando.
   const isNewlyCreatedAnimation = isEditing && column.title === '';
-  const isExiting = exitingItemIds.includes(column.id);
+  const isExiting = (exitingItemIds || []).includes(column.id);
 
   return (
     <div

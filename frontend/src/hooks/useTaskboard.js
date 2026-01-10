@@ -20,6 +20,7 @@ export const useTaskboard = () => {
   // --- State Management ---  DEFINIMOS LOS ESTADOS PRINCIPALES
   const [boards, setBoards] = useState([]);
   const [activeBoardId, setActiveBoardIdState] = useState(null);
+  const [slideDirection, setSlideDirection] = useState(0); // 1 para derecha (next), -1 para izquierda (prev)
 
   const [isLoading, setIsLoading] = useState(true);
   const [editingCardId, setEditingCardId] = useState(null);
@@ -141,12 +142,29 @@ export const useTaskboard = () => {
   }, [boards, activeBoardId]); // Se ejecuta si los tableros o el ID activo cambian
 
   // --- Wrappers para actualizar estado y guardar en DB ---
-  const setActiveBoardId = (id) => {
+
+  const setActiveBoardId = (id, direction = 0) => {
+    if (id === activeBoardId) return;
+    setSlideDirection(direction);
     setActiveBoardIdState(id);
     // Guarda la preferencia en el backend en lugar de localStorage
     api.updateUserPreferences({ lastActiveBoardId: id }).catch(error => {
       console.error('No se pudo guardar la preferencia del tablero activo:', error);
     });
+  };
+
+  const nextBoard = () => {
+    if (boards.length < 2) return;
+    const currentIndex = boards.findIndex((b) => b.id === activeBoardId);
+    const nextIndex = (currentIndex + 1) % boards.length;
+    setActiveBoardId(boards[nextIndex].id, 1);
+  };
+
+  const prevBoard = () => {
+    if (boards.length < 2) return;
+    const currentIndex = boards.findIndex((b) => b.id === activeBoardId);
+    const prevIndex = (currentIndex - 1 + boards.length) % boards.length;
+    setActiveBoardId(boards[prevIndex].id, -1);
   };
 
   // --- Helper to update the active board ---
@@ -631,6 +649,9 @@ export const useTaskboard = () => {
     setNewBoardIdToEdit,
     exitingItemIds,
     setExitingItemIds,
-    updateActiveBoard
+    updateActiveBoard,
+    slideDirection,
+    nextBoard,
+    prevBoard
   };
 };

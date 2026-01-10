@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DndContext,
   DragOverlay,
@@ -51,7 +52,12 @@ export const TaskboardView = () => {
     columnToDelete,
     setColumnToDelete,
     setEditingColumnId,
-    exitingItemIds,
+    newBoardIdToEdit,
+    setNewBoardIdToEdit,
+    updateActiveBoard,
+    slideDirection,
+    nextBoard,
+    prevBoard
   } = useTaskboardContext();
   const { user, authMode } = useAuth();
   const navigate = useNavigate();
@@ -97,20 +103,29 @@ export const TaskboardView = () => {
   const hotkeys = useMemo(
     () => ({
       "n": addColumn,
-      "[": () => {
-        const currentIndex = boards.findIndex((b) => b.id === activeBoardId);
-        const prevIndex = (currentIndex - 1 + boards.length) % boards.length;
-        setActiveBoardId(boards[prevIndex].id);
-      },
-      "]": () => {
-        const currentIndex = boards.findIndex((b) => b.id === activeBoardId);
-        const nextIndex = (currentIndex + 1) % boards.length;
-        setActiveBoardId(boards[nextIndex].id);
-      },
+      "[": prevBoard,
+      "]": nextBoard,
     }),
-    [boards, activeBoardId, addColumn, setActiveBoardId]
+    [addColumn, nextBoard, prevBoard]
   );
   useHotkeys(hotkeys);
+
+  // --- Animation Variants ---
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? "50%" : direction < 0 ? "-50%" : 0,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? "50%" : direction > 0 ? "-50%" : 0,
+      opacity: 0,
+      transition: { duration: 0.2 }
+    }),
+  };
 
   if (isLoading) {
     return <Loader />; // <-- 2. Usamos el nuevo componente
@@ -184,47 +199,63 @@ export const TaskboardView = () => {
         ref={mainContainerRef}
         className={`task-board-main ${isOverDeleteZone ? "no-scroll" : ""}`}
       >
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-          autoScroll={active?.data.current?.type !== "Column"}
-          collisionDetection={closestCenter}
-        >
-          <SortableContext items={columns.map((col) => col.id)}>
-            {columns.map((column) => (
-              <Column
-                key={column.id}
-                column={column}
-                cards={cards.filter((card) => card.column === column.id)}
-                onToggleOptions={handleToggleColumnOptions}
-              />
-            ))}
-          </SortableContext>
-          <DeleteZone />
-          {/* Aplicamos los estilos y una clase específica para la columna */}
-          <DragOverlay
-            style={dragItemStyles}
-            className={
-              activeColumn
-                ? "dnd-overlay-column"
-                : activeCard
-                ? "dnd-overlay-card"
-                : ""
-            }
+        <AnimatePresence mode="popLayout" custom={slideDirection} initial={false}>
+          <motion.div
+            key={activeBoardId}
+            custom={slideDirection}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 }
+            }}
+            className="task-board-main-animated-wrapper"
           >
-            {activeCard ? (
-              <Card card={activeCard} />
-            ) : activeColumn ? (
-              <Column
-                column={activeColumn}
-                // Pasamos un array vacío para no renderizar las tarjetas en el overlay.
-                cards={[]}
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+            <DndContext
+              sensors={sensors}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+              autoScroll={active?.data.current?.type !== "Column"}
+              collisionDetection={closestCenter}
+            >
+              <SortableContext items={columns.map((col) => col.id)}>
+                {columns.map((column) => (
+                  <Column
+                    key={column.id}
+                    column={column}
+                    cards={cards.filter((card) => card.column === column.id)}
+                    onToggleOptions={handleToggleColumnOptions}
+                  />
+                ))}
+              </SortableContext>
+              <DeleteZone />
+              {/* Aplicamos los estilos y una clase específica para la columna */}
+              <DragOverlay
+                style={dragItemStyles}
+                className={
+                  activeColumn
+                    ? "dnd-overlay-column"
+                    : activeCard
+                    ? "dnd-overlay-card"
+                    : ""
+                }
+              >
+                {activeCard ? (
+                  <Card card={activeCard} />
+                ) : activeColumn ? (
+                  <Column
+                    column={activeColumn}
+                    // Pasamos un array vacío para no renderizar las tarjetas en el overlay.
+                    cards={[]}
+                  />
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          </motion.div>
+        </AnimatePresence>
         {activeDropdown.columnId && mainContainerRef.current && (
           <ColumnOptionsDropdown
             container={mainContainerRef.current}

@@ -210,30 +210,26 @@ body {
     background-color: color-mix(in srgb, var(--color-success) 90%, #fff 10%);
 }
 
-.header-login-btn:active {
-    transform: scale(0.97);
-}
-
 .task-board-main {
-    /* flex-grow: 1; */
-    display: flex;
-    padding: 20px;
-    gap: 15px;
-    /* overflow-x: auto; */
     height: 100%;
     width: 100%;
     position: relative;
-    /* Necesario para posicionar la zona de eliminación */
-    /* width: 100%; */
+    overflow: hidden;
+}
 
-    /* ¡CAMBIO CLAVE! 'stretch' hace que todas las columnas tengan la misma altura. */
+.task-board-main-animated-wrapper {
+    display: flex;
+    padding: 20px;
+    gap: 15px;
+    height: 100%;
+    width: 100%;
     align-items: stretch;
-
     overflow-y: auto;
     overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--color-accent) var(--background-secondary);
 }
+
 
 /* Clase para deshabilitar el scroll horizontal cuando se arrastra sobre la zona de eliminación */
 .task-board-main.no-scroll {
