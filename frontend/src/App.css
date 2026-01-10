@@ -228,6 +228,8 @@ body {
     overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--color-accent) var(--background-secondary);
+    will-change: transform;
+    /* Sugerencia al navegador para optimizar la animación */
 }
 
 
