@@ -24,10 +24,12 @@ const LoginPage = () => {
 
   // Si el usuario ya está logueado (p.ej. por una sesión previa guardada),
   // lo redirigimos inmediatamente al dashboard principal para que no vea el login.
+  // Esto previene que usuarios autenticados accedan a /login desde la barra de direcciones
+  // o mediante el botón "atrás" del navegador.
   useEffect(() => {
     if (user) {
-      // Redirige a la página anterior o a la principal
-      navigate(-1, { replace: true });
+      // Redirige directamente a la página principal (reemplaza la entrada en el historial)
+      navigate('/', { replace: true });
     }
   }, [user, navigate]);
 
