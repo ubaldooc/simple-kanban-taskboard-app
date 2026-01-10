@@ -47,21 +47,18 @@ const HelpModal = ({ isOpen, onClose }) => {
           <h3>Atajos de Teclado</h3>
           <ul className="shortcuts-list">
             <li>
-              <span className="key-combo">Ctrl</span> +{" "}
               <span className="key-combo">N</span>
               <span className="key-desc">
                 Añadir una nueva columna al tablero actual.
               </span>
             </li>
             <li>
-              <span className="key-combo">Alt</span> +{" "}
-              <span className="key-combo">→</span>
-              <span className="key-desc">Cambiar al siguiente tablero.</span>
+              <span className="key-combo">[</span>
+              <span className="key-desc">Cambiar al tablero anterior.</span>
             </li>
             <li>
-              <span className="key-combo">Alt</span> +{" "}
-              <span className="key-combo">←</span>
-              <span className="key-desc">Cambiar al tablero anterior.</span>
+              <span className="key-combo">]</span>
+              <span className="key-desc">Cambiar al siguiente tablero.</span>
             </li>
           </ul>
         </div>
