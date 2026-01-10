@@ -18,6 +18,7 @@ import { body, validationResult } from 'express-validator';
 
 import { Board, Column, Card, User, RefreshToken } from './src/models/models.js';
 import { protect } from './src/middleware/authMiddleware.js';
+import { rejectAuthenticated } from './src/middleware/rejectAuthenticated.js';
 
 // --- Configuración inicial ---
 // Crea una instancia de la aplicación de Express
@@ -847,7 +848,7 @@ const generateTokensAndSetCookie = async (res, userId) => {
 };
 
 // POST /api/auth/google - Maneja el inicio de sesión/registro con el código de Google
-app.post('/api/auth/google', async (req, res) => {
+app.post('/api/auth/google', rejectAuthenticated, async (req, res) => {
   try {
     const { code } = req.body;
     console.log('Código recibido:', code); // <-- Agrega esto para depurar
@@ -907,7 +908,7 @@ app.post('/api/auth/google', async (req, res) => {
 });
 
 // POST /api/auth/register - Registra un nuevo usuario con email y contraseña
-app.post('/api/auth/register', authLimiter, async (req, res) => {
+app.post('/api/auth/register', rejectAuthenticated, authLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -1048,7 +1049,7 @@ app.post('/api/auth/resend-verification', authLimiter, async (req, res) => {
 });
 
 // POST /api/auth/login - Inicia sesión con email y contraseña
-app.post('/api/auth/login', authLimiter, async (req, res) => {
+app.post('/api/auth/login', rejectAuthenticated, authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 

@@ -123,6 +123,15 @@ export const AuthProvider = ({ children }) => {
           }
         }
 
+        // Si el error es 403 (Forbidden) y el código es ALREADY_AUTHENTICATED,
+        // significa que el usuario ya está autenticado e intentó acceder a login/register
+        if (error.response?.status === 403 && error.response?.data?.code === 'ALREADY_AUTHENTICATED') {
+          console.log('Usuario autenticado intentó acceder a ruta de autenticación');
+          // No mostramos error, simplemente lo manejamos silenciosamente
+          // El componente LoginPage ya redirige en el useEffect
+          return Promise.reject(error);
+        }
+
         // Si el error es 403 (Forbidden) o un 401 que no es por token expirado,
         // simplemente lo propagamos para que el componente lo maneje.
         return Promise.reject(error); // Propagamos el error para que otros 'catch' puedan manejarlo.
