@@ -4,6 +4,8 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
   closestCenter,
@@ -85,8 +87,11 @@ export const TaskboardView = () => {
   // --- DND Kit Sensors ---
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      // El arrastre se inicia después de que el puntero se mueva 5 píxeles.
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      // En móviles, pedimos una pulsación de 250ms para empezar a arrastrar.
+      activationConstraint: { delay: 250, tolerance: 5 },
     })
   );
 

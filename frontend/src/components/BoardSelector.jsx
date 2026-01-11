@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { DndContext, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import SortableBoardItem from './SortableBoardItem.jsx';
 import { useTaskboardContext } from '../context/TaskboardContext.jsx';
@@ -90,9 +90,14 @@ const BoardSelector = () => {
   };
 
   // --- DND Kit Logic ---  LOGICA PARA REORDENAR BOARDS
-  const sensors = useSensors(useSensor(PointerSensor, {
-    activationConstraint: { distance: 5 }, // Requiere mover 5px para iniciar el arrastre
-  }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 250, tolerance: 5 },
+    })
+  );
 
   const handleDragStart = (event) => {
     // Prevenir el inicio del arrastre si se está editando un tablero

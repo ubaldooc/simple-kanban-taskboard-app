@@ -1365,32 +1365,105 @@ body.dark .board-name-input {
 
 
 
-/* POSIBLE PALETA DE COLORES DEL LOGO DE ESTA APP */
-/* :root {
-  --amarillo-dorado: #fcc502;
-  --naranja-vibrante: #ff8c00;
-  --rosa-coral: #ff7f50;
+/* --- Media Queries para Mobile --- */
+@media (max-width: 768px) {
 
-  --verde-menta: #90ee90;
-  --azul-cielo: #87ceeb;
+    /* Ajustes generales del Header */
+    .task-board-header {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .header-left,
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .guest-login-prompt span,
+    .user-greeting {
+        display: none;
+        /* Ocultamos textos largos para ganar espacio */
+    }
+
+    .header-logo {
+        height: 24px;
+        /* Logo más pequeño */
+    }
+
+    /* Ajustes del Main Container */
+    .task-board-main {
+        padding: 10px;
+        gap: 15px;
+        scroll-snap-type: x mandatory;
+        /* Efecto de "páginas" al deslizar */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ajustes de las Columnas */
+    .column {
+        min-width: 85vw;
+        /* Casi todo el ancho de la pantalla */
+        max-width: 300px;
+        scroll-snap-align: center;
+        /* Centrar la columna al dejar de deslizar */
+        height: calc(100vh - 160px);
+        /* Ajustar altura según el nuevo header */
+    }
+
+    /* Ajustes de las Tarjetas */
+    .card {
+        padding: 12px;
+        font-size: 0.95em;
+    }
+
+    .card-count {
+        font-size: 0.75em;
+    }
+
+    /* Botón de añadir columna (Floating-like experience) */
+    .add-column-container {
+        min-width: 85vw;
+        max-width: 300px;
+        scroll-snap-align: center;
+    }
+
+    /* Zona de eliminación en mobile */
+    .delete-zone {
+        width: 70px;
+        /* Un poco más ancha para facilitar el drop con el dedo */
+    }
+
+    /* Modales responsivos */
+    .modal-content,
+    .help-modal-content,
+    .wallpaper-modal-content {
+        width: 95%;
+        max-height: 90vh;
+        padding: 20px;
+    }
+
+    /* Board Selector en mobile */
+    .board-selector {
+        flex: 1;
+        max-width: none;
+    }
+
+    .board-selector-active {
+        padding: 6px 10px;
+    }
 }
 
+/* --- Ajustes sutiles para pantallas muy pequeñas (iPhone SE, etc) --- */
+@media (max-width: 400px) {
+    .column {
+        min-width: 90vw;
+    }
 
-
-:root {
-    --amarillo-dorado: #fcc502;
-  
-    --azul-electrico: #0000ff;
-    --rosa-fucsia: #ff00ff;
-    --verde-lima: #32cd32;
-    --morado-oscuro: #800080;
-
-
-
-    --hm: #08c0ce;
-
-    --capuccino: #a66242;
-    --capuccino-claro: #d88f5f;
-    --chocolate: #835038;
-    rojo-original: #ef5350;
-} */
+    .header-logo {
+        display: none;
+        /* Quitamos el logo si el espacio es crítico */
+    }
+}
