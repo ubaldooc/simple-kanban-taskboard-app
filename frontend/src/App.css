@@ -1421,4 +1421,8 @@ body.dark .board-name-input {
     .add-column-container {
         min-width: 90vw;
     }
+
+    .board-selector {
+        min-width: 220px;
+    }
 }
