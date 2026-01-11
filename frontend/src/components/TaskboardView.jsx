@@ -235,6 +235,14 @@ export const TaskboardView = () => {
                   />
                 ))}
               </SortableContext>
+
+              {activeBoard && (
+                <div className="add-column-container">
+                  <div className="add-column-btn" onClick={addColumn}>
+                    <i className="fas fa-plus"></i> Añadir otra lista
+                  </div>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -253,21 +261,10 @@ export const TaskboardView = () => {
             {activeCard ? (
               <Card card={activeCard} />
             ) : activeColumn ? (
-              <Column
-                column={activeColumn}
-                cards={[]}
-              />
+              <Column column={activeColumn} cards={[]} />
             ) : null}
           </DragOverlay>
         </DndContext>
-
-        {activeBoard && (
-          <div className="add-column-container">
-            <div className="add-column-btn" onClick={addColumn}>
-              <i className="fas fa-plus"></i> Añadir otra lista
-            </div>
-          </div>
-        )}
       </main>
 
       {activeDropdown.columnId && mainContainerRef.current && (
