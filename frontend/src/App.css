@@ -852,7 +852,7 @@ div.column-title-input:focus {
 .help-section ul {
     list-style: none;
     padding-left: 0;
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 .help-section li {
@@ -867,12 +867,13 @@ div.column-title-input:focus {
 }
 
 .help-section li i {
-    color: var(--text-secondary);
+    color: var(--text-primary);
     margin-top: 3px;
     /* Ajustamos la posición del icono */
 }
 
 .shortcuts-list .key-combo {
+    color: white;
     background-color: #21262d;
     border: 1px solid #444c56;
     padding: 2px 8px;
