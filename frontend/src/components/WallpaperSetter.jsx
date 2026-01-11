@@ -26,11 +26,29 @@ const WallpaperSetter = () => {
     const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp";
     let finalWallpaperUrl = defaultWallpaper;
 
-    if (!isAuthLoading && authMode === "online" && user?.wallpaper) {
-      finalWallpaperUrl = user.wallpaper;
-    } else if (!isAuthLoading && authMode === "guest") {
-      const guestData = JSON.parse(localStorage.getItem("taskboardData")) || { preferences: {} };
-      finalWallpaperUrl = guestData.preferences?.wallpaper || defaultWallpaper;
+        // Estrategia de Prioridad para evitar Flash of Incorrect Content (FOIC):
+    // 1. Si hay usuario en contexto (online live), usarlo.
+    // 2. Si hay usuario en localStorage (online caché), usarlo.
+    // 3. Si hay datos de invitado en localStorage (guest caché), usarlo.
+    // 4. Default.
+    
+    if (user?.wallpaper) {
+        finalWallpaperUrl = user.wallpaper;
+    } else {
+        // Fallback a localStorage si el contexto aún no está listo o no hay usuario
+        try {
+            const localUser = JSON.parse(localStorage.getItem("user"));
+            if (localUser?.wallpaper) {
+                finalWallpaperUrl = localUser.wallpaper;
+            } else {
+                 const guestData = JSON.parse(localStorage.getItem("taskboardData"));
+                 if (guestData?.preferences?.wallpaper) {
+                     finalWallpaperUrl = guestData.preferences.wallpaper;
+                 }
+            }
+        } catch (e) {
+            console.error("Error leyendo localStorage en WallpaperSetter", e);
+        }
     }
 
     // Comprueba si el nuevo fondo es diferente al actual
