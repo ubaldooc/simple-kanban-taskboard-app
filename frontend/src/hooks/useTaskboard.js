@@ -102,12 +102,11 @@ export const useTaskboard = () => {
         if (idToLoad) {
           // Llamamos a setActiveBoardId para guardar la preferencia.
           setActiveBoardId(idToLoad);
-          // Y cargamos los detalles directamente aquí para evitar condiciones de carrera.
-          fetchBoardDetails(idToLoad);
+          // ¡CLAVE! Esperamos a que los detalles del tablero se carguen antes de terminar el loading.
+          await fetchBoardDetails(idToLoad);
         }
       } catch (error) {
         console.error("Error al cargar los tableros:", error);
-        // Podrías establecer un estado de error aquí para mostrarlo en la UI
       } finally {
         setIsLoading(false);
       }
