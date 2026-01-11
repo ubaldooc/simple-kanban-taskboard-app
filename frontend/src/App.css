@@ -7,7 +7,15 @@
     box-sizing: border-box;
 }
 
-html {}
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    /* Evita scrollbars dobles en el navegador */
+}
 
 /* --- Definición de Variables de Tema --- */
 body {
@@ -35,6 +43,17 @@ body {
     --color-danger: #cf222e;
     --color-success: #1f883d;
     --color-accent: #0969da;
+
+    /* Estilos funcionales de BODY */
+    font-family: Arial, sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    transition: background-image 0.5s ease-in-out;
 }
 
 body.dark {
@@ -63,39 +82,11 @@ body.dark {
     --color-accent: #58a6ff;
 }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    /* Se establece un color de fondo oscuro como respaldo mientras carga la imagen. */
-    /* background-color: #0d1117; */
-    /* Se establece la imagen de fondo por defecto directamente aquí para evitar el parpadeo. */
-    /* background-image: url("https://res.cloudinary.com/drljxouhe/image/upload/v1762161290/wallpaper-0_y7ewia.webp"); */
-    color: var(--text-primary);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    width: 100vw;
-    /* min-height: calc(100vh - 20px); */
-    min-width: calc(100vh - 20px);
-    box-sizing: border-box;
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    /* overflow: hidden; */
-    /* --- Transición suave para el cambio de fondo --- */
-    transition: background-image 0.5s ease-in-out;
-}
-
 #root {
-    /* padding: 20px; */
     height: 100%;
     width: 100%;
-    /* height: calc(100% - 20px); */
-    /* width: calc(100% - 20px); */
-
-    /* padding: 10px; */
-    /* border-radius: 8px; */
+    display: flex;
+    flex-direction: column;
 }
 
 .task-board-container {
@@ -105,13 +96,6 @@ body {
     flex-direction: column;
     width: 100%;
     height: 100%;
-    /* max-width: 1200px; */
-    /* min-height: 700px; */
-
-    margin-top: 50px;
-    height: calc(100% - 50px);
-
-
 }
 
 .task-board-header {
@@ -122,13 +106,11 @@ body {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--border-primary);
-
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 100;
-    /* Asegura que el header y sus dropdowns estén siempre al frente */
 }
 
 .header-left,
@@ -140,7 +122,6 @@ body {
 
 .header-logo {
     height: 122px;
-    /* Ajusta la altura según necesites */
     width: auto;
     user-select: none;
     object-fit: contain;
@@ -164,7 +145,6 @@ body {
     color: var(--text-primary);
 }
 
-/* Estilo para el nuevo icono de ayuda */
 .help-icon {
     cursor: pointer;
     transition: color 0.2s;
@@ -215,6 +195,8 @@ body {
     width: 100%;
     position: relative;
     overflow: hidden;
+    margin-top: 48px;
+    /* Compensamos la altura del header fijo */
 }
 
 .task-board-main-animated-wrapper {
@@ -229,15 +211,7 @@ body {
     scrollbar-width: thin;
     scrollbar-color: var(--color-accent) var(--background-secondary);
     will-change: transform;
-    /* Sugerencia al navegador para optimizar la animación */
 }
-
-
-/* Clase para deshabilitar el scroll horizontal cuando se arrastra sobre la zona de eliminación */
-.task-board-main.no-scroll {
-    overflow-x: hidden;
-}
-
 
 .column {
     /* MODO LIGHT: Fondo sólido, oscureciendo un poco el color de la columna */
