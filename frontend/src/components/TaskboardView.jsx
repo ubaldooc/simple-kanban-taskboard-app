@@ -198,27 +198,27 @@ export const TaskboardView = () => {
         ref={mainContainerRef}
         className={`task-board-main ${isOverDeleteZone ? "no-scroll" : ""}`}
       >
-        <AnimatePresence mode="popLayout" custom={slideDirection} initial={false}>
-          <motion.div
-            key={activeBoardId}
-            custom={slideDirection}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
-            }}
-            className="task-board-main-animated-wrapper"
-          >
-            <DndContext
-              sensors={sensors}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
-              autoScroll={active?.data.current?.type !== "Column"}
-              collisionDetection={closestCenter}
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          autoScroll={active?.data.current?.type !== "Column"}
+          collisionDetection={closestCenter}
+        >
+          <AnimatePresence mode="popLayout" custom={slideDirection} initial={false}>
+            <motion.div
+              key={activeBoardId}
+              custom={slideDirection}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 }
+              }}
+              className="task-board-main-animated-wrapper"
             >
               <SortableContext items={columns.map((col) => col.id)}>
                 {columns.map((column) => (
@@ -230,52 +230,31 @@ export const TaskboardView = () => {
                   />
                 ))}
               </SortableContext>
-              <DeleteZone />
-              {/* Aplicamos los estilos y una clase específica para la columna */}
-              <DragOverlay
-                style={dragItemStyles}
-                className={
-                  activeColumn
-                    ? "dnd-overlay-column"
-                    : activeCard
-                    ? "dnd-overlay-card"
-                    : ""
-                }
-              >
-                {activeCard ? (
-                  <Card card={activeCard} />
-                ) : activeColumn ? (
-                  <Column
-                    column={activeColumn}
-                    // Pasamos un array vacío para no renderizar las tarjetas en el overlay.
-                    cards={[]}
-                  />
-                ) : null}
-              </DragOverlay>
-            </DndContext>
-          </motion.div>
-        </AnimatePresence>
-        {activeDropdown.columnId && mainContainerRef.current && (
-          <ColumnOptionsDropdown
-            container={mainContainerRef.current}
-            position={activeDropdown.position}
-            onClose={() =>
-              setActiveDropdown({ columnId: null, position: null })
+            </motion.div>
+          </AnimatePresence>
+
+          <DeleteZone />
+
+          <DragOverlay
+            style={dragItemStyles}
+            className={
+              activeColumn
+                ? "dnd-overlay-column"
+                : activeCard
+                ? "dnd-overlay-card"
+                : ""
             }
-            onRename={() => {
-              setEditingColumnId(activeDropdown.columnId);
-              setActiveDropdown({ columnId: null, position: null });
-            }}
-            onDelete={() => {
-              handleDeleteColumnRequest(activeDropdown.columnId);
-              setActiveDropdown({ columnId: null, position: null });
-            }}
-            onColorChange={(color) => {
-              updateColumnColor(activeDropdown.columnId, color);
-              setActiveDropdown({ columnId: null, position: null });
-            }}
-          />
-        )}
+          >
+            {activeCard ? (
+              <Card card={activeCard} />
+            ) : activeColumn ? (
+              <Column
+                column={activeColumn}
+                cards={[]}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
 
         {activeBoard && (
           <div className="add-column-container">
@@ -285,6 +264,28 @@ export const TaskboardView = () => {
           </div>
         )}
       </main>
+
+      {activeDropdown.columnId && mainContainerRef.current && (
+        <ColumnOptionsDropdown
+          container={mainContainerRef.current}
+          position={activeDropdown.position}
+          onClose={() =>
+            setActiveDropdown({ columnId: null, position: null })
+          }
+          onRename={() => {
+            setEditingColumnId(activeDropdown.columnId);
+            setActiveDropdown({ columnId: null, position: null });
+          }}
+          onDelete={() => {
+            handleDeleteColumnRequest(activeDropdown.columnId);
+            setActiveDropdown({ columnId: null, position: null });
+          }}
+          onColorChange={(color) => {
+            updateColumnColor(activeDropdown.columnId, color);
+            setActiveDropdown({ columnId: null, position: null });
+          }}
+        />
+      )}
 
       <footer className="task-board-footer">
         <p>
