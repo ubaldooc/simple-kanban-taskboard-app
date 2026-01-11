@@ -127,6 +127,14 @@ body.dark {
     object-fit: contain;
 }
 
+.mobile-only {
+    display: none;
+}
+
+.desktop-only {
+    display: block;
+}
+
 .user-greeting {
     font-size: 0.9em;
     color: var(--text-secondary);
@@ -943,7 +951,7 @@ div.column-title-input:focus {
 .board-selector {
     position: relative;
     min-width: 280px;
-    max-width: 320px;
+    max-width: 350px;
 }
 
 .board-selector-active {
@@ -1336,10 +1344,21 @@ body.dark .board-name-input {
     }
 
     /* Ocultamos lo que no queremos ver en mobile */
-    .header-logo,
+    .desktop-only,
     .user-greeting,
     .guest-login-prompt {
         display: none !important;
+    }
+
+    .mobile-only {
+        display: block !important;
+    }
+
+    .header-logo-mobile {
+        height: 35px;
+        width: auto;
+        object-fit: contain;
+        user-select: none;
     }
 
     .header-left,

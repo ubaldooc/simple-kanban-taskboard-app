@@ -27,6 +27,7 @@ import LoggingOutModal from "./LoggingOutModal.jsx";
 import ProfileDropdown from "./ProfileDropdown.jsx";
 import HelpModal from "./HelpModal.jsx";
 import logoImage from "../assets/logo-dark.webp";
+import logoIsotipo from "../assets/logo-isotipo.webp";
 import WallpaperModal from "./WallpaperModal.jsx";
 import { useTaskboardContext } from "../context/TaskboardContext";
 import Loader from "./Loader.jsx"; // <-- 1. Importamos el nuevo componente
@@ -173,7 +174,8 @@ export const TaskboardView = () => {
 
       <header className="task-board-header">
         <div className="header-left">
-          <img src={logoImage} alt="Taskboard Logo" className="header-logo" draggable="false" />
+          <img src={logoImage} alt="Taskboard Logo" className="header-logo desktop-only" draggable="false" />
+          <img src={logoIsotipo} alt="Taskboard Isotipo" className="header-logo-mobile mobile-only" draggable="false" />
           <BoardSelector />
         </div>
         <div className="header-right">
