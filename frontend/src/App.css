@@ -1393,9 +1393,36 @@ body.dark .board-name-input {
         scroll-snap-align: center;
     }
 
-    /* Zona de eliminación en mobile */
+    /* Zona de eliminación en mobile (Cuadrado abajo a la izquierda) */
     .delete-zone {
-        width: 75px;
+        top: auto;
+        bottom: 10px;
+        left: 6px;
+        right: auto;
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        border: none;
+        /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); */
+        transform: translateX(-150%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Mostrar desplazando desde la izquierda */
+    .task-board-container.is-dragging-card .delete-zone {
+        transform: translateX(0);
+    }
+
+    .delete-zone span {
+        display: none;
+        /* Solo el icono en móvil */
+    }
+
+    .delete-zone i {
+        font-size: 1.6em;
     }
 
     /* Modales responsivos */
