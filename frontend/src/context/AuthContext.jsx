@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useRef,
+  useMemo,
 } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
@@ -26,9 +27,17 @@ export const AuthProvider = ({ children }) => {
   });
   // Estado para el Access Token (se guarda en memoria)
   const [accessToken, setAccessToken] = useState(null);
-  const [authMode, setAuthMode] = useState(null); // quiza deberia dejarlo en "guest" en vez de null
   const [isAuthLoading, setIsAuthLoading] = useState(true); // Nuevo estado de carga
   const [isLoggingOut, setIsLoggingOut] = useState(false); // Estado para el modal de cierre de sesión
+
+  // Derivamos authMode para que sea reactivo y preciso.
+  // Durante la carga inicial, "adivinamos" basándonos en si hay un usuario en localStorage.
+  const authMode = useMemo(() => {
+    if (isAuthLoading) {
+      return localStorage.getItem("user") ? "online" : "guest";
+    }
+    return user && accessToken ? "online" : "guest";
+  }, [isAuthLoading, user, accessToken]);
 
   // --- Refs para evitar dependencias en el interceptor ---
   // Usamos refs para que el interceptor siempre tenga acceso a la última versión
@@ -39,20 +48,17 @@ export const AuthProvider = ({ children }) => {
     accessTokenRef.current = accessToken;
     setUserRef.current = setUser;
   }, [accessToken, setUser]);
-  // Efecto que se ejecuta cuando el estado del usuario cambia.
+  // Efecto para persistir el usuario y configurar el token en Axios
   useEffect(() => {
-    // Si hay usuario Y un token de acceso, lo configuramos en axios.
     if (user && accessToken) {
       setAuthToken(accessToken);
       localStorage.setItem("user", JSON.stringify(user));
-      // console.log("AuthContext: User set, authMode online, token set in axios.");
-      setAuthMode("online");
-    } else {
-      setAuthToken(null); // Asegurarse de limpiar el token de axios
+    } else if (!isAuthLoading) {
+      // Solo limpiamos si NO estamos cargando la autenticación inicial
+      setAuthToken(null);
       localStorage.removeItem("user");
-      setAuthMode("guest");
     }
-  }, [user, accessToken]); // Este efecto se dispara si cambia el usuario o el token
+  }, [user, accessToken, isAuthLoading]);
 
   // Efecto para verificar la sesión al cargar la app ("Silent Refresh")
   useEffect(() => {
