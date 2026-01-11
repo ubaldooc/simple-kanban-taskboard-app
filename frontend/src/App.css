@@ -191,7 +191,7 @@ body.dark {
 }
 
 .task-board-main {
-    height: 100%;
+    height: calc(100% - 48px);
     width: 100%;
     position: relative;
     overflow: hidden;
@@ -1351,20 +1351,29 @@ body.dark .board-name-input {
 
     /* Ajustes del Main Container */
     .task-board-main {
-        padding: 10px;
-        gap: 15px;
+        padding: 0;
+        margin-top: 60px;
+        height: calc(100% - 60px);
+        gap: 0;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
-        /* Ajustamos la altura restando header y footer */
-        height: calc(100vh - 60px - 40px);
+    }
+
+    .task-board-main-animated-wrapper {
+        padding: 0 10px;
+        /* Padding lateral solamente para el snap */
+        gap: 15px;
     }
 
     /* Ajustes de las Columnas */
-    .column {
+    .column,
+    .add-column-container {
         min-width: 85vw;
         max-width: 320px;
         scroll-snap-align: center;
-        height: 100%;
+        height: calc(100% - 20px);
+        /* Ocupamos casi todo el alto */
+        margin: 10px 0;
     }
 
     /* Ajustes de las Tarjetas */
