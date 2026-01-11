@@ -1347,50 +1347,32 @@ body.dark .board-name-input {
     /* Efecto de clic */
 }
 
-/* Asegura que el icono dentro del botón de acción sea blanco */
-.dropdown-action-button i {
-    color: white;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* --- Media Queries para Mobile --- */
 @media (max-width: 768px) {
 
-    /* Ajustes generales del Header */
+    /* Ajustes generales del Header - Simplificado */
     .task-board-header {
-        flex-direction: column;
-        height: auto;
-        padding: 10px;
-        gap: 10px;
+        flex-direction: row;
+        height: 60px;
+        padding: 0 12px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Ocultamos lo que no queremos ver en mobile */
+    .header-logo,
+    .user-greeting,
+    .guest-login-prompt {
+        display: none !important;
     }
 
     .header-left,
     .header-right {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .guest-login-prompt span,
-    .user-greeting {
-        display: none;
-        /* Ocultamos textos largos para ganar espacio */
-    }
-
-    .header-logo {
-        height: 24px;
-        /* Logo más pequeño */
+        width: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     /* Ajustes del Main Container */
@@ -1398,19 +1380,17 @@ body.dark .board-name-input {
         padding: 10px;
         gap: 15px;
         scroll-snap-type: x mandatory;
-        /* Efecto de "páginas" al deslizar */
         -webkit-overflow-scrolling: touch;
+        /* Ajustamos la altura restando header y footer */
+        height: calc(100vh - 60px - 40px);
     }
 
     /* Ajustes de las Columnas */
     .column {
         min-width: 85vw;
-        /* Casi todo el ancho de la pantalla */
-        max-width: 300px;
+        max-width: 320px;
         scroll-snap-align: center;
-        /* Centrar la columna al dejar de deslizar */
-        height: calc(100vh - 160px);
-        /* Ajustar altura según el nuevo header */
+        height: 100%;
     }
 
     /* Ajustes de las Tarjetas */
@@ -1423,17 +1403,16 @@ body.dark .board-name-input {
         font-size: 0.75em;
     }
 
-    /* Botón de añadir columna (Floating-like experience) */
+    /* Botón de añadir columna */
     .add-column-container {
         min-width: 85vw;
-        max-width: 300px;
+        max-width: 320px;
         scroll-snap-align: center;
     }
 
     /* Zona de eliminación en mobile */
     .delete-zone {
-        width: 70px;
-        /* Un poco más ancha para facilitar el drop con el dedo */
+        width: 75px;
     }
 
     /* Modales responsivos */
@@ -1445,25 +1424,18 @@ body.dark .board-name-input {
         padding: 20px;
     }
 
-    /* Board Selector en mobile */
+    /* Board Selector en mobile (ocupa el espacio central) */
     .board-selector {
         flex: 1;
         max-width: none;
     }
-
-    .board-selector-active {
-        padding: 6px 10px;
-    }
 }
 
-/* --- Ajustes sutiles para pantallas muy pequeñas (iPhone SE, etc) --- */
+/* --- Ajustes sutiles para pantallas muy pequeñas --- */
 @media (max-width: 400px) {
-    .column {
-        min-width: 90vw;
-    }
 
-    .header-logo {
-        display: none;
-        /* Quitamos el logo si el espacio es crítico */
+    .column,
+    .add-column-container {
+        min-width: 90vw;
     }
 }
