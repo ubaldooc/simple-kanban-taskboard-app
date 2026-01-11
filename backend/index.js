@@ -836,11 +836,13 @@ const generateTokensAndSetCookie = async (res, userId) => {
   await RefreshToken.create({ token: refreshToken, user: userId, expires });
 
   // 3. Enviar el Refresh Token en una cookie HttpOnly
+  const isProd = process.env.NODE_ENV === 'production'; // Esto es para saber si estoy en produccion o en desarrollo. me ayuda a seleccionar true o false en las d abajo para las cookies de token de sesion
+
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    partitioned: true, // Agrega esto para compatibilidad con Chrome/Edge modernos
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    partitioned: isProd,
     expires
   });
 
