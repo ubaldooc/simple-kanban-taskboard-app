@@ -91,7 +91,7 @@ export const TaskboardView = () => {
     }),
     useSensor(TouchSensor, {
       // En móviles, pedimos una pulsación de 250ms para empezar a arrastrar.
-      activationConstraint: { delay: 250, tolerance: 5 },
+      activationConstraint: { delay: 450, tolerance: 10 },
     })
   );
 
@@ -208,8 +208,12 @@ export const TaskboardView = () => {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
-          autoScroll={active?.data.current?.type !== "Column"}
           collisionDetection={closestCenter}
+          autoScroll={{
+            threshold: 0.15, // Empieza a scrollear cuando el objeto está al 15% del borde
+            acceleration: 5,  // Velocidad de aceleración (más bajo = más lento y controlado)
+            interval: 10,     // Frecuencia de actualización en ms
+          }}
         >
           <AnimatePresence mode="popLayout" custom={slideDirection} initial={false}>
             <motion.div
