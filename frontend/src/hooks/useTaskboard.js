@@ -32,7 +32,8 @@ export const useTaskboard = () => {
 
   // --- Derived State ---    
   const activeBoard = boards.find(b => b.id === activeBoardId);
-  const columns = activeBoard ? activeBoard.columns : [];
+  // Si columns es null (no cargado), devolvemos []; si ya cargó, devolvemos el array
+  const columns = activeBoard?.columns || [];
   const cards = activeBoard?.cards || [];
 
   // --- Effects ---
@@ -88,9 +89,9 @@ export const useTaskboard = () => {
         const finalBoardsData = boardsData.map(board => ({
           ...board,
           id: board._id, // El _id viene por defecto
-          // Inicializamos columns y cards como arrays vacíos. Se cargarán bajo demanda.
-          columns: [],
-          cards: [],
+          // Inicializamos columns y cards como null para diferenciar de "vacío"
+          columns: null,
+          cards: null,
         }));
 
         setBoards(finalBoardsData);
@@ -117,9 +118,8 @@ export const useTaskboard = () => {
 
   useEffect(() => {
     // Cargar detalles cuando el tablero activo cambia y no tiene columnas cargadas
-    // Esta lógica se ha movido al useEffect principal para mayor robustez.
-    // Mantenemos este efecto para otros casos, pero la carga inicial ya no depende de él.
-    if (activeBoard && activeBoard.columns.length === 0 && !activeBoard.id.startsWith('temp-')) {
+    // Usamos '=== null' para saber que NO se han cargado, diferenciando de un array vacío []
+    if (activeBoard && activeBoard.columns === null && !activeBoard.id.startsWith('temp-')) {
       fetchBoardDetails(activeBoard.id);
     }
   }, [activeBoard]); // Dependemos de `activeBoard` directamente, es más seguro que `activeBoardId`.
