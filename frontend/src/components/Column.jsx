@@ -124,9 +124,9 @@ const ColumnComponent = ({ column, cards, onToggleOptions }) => {
     if (!editingColumnId) setEditingColumnId(column.id);
   };
 
-  // La animación se aplica solo si la columna está en modo edición Y su título original está vacío.
-  // Esto diferencia una columna nueva de una existente que se está editando.
-  const isNewlyCreatedAnimation = isEditing && column.title === '';
+  // La animación se aplica solo si la columna está en modo edición Y su título original está vacío Y tiene un ID temporal.
+  // Esto diferencia una columna nueva en proceso de creación de una que ya se guardó.
+  const isNewlyCreatedAnimation = isEditing && column.title === '' && String(column.id).startsWith('temp-');
   const isExiting = (exitingItemIds || []).includes(column.id);
 
   return (

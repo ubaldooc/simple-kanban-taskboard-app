@@ -384,12 +384,24 @@ export const useTaskboard = () => {
       if (!createdColumn) throw new Error('No se pudo crear la columna.');
 
       // 4. Reemplazar la columna temporal con la real del backend
-      updateActiveBoard(board => ({
-        ...board,
-        columns: board.columns.map(col =>
-          col.id === tempId ? { ...createdColumn, id: createdColumn._id } : col
-        ),
-      }));
+      updateActiveBoard(board => {
+        // Verificar si la columna temporal aún existe (pudo haber sido eliminada por el usuario mientras se creaba)
+        const exists = board.columns.some(col => col.id === tempId);
+
+        if (!exists) {
+          // Si la columna ya no existe en el estado local, significa que fue eliminada.
+          // Debemos eliminar la columna recién creada en el servidor para evitar datos huérfanos.
+          api.deleteColumn(createdColumn._id).catch(err => console.error("Error limpiando columna huérfana:", err));
+          return board; // No modificamos el estado
+        }
+
+        return {
+          ...board,
+          columns: board.columns.map(col =>
+            col.id === tempId ? { ...createdColumn, id: createdColumn._id } : col
+          ),
+        };
+      });
       setEditingColumnId(createdColumn._id); // Actualizar el ID en edición al ID permanente
     } catch (error) {
       toast.error(error.message);
@@ -555,6 +567,16 @@ export const useTaskboard = () => {
 
     const originalBoard = activeBoard;
 
+    // Si es una columna temporal, no hacemos la llamada al backend y eliminamos inmediatamente para evitar condiciones de carrera
+    if (String(columnIdToDelete).startsWith('temp-')) {
+      updateActiveBoard(board => ({
+        ...board,
+        columns: board.columns.filter(col => col.id !== columnIdToDelete),
+        cards: board.cards.filter(card => card.column !== columnIdToDelete),
+      }));
+      return;
+    }
+
     // Actualización optimista con animación
     setExitingItemIds(prev => [...prev, columnIdToDelete]);
 
@@ -585,6 +607,17 @@ export const useTaskboard = () => {
     if (columnToDelete) {
       const columnIdToDelete = columnToDelete;
       const originalBoard = activeBoard;
+
+      // Si es una columna temporal, no hacemos la llamada al backend y eliminamos inmediatamente
+      if (String(columnIdToDelete).startsWith('temp-')) {
+        updateActiveBoard(board => ({
+          ...board,
+          columns: board.columns.filter(col => col.id !== columnIdToDelete),
+          cards: board.cards.filter(card => card.column !== columnIdToDelete),
+        }));
+        setColumnToDelete(null);
+        return;
+      }
 
       // Actualización optimista con animación
       setExitingItemIds(prev => [...prev, columnIdToDelete]);
