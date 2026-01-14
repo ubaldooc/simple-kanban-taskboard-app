@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import guestAvatar from "../assets/avatar-guest.webp"; // Imagen para invitados
 import defaultAvatar from "../assets/avatar-default.webp"; // Imagen para usuarios online sin foto
 
-const ProfileDropdown = ({ onOpenHelpModal, onOpenWallpaperModal }) => {
+const ProfileDropdown = ({ onOpenHelpModal, onOpenWallpaperModal, onOpenFeedbackModal }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
@@ -94,7 +94,7 @@ const ProfileDropdown = ({ onOpenHelpModal, onOpenWallpaperModal }) => {
               ></i>
               Modo {theme === "dark" ? "Claro" : "Oscuro"}
             </li>
-            <li>
+            <li onClick={onOpenFeedbackModal}>
               <i className="fas fa-comment-alt"></i> Enviar comentarios
             </li>
             <li onClick={onOpenHelpModal}>

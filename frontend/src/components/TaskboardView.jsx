@@ -29,6 +29,7 @@ import HelpModal from "./HelpModal.jsx";
 import logoImage from "../assets/logo-dark.webp";
 import logoIsotipo from "../assets/logo-isotipo.webp";
 import WallpaperModal from "./WallpaperModal.jsx";
+import FeedbackModal from "./FeedbackModal.jsx";
 import { useTaskboardContext } from "../context/TaskboardContext";
 import Loader from "./Loader.jsx"; // <-- 1. Importamos el nuevo componente
 import { useAuth } from "../context/AuthContext.jsx";
@@ -74,6 +75,7 @@ export const TaskboardView = () => {
   const mainContainerRef = useRef(null);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false); // <-- 2. Estado para el modal de ayuda
   const [isWallpaperModalOpen, setIsWallpaperModalOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
   const {
     active,
@@ -197,6 +199,7 @@ export const TaskboardView = () => {
           <ProfileDropdown
             onOpenHelpModal={() => setIsHelpModalOpen(true)}
             onOpenWallpaperModal={() => setIsWallpaperModalOpen(true)}
+            onOpenFeedbackModal={() => setIsFeedbackModalOpen(true)}
           />
         </div>
       </header>
@@ -328,6 +331,11 @@ export const TaskboardView = () => {
       <WallpaperModal
         isOpen={isWallpaperModalOpen}
         onClose={() => setIsWallpaperModalOpen(false)}
+      />
+
+      <FeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
       />
     </div>
   );

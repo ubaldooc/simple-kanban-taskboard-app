@@ -1241,6 +1241,60 @@ app.post('/api/auth/reset-password/:token', authLimiter, async (req, res) => {
 
 
 
+// --- 3. ENDPOINT PARA ENVIAR FEEDBACK ---
+app.post('/api/feedback', authLimiter, async (req, res) => {
+  const { message, email } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ message: 'El mensaje no puede estar vacío.' });
+  }
+
+  try {
+    // Si el usuario está autenticado, intentamos obtener su info, si no, usamos la info del body
+    let userInfo = 'Usuario Anónimo/Invitado';
+    let userEmail = email || 'No proporcionado';
+
+    // Intenta decodificar el token si existe para obtener más info (opcional)
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        if (user) {
+          userInfo = `${user.name} (${user.email})`;
+          userEmail = user.email;
+        }
+      } catch (e) {
+        // Token inválido o expirado, lo ignoramos
+      }
+    }
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER, // Te envías el correo a ti mismo
+      subject: `📢 Nuevo Feedback de ${userInfo}`,
+      html: `
+        <h3>Has recibido un nuevo comentario/feedback:</h3>
+        <p><strong>Usuario:</strong> ${userInfo}</p>
+        <p><strong>Email de contacto:</strong> ${userEmail}</p>
+        <hr />
+        <p><strong>Mensaje:</strong></p>
+        <p style="white-space: pre-wrap;">${message}</p>
+      `,
+      replyTo: userEmail !== 'No proporcionado' ? userEmail : undefined
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: '¡Gracias por tus comentarios! Los hemos recibido correctamente.' });
+
+  } catch (error) {
+    console.error('Error al enviar feedback:', error);
+    res.status(500).json({ message: 'Error interno al enviar el feedback.' });
+  }
+});
+
+
 // WALLPAPER
 // WALLPAPER
 // WALLPAPER

@@ -52,6 +52,9 @@ const onlineApi = {
 
 };
 
+// Función independiente para enviar feedback (siempre intenta usar online)
+export const sendFeedback = (data) => apiClient.post('/feedback', data).then(handleResponse);
+
 /**
  * Devuelve el objeto de la API correspondiente según el modo de autenticación.
  * @param {string} authMode - Puede ser 'guest' o 'online'.
