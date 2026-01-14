@@ -1272,7 +1272,7 @@ app.post('/api/feedback', authLimiter, async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER, // Te envías el correo a ti mismo
-      subject: `📢 Nuevo Feedback de ${userInfo}`,
+      subject: `[SimpleKanban] 📢 Nuevo Feedback de ${userInfo}`,
       html: `
         <h3>Has recibido un nuevo comentario/feedback:</h3>
         <p><strong>Usuario:</strong> ${userInfo}</p>
