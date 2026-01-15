@@ -83,8 +83,8 @@ const upload = multer({ storage });
 // --- Configuración de Nodemailer ---
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true para puerto 465, false para puerto 587
+  port: 465,
+  secure: true, // true para puerto 465, false para puerto 587
   auth: {
     user: process.env.EMAIL_USER, // tu correo: 'tu-correo@gmail.com'
     pass: process.env.EMAIL_PASS, // tu contraseña de aplicación de gmail
