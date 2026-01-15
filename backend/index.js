@@ -82,21 +82,14 @@ const upload = multer({ storage });
 
 // --- Configuración de Nodemailer ---
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true para puerto 465, false para puerto 587
+  service: 'Gmail',
   auth: {
-    user: process.env.EMAIL_USER, // tu correo: 'tu-correo@gmail.com'
-    pass: process.env.EMAIL_PASS, // tu contraseña de aplicación de gmail
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
   tls: {
     rejectUnauthorized: false
-  },
-  // Opciones de conexión para evitar Timeouts
-  connectionTimeout: 10000, // 10 segundos
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-  family: 4 // Forzar IPv4 (Solución común para timeouts en servidores cloud)
+  }
 });
 
 // Verificar conexión SMTP al arrancar
