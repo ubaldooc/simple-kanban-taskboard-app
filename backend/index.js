@@ -106,12 +106,27 @@ app.use(cookieParser()); // Usa el middleware para parsear cookies
 app.use(express.json());
 
 // --- Configuración de Rate Limiting ---
+// ¡CRUCIAL! Para servidores en la nube (Render, Vercel, Heroku), confiamos en el primer proxy para leer la IP real.
+app.set('trust proxy', 1);
+
+// Limitador Global: Protege la app de ataques DDoS básicos o tráfico abusivo.
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 300, // Aumentamos a 300 para no bloquear uso normal del tablero
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Has excedido el límite de peticiones. Intenta más tarde.' }
+});
+
+// Aplicamos el limitador global a TODAS las rutas
+app.use(limiter);
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10, // Limita cada IP a 10 peticiones en la ventana de 15 minutos
+  max: 10, // Limita cada IP a 10 peticiones en la ventana de 15 minutos (Login/Register)
   standardHeaders: true, // Devuelve la información del límite en los headers `RateLimit-*`
   legacyHeaders: false, // Deshabilita los headers `X-RateLimit-*`
-  message: { message: 'Demasiadas peticiones desde esta IP, por favor intenta de nuevo en 15 minutos.' },
+  message: { message: 'Demasiados intentos de inicio de sesión, por favor intenta de nuevo en 15 minutos.' },
 });
 
 
