@@ -1253,6 +1253,7 @@ app.post('/api/feedback', authLimiter, async (req, res) => {
     // Si el usuario está autenticado, intentamos obtener su info, si no, usamos la info del body
     let userInfo = 'Usuario Anónimo/Invitado';
     let userEmail = email || 'No proporcionado';
+    let userName = 'Invitado';
 
     // Intenta decodificar el token si existe para obtener más info (opcional)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -1263,6 +1264,7 @@ app.post('/api/feedback', authLimiter, async (req, res) => {
         if (user) {
           userInfo = `${user.name} (${user.email})`;
           userEmail = user.email;
+          userName = user.name;
         }
       } catch (e) {
         // Token inválido o expirado, lo ignoramos
@@ -1272,7 +1274,7 @@ app.post('/api/feedback', authLimiter, async (req, res) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER, // Te envías el correo a ti mismo
-      subject: `📢 [SimpleKanban] Feedback de ${user.name}`,
+      subject: `📢 [SimpleKanban] Feedback de ${userName}`,
       html: `
         <h3>Este mensaje proviene de tu app SimpleKanban Taskboard</h3>
         <h3>Has recibido un nuevo comentario/feedback:</h3>
