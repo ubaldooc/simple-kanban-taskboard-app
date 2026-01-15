@@ -94,6 +94,13 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Verificar conexión SMTP al arrancar
+transporter.verify().then(() => {
+  console.log('✅ Listo para enviar correos');
+}).catch((error) => {
+  console.error('❌ Error en la configuración de correo:', error);
+});
+
 
 // Middleware para habilitar CORS
 // Es crucial configurar CORS para que acepte credenciales (cookies) desde tu frontend
