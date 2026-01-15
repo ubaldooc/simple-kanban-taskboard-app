@@ -89,6 +89,9 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER, // tu correo: 'tu-correo@gmail.com'
     pass: process.env.EMAIL_PASS, // tu contraseña de aplicación de gmail
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 
