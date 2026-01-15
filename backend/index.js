@@ -1262,7 +1262,7 @@ app.post('/api/auth/reset-password/:token', authLimiter, async (req, res) => {
 
 
 // --- 3. ENDPOINT PARA ENVIAR FEEDBACK ---
-app.post('/api/feedback', authLimiter, async (req, res) => {
+app.post('/api/feedback', async (req, res) => {
   const { message, email } = req.body;
 
   if (!message) {
