@@ -950,8 +950,9 @@ div.column-title-input:focus {
 /* --- Estilos para el nuevo BoardSelector --- */
 .board-selector {
     position: relative;
-    min-width: 280px;
-    max-width: 350px;
+    min-width: 540px;
+    max-width: 580px;
+    /* margin-left: 140px; */
 }
 
 .board-selector-active {
@@ -1095,7 +1096,7 @@ div.column-title-input:focus {
 }
 
 .board-name {
-    max-width: 170px;
+    max-width: 420px;
 }
 
 .board-name-input {
@@ -1108,8 +1109,8 @@ div.column-title-input:focus {
     color: var(--text-primary);
     outline: none;
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 30%, transparent);
-    width: 120px;
-    max-width: 210px;
+    width: 400px;
+    max-width: 420px;
 }
 
 /* En modo oscuro, el texto del input de edición del tablero será negro para mejor contraste */
