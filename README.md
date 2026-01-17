@@ -37,7 +37,7 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
     *   **Tema claro y oscuro:** Adapta la interfaz a tu preferencia.
     <br>
     <!-- TODO: Coloca captura del modo oscuro como 'feature-darkmode.webp' -->
-    <img src="assets/feature-darkmode.webp" alt="Modo Oscuro" width="600" />
+    <!-- <img src="assets/feature-darkmode.webp" alt="Modo Oscuro" width="600" /> -->
     <br>
     <!-- TODO: Coloca captura del modal de wallpapers como 'feature-wallpapers.png' -->
     <img src="assets/feature-wallpapers.webp" alt="Personalización de Fondos" width="600" />
