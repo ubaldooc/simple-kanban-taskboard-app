@@ -28,7 +28,7 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
     *   Funcionalidad de "Olvidé mi contraseña".
     <br>
     <!-- TODO: Coloca captura del login como 'feature-auth.png' -->
-    ![Autenticación y Seguridad](https://github.com/ubaldooc/simple-kanban-taskboard-app/blob/master/assets/feature-auth.webp?raw=true)
+    <img src="assets/feature-auth.webp" alt="Autenticación y Seguridad" width="600" />
 
 *   **Personalización:**
     *   Sube tus propios fondos de pantalla.
@@ -37,10 +37,10 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
     *   **Tema claro y oscuro:** Adapta la interfaz a tu preferencia.
     <br>
     <!-- TODO: Coloca captura del modo oscuro como 'feature-darkmode.webp' -->
-    ![Modo Oscuro](https://github.com/ubaldooc/simple-kanban-taskboard-app/blob/master/assets/feature-darkmode.webp?raw=true)
+    <img src="assets/feature-darkmode.webp" alt="Modo Oscuro" width="600" />
     <br>
     <!-- TODO: Coloca captura del modal de wallpapers como 'feature-wallpapers.png' -->
-    ![Personalización de Fondos](https://github.com/ubaldooc/simple-kanban-taskboard-app/blob/master/assets/feature-wallpapers.webp?raw=true)
+    <img src="assets/feature-wallpapers.webp" alt="Personalización de Fondos" width="600" />
 
 *   **Modo Invitado (Offline):** Funcionalidad completa de un tablero sin necesidad de registro, con persistencia de datos en el `localStorage` del navegador.
 *   **Seguridad:**
