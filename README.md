@@ -11,8 +11,8 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
 
 <!-- TODO: Coloca una miniatura de tu video como 'video-thumbnail.png' en 'assets' y actualiza el enlace de YouTube -->
 ### 🎥 Video Demostrativo de las funciones principales
-(https://github.com/user-attachments/assets/db1123ca-59e9-4c88-bca6-7bb77776da04)
-> *Haz clic en la imagen para ver el recorrido completo de la aplicación.*
+[Ver Video Completo](https://github.com/user-attachments/assets/db1123ca-59e9-4c88-bca6-7bb77776da04)
+> *Haz clic en el enlace para ver el recorrido completo de la aplicación.*
 
 ---
 
@@ -28,7 +28,7 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
     *   Funcionalidad de "Olvidé mi contraseña".
     <br>
     <!-- TODO: Coloca captura del login como 'feature-auth.png' -->
-    ![Autenticación y Seguridad](/assets/feature-auth.webp)
+    ![Autenticación y Seguridad](assets/feature-auth.webp)
 
 *   **Personalización:**
     *   Sube tus propios fondos de pantalla.
@@ -37,10 +37,10 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
     *   **Tema claro y oscuro:** Adapta la interfaz a tu preferencia.
     <br>
     <!-- TODO: Coloca captura del modo oscuro como 'feature-darkmode.webp' -->
-    ![Modo Oscuro](/assets/feature-darkmode.webp)
+    ![Modo Oscuro](assets/feature-darkmode.webp)
     <br>
     <!-- TODO: Coloca captura del modal de wallpapers como 'feature-wallpapers.png' -->
-    ![Personalización de Fondos](/assets/feature-wallpapers.webp)
+    ![Personalización de Fondos](assets/feature-wallpapers.webp)
 
 *   **Modo Invitado (Offline):** Funcionalidad completa de un tablero sin necesidad de registro, con persistencia de datos en el `localStorage` del navegador.
 *   **Seguridad:**
