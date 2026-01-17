@@ -80,9 +80,17 @@ cloudinary.config({
 const storage = multer.memoryStorage(); // Almacena los archivos en memoria
 const upload = multer({ storage });
 
-// --- Configuración de Nodemailer ---
+// --- Configuración de Nodemailer (Compatible con Gmail y proveedores SMTP como Brevo) ---
 const transporter = nodemailer.createTransport({
-  service: 'Gmail',
+  // Si defines SMTP_HOST en tu .env, usará esa configuración (Recomendado para Brevo/Resend).
+  // Si no, seguirá usando la configuración 'Gmail' que tenías antes.
+  ...(process.env.SMTP_HOST ? {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT || 587,
+    secure: process.env.SMTP_PORT == 465, // true para puerto 465, false para otros
+  } : {
+    service: 'Gmail'
+  }),
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -1266,8 +1274,14 @@ app.post('/api/auth/reset-password/:token', authLimiter, async (req, res) => {
 
 
 
+const feedbackLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 5, // Limita a 5 feedbacks por IP por hora
+  message: { message: 'Has enviado demasiados comentarios. Por favor espera un tiempo antes de enviar otro.' }
+});
+
 // --- 3. ENDPOINT PARA ENVIAR FEEDBACK ---
-app.post('/api/feedback', async (req, res) => {
+app.post('/api/feedback', feedbackLimiter, async (req, res) => {
   const { message, email } = req.body;
 
   if (!message) {
