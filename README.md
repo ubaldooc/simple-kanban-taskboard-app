@@ -34,7 +34,10 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
     *   Sube tus propios fondos de pantalla.
     *   Selecciona entre una galería de fondos predefinidos.
     *   Cambia el color de las columnas.
-    *   Tema claro y oscuro.
+    *   **Tema claro y oscuro:** Adapta la interfaz a tu preferencia.
+    <br>
+    <!-- TODO: Coloca captura del modo oscuro como 'feature-darkmode.webp' -->
+    ![Modo Oscuro](assets/feature-darkmode.webp)
     <br>
     <!-- TODO: Coloca captura del modal de wallpapers como 'feature-wallpapers.png' -->
     ![Personalización de Fondos](assets/feature-wallpapers.webp)
