@@ -201,17 +201,27 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   // Función auxiliar robusta para comparar URLs
   const extractPublicId = (url) => {
     if (!url) return "";
-    // Si contiene 'users_wallpapers', extraemos esa parte única
-    if (url.includes('users_wallpapers/')) {
-        const parts = url.split('users_wallpapers/');
-        let uniquePart = parts[1]; // "user123/imageXYZ.jpg"
+    try {
+        // 1. Decodificar la URL por si contiene caracteres encoded (%20, etc.)
+        const decoded = decodeURIComponent(url);
         
-        // Quitamos la extensión si existe para comparar solo IDs
-        const lastDot = uniquePart.lastIndexOf('.');
-        if (lastDot !== -1) {
-            uniquePart = uniquePart.substring(0, lastDot);
+        // Si contiene 'users_wallpapers', extraemos esa parte única
+        if (decoded.includes('users_wallpapers/')) {
+            const parts = decoded.split('users_wallpapers/');
+            let uniquePart = parts[1]; 
+            
+            // 2. Eliminar query params si existen (ej: ?v=123)
+            uniquePart = uniquePart.split('?')[0];
+
+            // 3. Quitamos la extensión si existe
+            const lastDot = uniquePart.lastIndexOf('.');
+            if (lastDot !== -1) {
+                uniquePart = uniquePart.substring(0, lastDot);
+            }
+            return `users_wallpapers/${uniquePart}`;
         }
-        return `users_wallpapers/${uniquePart}`;
+    } catch (e) {
+        console.error("Error al extraer ID de wallpaper:", e);
     }
     return url;
   };
@@ -228,17 +238,11 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     // Cierra el modal de confirmación
     setWallpaperToDelete(null);
 
-    // Comparación robusta de IDs
+    // Comparación robusta de IDs: normaliza URLs para detectar coincidencias exactas
     const selectedId = extractPublicId(selectedWallpaper);
     const deleteId = extractPublicId(urlToDelete);
 
-    console.log(urlToDelete, originalWallpapers);
-    console.log(selectedId, deleteId);
-    
-    console.log(`[Wallpaper] Eliminando. Actual: ${selectedId} | Borrando: ${deleteId}`);
-
     if (selectedId && deleteId && selectedId === deleteId) {
-        console.log("[Wallpaper] Coincidencia detectada. Reseteando fondo.");
         const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp";
         setSelectedWallpaper(defaultWallpaper);
         setUser(prev => ({ ...prev, wallpaper: defaultWallpaper }));
