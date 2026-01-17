@@ -1401,13 +1401,30 @@ app.delete('/api/user/wallpapers', protect, async (req, res) => {
       return res.status(400).json({ message: 'Se requiere la URL del fondo a eliminar.' });
     }
 
-    // Extrae el public_id de la URL de Cloudinary
+    // Extrae el public_id de la URL de Cloudinary (ej: users_wallpapers/user123/imageXYZ)
     const publicIdMatch = wallpaperUrl.match(/users_wallpapers\/.*\/[a-zA-Z0-9_-]+/);
+
     if (publicIdMatch) {
-      await cloudinary.uploader.destroy(publicIdMatch[0]);
+      const publicId = publicIdMatch[0];
+
+      // 1. Eliminar de Cloudinary
+      await cloudinary.uploader.destroy(publicId);
+
+      // 2. Eliminar de la base de datos de forma robusta
+      // Buscamos al usuario y filtramos su array manualmente para evitar problemas 
+      // con discrepancias de URL (por transformaciones, http/https, etc.)
+      const user = await User.findById(req.user._id);
+
+      if (user && user.customWallpapers) {
+        // Guardamos solo las URLs que NO contengan el publicID eliminado
+        user.customWallpapers = user.customWallpapers.filter(url => !url.includes(publicId));
+        await user.save();
+
+        return res.status(200).json(user.customWallpapers);
+      }
     }
 
-    // Elimina la URL del array en la base de datos
+    // Fallback: Si no se pudo extraer el ID (o no se encontró usuario), intentamos un pull directo
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { $pull: { customWallpapers: wallpaperUrl } },
