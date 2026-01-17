@@ -1418,6 +1418,13 @@ app.delete('/api/user/wallpapers', protect, async (req, res) => {
       if (user && user.customWallpapers) {
         // Guardamos solo las URLs que NO contengan el publicID eliminado
         user.customWallpapers = user.customWallpapers.filter(url => !url.includes(publicId));
+
+        // Si el wallpaper eliminado es el actual, lo reseteamos al default
+        if (user.wallpaper && user.wallpaper.includes(publicId)) {
+          console.log('Reseteando wallpaper activo por eliminación del actual.');
+          user.wallpaper = process.env.DEFAULT_WALLPAPER_URL || null;
+        }
+
         await user.save();
 
         return res.status(200).json(user.customWallpapers);

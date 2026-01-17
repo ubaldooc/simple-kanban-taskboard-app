@@ -79,9 +79,9 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     const file = e.target.files[0];
     if (file) {
       // Comprobación del tamaño del archivo
-      const maxSizeInBytes = 5 * 1024 * 1024; // 8 MB
+      const maxSizeInBytes = 5 * 1024 * 1024; // 5 MB
       if (file.size > maxSizeInBytes) {
-        toast.error("El archivo es demasiado grande. El tamaño máximo es de 8 MB.");
+        toast.error("El archivo es demasiado grande. El tamaño máximo es de 5 MB.");
         return; // Detiene la ejecución si el archivo es muy grande
       }
 
@@ -198,6 +198,24 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     setWallpaperToDelete(urlToDelete);
   };
 
+  // Función auxiliar robusta para comparar URLs
+  const extractPublicId = (url) => {
+    if (!url) return "";
+    // Si contiene 'users_wallpapers', extraemos esa parte única
+    if (url.includes('users_wallpapers/')) {
+        const parts = url.split('users_wallpapers/');
+        let uniquePart = parts[1]; // "user123/imageXYZ.jpg"
+        
+        // Quitamos la extensión si existe para comparar solo IDs
+        const lastDot = uniquePart.lastIndexOf('.');
+        if (lastDot !== -1) {
+            uniquePart = uniquePart.substring(0, lastDot);
+        }
+        return `users_wallpapers/${uniquePart}`;
+    }
+    return url;
+  };
+
   // Paso 2: Se ejecuta si el usuario confirma la eliminación en el modal
   const confirmDeleteWallpaper = async () => {
     if (!wallpaperToDelete) return;
@@ -205,8 +223,26 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     const urlToDelete = wallpaperToDelete;
     const originalWallpapers = [...customWallpapers];
 
+    
+
     // Cierra el modal de confirmación
     setWallpaperToDelete(null);
+
+    // Comparación robusta de IDs
+    const selectedId = extractPublicId(selectedWallpaper);
+    const deleteId = extractPublicId(urlToDelete);
+
+    console.log(urlToDelete, originalWallpapers);
+    console.log(selectedId, deleteId);
+    
+    console.log(`[Wallpaper] Eliminando. Actual: ${selectedId} | Borrando: ${deleteId}`);
+
+    if (selectedId && deleteId && selectedId === deleteId) {
+        console.log("[Wallpaper] Coincidencia detectada. Reseteando fondo.");
+        const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp";
+        setSelectedWallpaper(defaultWallpaper);
+        setUser(prev => ({ ...prev, wallpaper: defaultWallpaper }));
+    }
 
     // Actualización optimista: elimina el fondo de la UI inmediatamente
     setCustomWallpapers(current => current.filter(url => url !== urlToDelete));
