@@ -1,12 +1,18 @@
 
 # Taskboard App
 
-[![Ver Demo en Vivo](https://img.shields.io/badge/Ver%20Demo-En%20Vivo-brightgreen?style=for-the-badge)](https://tu-enlace-a-la-demo.com)
+[![Ver Demo en Vivo](https://img.shields.io/badge/Ver%20Demo-En%20Vivo-brightgreen?style=for-the-badge)](https://simple-kanban-taskboard-app.vercel.app/)
 
 Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, construida con el stack MERN (MongoDB, Express, React, Node.js) y totalmente dockerizada para un despliegue y desarrollo sencillos.
 
-<!-- TODO: Reemplazar con un screenshot o GIF real de la aplicación -->
-![Screenshot de la App](https://i.imgur.com/placeholder.png) 
+<!-- TODO: Coloca tu GIF principal como 'demo-hero.gif' en la carpeta 'assets' -->
+### 🚀 Demo Rápida
+![Demo Drag & Drop](assets/demo-hero.gif)
+
+<!-- TODO: Coloca una miniatura de tu video como 'video-thumbnail.png' en 'assets' y actualiza el enlace de YouTube -->
+### 🎥 Video Demostrativo de las funciones principales
+(https://github.com/user-attachments/assets/db1123ca-59e9-4c88-bca6-7bb77776da04)
+> *Haz clic en la imagen para ver el recorrido completo de la aplicación.*
 
 ---
 
@@ -20,11 +26,19 @@ Una aplicación web moderna y completa tipo Kanban para la gestión de tareas, c
     *   Inicio de sesión con Email/Contraseña y Google (OAuth 2.0).
     *   Sistema seguro de tokens (Access y Refresh Tokens) con cookies `HttpOnly`.
     *   Funcionalidad de "Olvidé mi contraseña".
+    <br>
+    <!-- TODO: Coloca captura del login como 'feature-auth.png' -->
+    ![Autenticación y Seguridad](assets/feature-auth.webp)
+
 *   **Personalización:**
     *   Sube tus propios fondos de pantalla.
     *   Selecciona entre una galería de fondos predefinidos.
     *   Cambia el color de las columnas.
     *   Tema claro y oscuro.
+    <br>
+    <!-- TODO: Coloca captura del modal de wallpapers como 'feature-wallpapers.png' -->
+    ![Personalización de Fondos](assets/feature-wallpapers.webp)
+
 *   **Modo Invitado (Offline):** Funcionalidad completa de un tablero sin necesidad de registro, con persistencia de datos en el `localStorage` del navegador.
 *   **Seguridad:**
     *   Protección contra ataques de fuerza bruta (Rate Limiting).
@@ -67,8 +81,7 @@ Sigue estos pasos para levantar el proyecto completo en tu máquina local.
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/taskboard-app.git
-cd taskboard-app
+git clone https://github.com/ubaldooc/simple-kanban-taskboard-app.git
 ```
 
 ### 2. Configurar Variables de Entorno
