@@ -974,10 +974,19 @@ div.column-title-input:focus {
 
 .board-selector-active span {
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+    /* Importante para que el ellipsis funcione en flexbox */
 }
 
 .board-selector-active .fa-chevron-down {
     transition: transform 0.2s ease-in-out;
+    flex-shrink: 0;
+    /* Asegura que el icono no se aplaste */
+    margin-left: 10px;
 }
 
 .board-selector-active .fa-chevron-down.open {
