@@ -84,13 +84,13 @@ const upload = multer({ storage });
 // --- Configuración de Gmail API (OAuth2) ---
 const OAuth2 = google.auth.OAuth2;
 const oauth2Client = new OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.MAIL_GOOGLE_CLIENT_ID,
+  process.env.MAIL_GOOGLE_CLIENT_SECRET,
   "https://developers.google.com/oauthplayground"
 );
 
 oauth2Client.setCredentials({
-  refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+  refresh_token: process.env.MAIL_GOOGLE_REFRESH_TOKEN
 });
 
 /**
@@ -106,9 +106,9 @@ const sendMail = async ({ to, subject, html, from, replyTo }) => {
       auth: {
         type: 'OAuth2',
         user: process.env.EMAIL_USER,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+        clientId: process.env.MAIL_GOOGLE_CLIENT_ID,
+        clientSecret: process.env.MAIL_GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.MAIL_GOOGLE_REFRESH_TOKEN,
         accessToken: accessToken.token,
       },
       // Importante: No forzar puerto SMTP, dejar que nodemailer use la configuración de 'gmail'
