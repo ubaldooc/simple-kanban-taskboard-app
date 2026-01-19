@@ -181,6 +181,13 @@ const authLimiter = rateLimit({
   message: { message: 'Demasiados intentos de inicio de sesión, por favor intenta de nuevo en 15 minutos.' },
 });
 
+// Limitador para Feedback: 5 mensajes cada 30 minutos por IP
+const feedbackLimiter = rateLimit({
+  windowMs: 30 * 60 * 1000, // 30 minutos
+  max: 5,
+  message: { message: 'Has enviado demasiados mensajes de feedback. Por favor espera 30 minutos para enviar otro.' }
+});
+
 
 
 
@@ -1314,7 +1321,7 @@ app.post('/api/auth/reset-password/:token', authLimiter, async (req, res) => {
 
 
 // --- 3. ENDPOINT PARA ENVIAR FEEDBACK ---
-app.post('/api/feedback', async (req, res) => {
+app.post('/api/feedback', feedbackLimiter, async (req, res) => {
   const { message, email } = req.body;
 
   if (!message) {
