@@ -1331,7 +1331,7 @@ app.post('/api/feedback', async (req, res) => {
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER, // Te envías el correo a ti mismo
+      to: process.env.FEEDBACK_EMAIL || process.env.EMAIL_USER, // Destino configurable
       subject: `📢 [SimpleKanban] Feedback de ${userName}`,
       html: `
         <h3>Este mensaje proviene de tu app SimpleKanban Taskboard</h3>
