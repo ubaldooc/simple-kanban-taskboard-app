@@ -11,6 +11,7 @@ import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import cron from 'node-cron';
 import nodemailer from 'nodemailer';
+import { google } from 'googleapis'; // Importamos googleapis
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
@@ -80,32 +81,56 @@ cloudinary.config({
 const storage = multer.memoryStorage(); // Almacena los archivos en memoria
 const upload = multer({ storage });
 
-// --- Configuración de Nodemailer ---
-const transporter = nodemailer.createTransport({
-  // Si defines SMTP_HOST en tu .env, usará esa configuración (Recomendado para Brevo/Resend).
-  // Si no, seguirá usando la configuración 'Gmail' que tenías antes.
-  ...(process.env.SMTP_HOST ? {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT || 587,
-    secure: Number(process.env.SMTP_PORT) === 465, // true para puerto 465, false para otros
-  } : {
-    service: 'Gmail'
-  }),
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
+// --- Configuración de Gmail API (OAuth2) ---
+const OAuth2 = google.auth.OAuth2;
+const oauth2Client = new OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  "https://developers.google.com/oauthplayground"
+);
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN
 });
 
-// Verificar conexión SMTP al arrancar
-transporter.verify().then(() => {
-  console.log('✅ Listo para enviar correos');
-}).catch((error) => {
-  console.error('❌ Error en la configuración de correo:', error);
-});
+/**
+ * Función genérica para enviar correos usando la API de Gmail
+ * Esto evita el bloqueo de puertos SMTP (587/465) en Render.
+ */
+const sendMail = async ({ to, subject, html, from, replyTo }) => {
+  try {
+    const accessToken = await oauth2Client.getAccessToken();
+
+    const transport = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: process.env.EMAIL_USER,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+        accessToken: accessToken.token,
+      },
+      // Importante: No forzar puerto SMTP, dejar que nodemailer use la configuración de 'gmail'
+    });
+
+    const mailOptions = {
+      from: from || `Taskboard <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+      replyTo: replyTo || undefined
+    };
+
+    const result = await transport.sendMail(mailOptions);
+    return result;
+  } catch (error) {
+    console.error('❌ Error al enviar correo vía Gmail API:', error);
+    throw error;
+  }
+};
+
+console.log('✉️ Gmail API (OAuth2) lista para enviar correos');
 
 
 // Middleware para habilitar CORS
@@ -992,7 +1017,7 @@ app.post('/api/auth/register', rejectAuthenticated, authLimiter, async (req, res
         <p>Este enlace expirará en 24 horas.</p>
       `,
     };
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
 
     // 7. Enviar una respuesta al frontend indicando que se debe verificar el correo
     res.status(201).json({
@@ -1074,7 +1099,7 @@ app.post('/api/auth/resend-verification', authLimiter, async (req, res) => {
       subject: 'Activa tu cuenta en Taskboard (Reenvío)',
       html: `<p>Hola ${user.name},</p><p>Aquí tienes tu nuevo enlace para activar la cuenta: <a href="${verificationLink}">Activar Cuenta</a></p><p>Este enlace expirará en 24 horas.</p>`,
     };
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
 
     res.status(200).json({ message: 'Se ha enviado un nuevo enlace de verificación a tu correo.' });
   } catch (error) {
@@ -1227,7 +1252,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
     };
 
     // Enviar el correo
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
 
     res.status(200).json({ message: 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.' });
 
@@ -1320,7 +1345,7 @@ app.post('/api/feedback', async (req, res) => {
       replyTo: userEmail !== 'No proporcionado' ? userEmail : undefined
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
 
     res.status(200).json({ message: '¡Gracias por tus comentarios! Los hemos recibido correctamente.' });
 
