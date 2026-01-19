@@ -99,19 +99,11 @@ oauth2Client.setCredentials({
  */
 const sendMail = async ({ to, subject, html, from, replyTo }) => {
   try {
-    const accessToken = await oauth2Client.getAccessToken();
-
+    // Generar el cuerpo del correo usando Nodemailer (es más fácil para manejar HTML y formatos)
     const transport = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'OAuth2',
-        user: process.env.EMAIL_USER,
-        clientId: process.env.MAIL_GOOGLE_CLIENT_ID,
-        clientSecret: process.env.MAIL_GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.MAIL_GOOGLE_REFRESH_TOKEN,
-        accessToken: accessToken.token,
-      },
-      // Importante: No forzar puerto SMTP, dejar que nodemailer use la configuración de 'gmail'
+      streamTransport: true,
+      newline: 'unix',
+      buffer: true,
     });
 
     const mailOptions = {
@@ -122,10 +114,32 @@ const sendMail = async ({ to, subject, html, from, replyTo }) => {
       replyTo: replyTo || undefined
     };
 
-    const result = await transport.sendMail(mailOptions);
+    // Obtenemos el correo en formato "raw" (RFC822)
+    const message = await transport.sendMail(mailOptions);
+
+    // Codificamos el mensaje en base64url para la API de Gmail
+    const encodedMessage = Buffer.from(message.message)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    // Enviamos el correo usando la API REST de Google (Puerto 443/HTTPS)
+    // Esto garantiza que Render NO bloquee la conexión
+    const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+    const result = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedMessage,
+      },
+    });
+
     return result;
   } catch (error) {
-    console.error('❌ Error al enviar correo vía Gmail API:', error);
+    console.error('❌ Error al enviar correo vía Gmail API REST:', error);
+    if (error.response && error.response.data) {
+      console.error('Detalle del error de Google:', error.response.data);
+    }
     throw error;
   }
 };
