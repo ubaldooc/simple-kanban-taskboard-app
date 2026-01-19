@@ -87,7 +87,7 @@ const transporter = nodemailer.createTransport({
   ...(process.env.SMTP_HOST ? {
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT || 587,
-    secure: process.env.SMTP_PORT == 465, // true para puerto 465, false para otros
+    secure: Number(process.env.SMTP_PORT) === 465, // true para puerto 465, false para otros
   } : {
     service: 'Gmail'
   }),

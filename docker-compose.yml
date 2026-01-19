@@ -5,10 +5,11 @@ services:
     build: ./backend
     ports:
       - "5001:5001"
+    env_file:
+      - ./backend/.env
     environment:
       - PORT=5001
       - NODE_ENV=production
-      # Agrega aquí otras variables de entorno necesarias, o usa un archivo .env
     networks:
       - app-network
 
