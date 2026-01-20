@@ -185,7 +185,18 @@ const authLimiter = rateLimit({
 const feedbackLimiter = rateLimit({
   windowMs: 30 * 60 * 1000, // 30 minutos
   max: 5,
-  message: { message: 'Has enviado demasiados mensajes de feedback. Por favor espera 30 minutos para enviar otro.' }
+  standardHeaders: true, // Informa del límite en los headers
+  legacyHeaders: false,
+  // Detección explícita de IP (útil para debug y consistencia)
+  keyGenerator: (req) => {
+    return req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  },
+  handler: (req, res) => {
+    res.status(429).json({
+      message: 'Has enviado demasiados mensajes de feedback. Por favor espera 30 minutos para enviar otro.'
+    });
+  },
+  validate: { trustProxy: false } // Evita advertencias si la config de proxy es detectada como inusual
 });
 
 

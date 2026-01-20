@@ -825,6 +825,32 @@ div.column-title-input:focus {
     font-size: 1.3em;
 }
 
+/* --- Estilos para el Modal de Feedback --- */
+.feedback-modal {
+    max-width: 500px;
+}
+
+.feedback-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px;
+    border-radius: 6px;
+    border: 3px double blue;
+    background-color: rgb(241, 241, 241);
+    color: black;
+    font-family: inherit;
+    font-size: 0.95em;
+    resize: none;
+    /* Evita que el usuario la estire */
+    margin-bottom: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.feedback-textarea:focus {
+    border-color: var(--color-accent);
+}
+
 /* --- Estilos para el Modal de Ayuda --- */
 .modal-content.help-modal {
     text-align: left;

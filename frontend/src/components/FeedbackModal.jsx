@@ -27,7 +27,9 @@ const FeedbackModal = ({ isOpen, onClose }) => {
       setMessage('');
       onClose();
     } catch (error) {
-      toast.error('Error al enviar. Inténtalo de nuevo.');
+      // Si el error tiene un mensaje del servidor (como el del limitador 429), lo mostramos
+      const errorMessage = error.response?.data?.message || 'Error al enviar. Inténtalo de nuevo.';
+      toast.error(errorMessage);
       console.error(error);
     } finally {
       setIsSending(false);
