@@ -184,7 +184,7 @@ const authLimiter = rateLimit({
 // Limitador GLOBAL para Feedback: 30 mensajes cada 30 minutos entre TODOS los usuarios
 const feedbackLimiter = rateLimit({
   windowMs: 30 * 60 * 1000, // 30 minutos
-  max: 30, // Máximo total de mensajes permitidos
+  max: 3, // Máximo total de mensajes permitidos
   standardHeaders: true,
   legacyHeaders: false,
   // Al usar una función que devuelve una constante, el límite se aplica a TODO el servidor,
