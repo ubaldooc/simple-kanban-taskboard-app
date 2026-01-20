@@ -158,8 +158,8 @@ app.use(cookieParser()); // Usa el middleware para parsear cookies
 app.use(express.json());
 
 // --- Configuración de Rate Limiting ---
-// ¡CRUCIAL! Para servidores en la nube (Render, Vercel, Heroku), confiamos en el primer proxy para leer la IP real.
-app.set('trust proxy', 1);
+// En Render, usamos 'true' para que confíe en el balanceador de carga y obtenga la IP real del cliente.
+app.set('trust proxy', true);
 
 // Limitador Global: Protege la app de ataques DDoS básicos o tráfico abusivo.
 const limiter = rateLimit({
@@ -181,22 +181,21 @@ const authLimiter = rateLimit({
   message: { message: 'Demasiados intentos de inicio de sesión, por favor intenta de nuevo en 15 minutos.' },
 });
 
-// Limitador para Feedback: 5 mensajes cada 30 minutos por IP
+// Limitador GLOBAL para Feedback: 30 mensajes cada 30 minutos entre TODOS los usuarios
 const feedbackLimiter = rateLimit({
   windowMs: 30 * 60 * 1000, // 30 minutos
-  max: 5,
-  standardHeaders: true, // Informa del límite en los headers
+  max: 30, // Máximo total de mensajes permitidos
+  standardHeaders: true,
   legacyHeaders: false,
-  // Detección explícita de IP (útil para debug y consistencia)
-  keyGenerator: (req) => {
-    return req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  },
+  // Al usar una función que devuelve una constante, el límite se aplica a TODO el servidor,
+  // ignorando la IP individual.
+  keyGenerator: (req) => 'global_feedback_limit',
   handler: (req, res) => {
+    console.warn(`🚫 Límite GLOBAL de feedback agotado.`);
     res.status(429).json({
-      message: 'Has enviado demasiados mensajes de feedback. Por favor espera 30 minutos para enviar otro.'
+      message: 'El servicio de feedback no está disponible por el momento debido a alta demanda. Por favor, inténtalo más tarde.'
     });
-  },
-  validate: { trustProxy: false } // Evita advertencias si la config de proxy es detectada como inusual
+  }
 });
 
 
@@ -1334,6 +1333,9 @@ app.post('/api/auth/reset-password/:token', authLimiter, async (req, res) => {
 // --- 3. ENDPOINT PARA ENVIAR FEEDBACK ---
 app.post('/api/feedback', feedbackLimiter, async (req, res) => {
   const { message, email } = req.body;
+
+  // Log para verificar qué IP está detectando el servidor en Render
+  console.log(`📩 Intento de feedback desde IP: ${req.ip || req.headers['x-forwarded-for']}`);
 
   if (!message) {
     return res.status(400).json({ message: 'El mensaje no puede estar vacío.' });
