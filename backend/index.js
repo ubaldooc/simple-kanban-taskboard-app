@@ -766,8 +766,7 @@ app.post(
   // --- ¡AQUÍ EMPIEZA LA MAGIA DE EXPRESS-VALIDATOR! ---
   body('title')
     .notEmpty().withMessage('El título de la tarjeta es requerido.')
-    .trim() // Elimina espacios en blanco al inicio y al final
-    .escape(), // Convierte caracteres HTML (<, >, &, ', ") a sus entidades correspondientes
+    .trim(), // Elimina espacios en blanco al inicio y al final
   async (req, res) => {
     // 1. Comprobar si hubo errores de validación
     const errors = validationResult(req);
@@ -816,7 +815,7 @@ app.post(
 
 
 // PUT /api/cards/:id - Actualiza una tarjeta (título, columna, orden)
-app.put('/api/cards/:id', protect, body('title').optional().trim().escape(), async (req, res) => {
+app.put('/api/cards/:id', protect, body('title').optional().trim(), async (req, res) => {
   try {
     const { id } = req.params;
     const { title, column, order } = req.body;
