@@ -27,7 +27,7 @@ const app = express();
 // Usa el puerto del .env o 5001 como valor por defecto. Asegúrate de que PORT esté en tu .env
 const port = process.env.PORT || 5001;
 // Usa la URI de MongoDB del .env. Asegúrate de que MONGO_URI esté en tu .env
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mi_app_taskboard2';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mi_app_taskboard';
 
 // --- Helper para crear Tablero de Bienvenida ---
 const createWelcomeBoard = async (userId) => {
