@@ -55,6 +55,9 @@ const onlineApi = {
 // Función independiente para enviar feedback (siempre intenta usar online)
 export const sendFeedback = (data) => apiClient.post('/feedback', data).then(handleResponse);
 
+// Función para despertar el backend al entrar a la página
+export const wakeupBackend = () => apiClient.get('/ping').then(handleResponse).catch(() => {});
+
 /**
  * Devuelve el objeto de la API correspondiente según el modo de autenticación.
  * @param {string} authMode - Puede ser 'guest' o 'online'.

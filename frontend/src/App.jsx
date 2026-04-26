@@ -5,9 +5,14 @@ import LoginPage from "./pages/LoginPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx"; // Importamos la nueva página
 import VerifyEmailPage from "./pages/VerifyEmailPage.jsx"; // Importamos la página de verificación
 import WallpaperSetter from "./components/WallpaperSetter.jsx";
-import { getApiService } from "./services/apiService.js";
+import { getApiService, wakeupBackend } from "./services/apiService.js";
 
 function App() {
+
+  // Despertar el backend tan pronto como cargue la aplicación
+  useEffect(() => {
+    wakeupBackend();
+  }, []);
 
   // TOFO ESTO DE ABAJO NO SIRVE PORUQE AHORA LEO EL WALLPAPER DESDE EL INDEX.HTML MAS RAPIDO
   // Estado para el wallpaper del modo invitado, gestionado a nivel de App.

@@ -259,7 +259,10 @@ app.get('/', (req, res) => {
   res.send('¡Hola, mundo desde el backend!');
 });
 
-
+// --- Endpoint para despertar el servidor (útil para hosting gratuito como Render) ---
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Backend awake' });
+});
 
 
 // --- API Routes ---
