@@ -437,6 +437,8 @@ div.column-title-input:focus {
     line-height: 1.4;
     overflow-wrap: break-word;
     /* Asegura que el texto largo se ajuste */
+    white-space: pre-wrap;
+    /* Permite que los saltos de línea se muestren correctamente */
 }
 
 /* Cuando la tarjeta está en modo de edición, eliminamos su padding
