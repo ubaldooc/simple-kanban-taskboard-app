@@ -9,7 +9,7 @@ import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importam
 import AuthLoadingModal from '../components/AuthLoadingModal'; // Importamos el modal de carga
 
 const LoginPage = () => {
-  const { user, login, register, loginWithGoogle } = useAuth();
+  const { user, login, register, loginWithGoogle, isAuthenticating } = useAuth();
   const navigate = useNavigate();
   const [isRegisterView, setIsRegisterView] = useState(false);
   const [email, setEmail] = useState('');
@@ -137,10 +137,18 @@ const LoginPage = () => {
                   )}
                 </div>
               )}
-              <button type="submit" className="submit-button">Iniciar Sesión</button>
+              <button type="submit" className="submit-button" disabled={isLoading || isAuthenticating}>
+                {(isLoading || isAuthenticating) && !isRegisterView ? (
+                  <>
+                    <span className="spinner-small"></span> Iniciando Sesión...
+                  </>
+                ) : 'Iniciar Sesión'}
+              </button>
             </form>
             <div className="divider"><span>O</span></div>
-            <button onClick={() => loginWithGoogle()} className="google-login-button"><span className="google-icon"></span><span>Iniciar Sesión con Google</span></button>
+            <button type="button" onClick={() => loginWithGoogle()} className="google-login-button" disabled={isLoading || isAuthenticating}>
+              <span className="google-icon"></span><span>Iniciar Sesión con Google</span>
+            </button>
           </div>
 
           {/* --- Formulario de Registro --- */}
@@ -164,8 +172,8 @@ const LoginPage = () => {
                 </div>
               </div>
               {error && isRegisterView && <p className="error-message">{error}</p>}
-              <button type="submit" className="submit-button" disabled={isLoading}>
-                {isLoading && isRegisterView ? (
+              <button type="submit" className="submit-button" disabled={isLoading || isAuthenticating}>
+                {(isLoading || isAuthenticating) && isRegisterView ? (
                   <>
                     <span className="spinner-small"></span> Registrando...
                   </>
@@ -173,7 +181,9 @@ const LoginPage = () => {
               </button>
             </form>
             <div className="divider"><span>O</span></div>
-            <button onClick={() => loginWithGoogle()} className="google-login-button"><span className="google-icon"></span><span>Iniciar Sesión con Google</span></button>
+            <button type="button" onClick={() => loginWithGoogle()} className="google-login-button" disabled={isLoading || isAuthenticating}>
+              <span className="google-icon"></span><span>Iniciar Sesión con Google</span>
+            </button>
           </div>
         </div>
         <div className="auth-switch">
@@ -191,7 +201,7 @@ const LoginPage = () => {
       />
 
       {/* Modal de Carga interactiva (Inicio de sesión o registro en curso) */}
-      <AuthLoadingModal isOpen={isLoading} isRegistering={isRegisterView} />
+      <AuthLoadingModal isOpen={isLoading || isAuthenticating} isRegistering={isRegisterView} />
 
       {/* --- Modal de Éxito de Registro --- */}
       {showSuccessModal && (

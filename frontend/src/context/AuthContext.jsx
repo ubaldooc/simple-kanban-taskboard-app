@@ -27,7 +27,8 @@ export const AuthProvider = ({ children }) => {
   });
   // Estado para el Access Token (se guarda en memoria)
   const [accessToken, setAccessToken] = useState(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true); // Nuevo estado de carga
+  const [isAuthLoading, setIsAuthLoading] = useState(true); // Nuevo estado de carga para check inicial
+  const [isAuthenticating, setIsAuthenticating] = useState(false); // Estado para operaciones de autenticación asíncronas
   const [isLoggingOut, setIsLoggingOut] = useState(false); // Estado para el modal de cierre de sesión
 
   // Derivamos authMode para que sea reactivo y preciso.
@@ -150,6 +151,7 @@ export const AuthProvider = ({ children }) => {
 
   // Función para iniciar sesión
   const login = async (email, password) => {
+    setIsAuthenticating(true);
     try {
       const { data } = await apiClient.post("/auth/login", { email, password });
 
@@ -166,6 +168,8 @@ export const AuthProvider = ({ children }) => {
         error.message ||
         "Credenciales incorrectas";
       return { success: false, message };
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
@@ -173,6 +177,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = useGoogleLogin({
     flow: "auth-code",
     onSuccess: async (codeResponse) => {
+      setIsAuthenticating(true);
       try {
         const { data } = await apiClient.post("/auth/google", {
           code: codeResponse.code,
@@ -198,6 +203,8 @@ export const AuthProvider = ({ children }) => {
         } else {
           console.error("Error al configurar la petición:", error.message);
         }
+      } finally {
+        setIsAuthenticating(false);
       }
     },
     onError: (error) => console.error("Fallo en el login de Google:", error),
@@ -205,6 +212,7 @@ export const AuthProvider = ({ children }) => {
 
   // Función para registrar un nuevo usuario
   const register = async (name, email, password) => {
+    setIsAuthenticating(true);
     try {
       const { data } = await apiClient.post("/auth/register", {
         name,
@@ -224,6 +232,8 @@ export const AuthProvider = ({ children }) => {
         error.message ||
         "No se pudo completar el registro.";
       return { success: false, message };
+    } finally {
+      setIsAuthenticating(false);
     }
   };
 
@@ -262,6 +272,7 @@ export const AuthProvider = ({ children }) => {
     accessToken,
     authMode,
     isAuthLoading, // Exponemos el estado de carga
+    isAuthenticating, // Exponemos el estado que maneja la UX del servidor despertando
     isLoggingOut, // Exponemos el estado de cierre de sesión
     login,
     register,
