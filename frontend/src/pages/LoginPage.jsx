@@ -6,6 +6,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import './LoginPage.css'; // Estilos para el formulario
 import logoImage from '../assets/logo-dark.webp'; // Importamos el logo
 import ForgotPasswordModal from '../components/ForgotPasswordModal'; // Importamos el modal
+import AuthLoadingModal from '../components/AuthLoadingModal'; // Importamos el modal de carga
 
 const LoginPage = () => {
   const { user, login, register, loginWithGoogle } = useAuth();
@@ -188,6 +189,9 @@ const LoginPage = () => {
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
       />
+
+      {/* Modal de Carga interactiva (Inicio de sesión o registro en curso) */}
+      <AuthLoadingModal isOpen={isLoading} isRegistering={isRegisterView} />
 
       {/* --- Modal de Éxito de Registro --- */}
       {showSuccessModal && (
