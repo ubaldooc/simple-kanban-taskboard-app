@@ -9,9 +9,15 @@ import { getApiService, wakeupBackend } from "./services/apiService.js";
 
 function App() {
 
-  // Despertar el backend tan pronto como cargue la aplicación
+  // Despertar el backend tan pronto como cargue la aplicación y cada 5 minutos
   useEffect(() => {
     wakeupBackend();
+
+    const intervalId = setInterval(() => {
+      wakeupBackend();
+    }, 300000); // 300,000 ms = 5 minutos
+
+    return () => clearInterval(intervalId);
   }, []);
 
   // TOFO ESTO DE ABAJO NO SIRVE PORUQE AHORA LEO EL WALLPAPER DESDE EL INDEX.HTML MAS RAPIDO
