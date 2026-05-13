@@ -23,7 +23,7 @@ const WallpaperSetter = () => {
   }, []); // El array vacío asegura que este efecto se configure solo una vez.
 
   useEffect(() => {
-    const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp";
+    const defaultWallpaper = import.meta.env.VITE_DEFAULT_WALLPAPER_URL;
     let finalWallpaperUrl = defaultWallpaper;
 
         // Estrategia de Prioridad para evitar Flash of Incorrect Content (FOIC):

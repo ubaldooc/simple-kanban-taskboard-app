@@ -11,7 +11,7 @@ const WallpaperModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { user, setUser, authMode } = useAuth();
   const [selectedWallpaper, setSelectedWallpaper] = useState(
-    user?.wallpaper || "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp"
+    user?.wallpaper || import.meta.env.VITE_DEFAULT_WALLPAPER_URL
   );
   const [file, setFile] = useState(null);
   // Nuevos estados para los wallpapers predefinidos y la carga
@@ -243,7 +243,7 @@ const WallpaperModal = ({ isOpen, onClose }) => {
     const deleteId = extractPublicId(urlToDelete);
 
     if (selectedId && deleteId && selectedId === deleteId) {
-        const defaultWallpaper = "https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp";
+        const defaultWallpaper = import.meta.env.VITE_DEFAULT_WALLPAPER_URL;
         setSelectedWallpaper(defaultWallpaper);
         setUser(prev => ({ ...prev, wallpaper: defaultWallpaper }));
     }

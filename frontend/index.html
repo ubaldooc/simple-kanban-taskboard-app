@@ -16,7 +16,7 @@
     // Espera a que el DOM esté completamente cargado antes de ejecutar el script.
     document.addEventListener('DOMContentLoaded', function () {
       try {
-        const defaultWallpaper = 'https://res.cloudinary.com/drljxouhe/image/upload/v1764390345/wallpaper-0_w79dim.webp';
+        const defaultWallpaper = '%VITE_DEFAULT_WALLPAPER_URL%';
         let finalWallpaperUrl = defaultWallpaper;
 
         // 1. Modo Online: Busca el wallpaper en el objeto 'user'.
