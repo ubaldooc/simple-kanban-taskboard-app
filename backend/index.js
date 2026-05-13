@@ -1402,7 +1402,7 @@ app.get('/api/wallpapers/predefined', async (req, res) => {
     // Usamos la API de Cloudinary para buscar recursos en una carpeta específica.
     // ¡CAMBIO CLAVE! Usamos resources_by_tag en lugar de resources con prefix.
     // Esto es más seguro y está permitido por defecto.
-    const { resources } = await cloudinary.api.resources_by_tag('default_wallpaper', {
+    const { resources } = await cloudinary.api.resources_by_tag('default_wallpapers', {
       context: true, // Opcional, pero útil si añades metadatos
       max_results: 30 // Límite de fondos a devolver, ajústalo si tienes más.
     });
